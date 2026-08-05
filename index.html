@@ -1,3 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HeavyDuty Workout Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: { 500: '#f59e0b', 600: '#d97706' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header / Navigation -->
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="text-xl">🏋️‍♂️</span>
+        <h1 class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">HeavyDuty</h1>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleCreatine()" id="creatine-btn" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
+          Logged: 0g
+        </button>
+        <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+          <span id="theme-icon">🌙 Dark</span>
+        </button>
+        <button onclick="openSettingsModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+          ⚙️ Settings
+        </button>
+        <button id="sync_button" onclick="syncWithDrive()" class="hidden px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-900 transition">
+          🔄 Sync Drive
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-4xl mx-auto px-4 flex space-x-2 border-t border-slate-100 dark:border-slate-700/50 pt-2 pb-2">
+      <button data-tab="dashboard" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-900 transition">Dashboard</button>
+      <button data-tab="workout" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Workout Log</button>
+      <button data-tab="history" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">History</button>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- TAB 1: DASHBOARD -->
+    <section id="dashboard" class="tab-content active space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">Workout Routines</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Select a split or start a new template</p>
+        </div>
+        <button onclick="createNewDay()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-xl shadow transition">
+          + New Routine Day
+        </button>
+      </div>
+
+      <div id="workout-days-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- TAB 2: WORKOUT LOG / EDITOR -->
+    <section id="workout" class="tab-content space-y-6">
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <input type="text" id="active-day-title" onchange="updateDayTitle(this.value)" class="text-xl font-extrabold bg-transparent text-slate-900 dark:text-white focus:outline-none border-b border-transparent focus:border-amber-500 w-full sm:w-auto" placeholder="Routine Name" />
+          
+          <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+            <button onclick="addExerciseToActiveDay()" class="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold text-slate-800 dark:text-slate-200 rounded-lg">
+              + Add Exercise
+            </button>
+            <button onclick="finishAndSaveWorkout()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow">
+              ✓ Save Workout
+            </button>
+          </div>
+        </div>
+
+        <!-- Timer Tool -->
+        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+          <div class="flex items-center space-x-2">
+            <span class="font-bold">Rest Timer:</span>
+            <span id="timer-display" class="font-mono text-base font-extrabold text-amber-500">01:30</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="number" id="timer-input-seconds" value="90" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-center font-bold text-slate-900 dark:text-white" />
+            <span class="text-slate-400">sec</span>
+            <button onclick="startTimer()" class="px-2.5 py-1 bg-amber-500 text-slate-900 font-bold rounded">Start</button>
+            <button onclick="pauseTimer()" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-700 font-semibold rounded">Pause</button>
+            <button onclick="resetTimer()" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-700 font-semibold rounded">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="exercises-list" class="space-y-4"></div>
+    </section>
+
+    <!-- TAB 3: HISTORY -->
+    <section id="history" class="tab-content space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Logged History</h2>
+        <button onclick="clearHistory()" class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold text-xs rounded-lg hover:bg-red-200">
+          Clear History
+        </button>
+      </div>
+      <div id="history-list" class="space-y-4"></div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 border border-slate-200 dark:border-slate-700 shadow-xl">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-slate-900 dark:text-white">Cloud Sync Settings</h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
+      </div>
+
+      <!-- Sync Status Display -->
+      <div class="p-3 rounded-lg border text-xs flex items-center justify-between" id="sync-status-box">
+        <div class="flex items-center space-x-2">
+          <span id="sync-status-icon">⚪</span>
+          <span id="sync-status-text" class="font-semibold text-slate-600 dark:text-slate-300">Drive Sync: Not Configured</span>
+        </div>
+        <span id="sync-last-time" class="text-[10px] text-slate-400"></span>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Google OAuth Client ID</label>
+          <input type="text" id="setting-client-id" placeholder="123456789-xxx.apps.googleusercontent.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono text-[11px]" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Google API Key</label>
+          <input type="password" id="setting-api-key" placeholder="AIzaSy..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono text-[11px]" />
+        </div>
+      </div>
+
+      <div class="flex space-x-3 pt-2">
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-xl shadow transition">
+          Save Credentials
+        </button>
+        <button onclick="downloadLocalBackup()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition">
+          📥 Export Backup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conflict Resolution Modal -->
+  <div id="conflict-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-5 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      <div class="border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-extrabold text-lg text-amber-500 flex items-center space-x-2">
+          <span>⚠️</span> Data Version Conflict Detected
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          Your cloud storage and local storage versions do not match. Select which version you would like to keep.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-xs">
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <span class="font-bold text-slate-900 dark:text-white block">💻 Local Storage</span>
+          <p class="text-slate-500">Last Workout Date:</p>
+          <p id="conflict-local-date" class="font-mono font-bold text-amber-500">--</p>
+          <p id="conflict-local-count" class="text-[11px] text-slate-400">0 sessions stored</p>
+        </div>
+
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <span class="font-bold text-slate-900 dark:text-white block">☁️ Cloud Backup</span>
+          <p class="text-slate-500">Last Workout Date:</p>
+          <p id="conflict-cloud-date" class="font-mono font-bold text-amber-500">--</p>
+          <p id="conflict-cloud-count" class="text-[11px] text-slate-400">0 sessions stored</p>
+        </div>
+      </div>
+
+      <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg text-xs text-amber-600 dark:text-amber-400 font-semibold" id="conflict-diff-summary">
+        Difference: --
+      </div>
+
+      <div class="flex space-x-3 pt-2">
+        <button id="btn-use-local" class="w-full py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition">
+          Use Local Version
+        </button>
+        <button id="btn-use-cloud" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-xl shadow transition">
+          Use Cloud Version
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const initialDays = [
       {
@@ -450,18 +658,53 @@
       }
     }
 
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
+    /* --- SETTINGS & SYNC MODAL CONTROLS --- */
 
     function openSettingsModal() {
       document.getElementById('setting-client-id').value = localStorage.getItem('google_client_id') || '';
       document.getElementById('setting-api-key').value = localStorage.getItem('google_api_key') || '';
       document.getElementById('settings-modal').classList.remove('hidden');
+      updateSyncStatusUI();
     }
 
     function closeSettingsModal() {
       document.getElementById('settings-modal').classList.add('hidden');
+    }
+
+    function updateSyncStatusUI(status = 'idle', message = '', time = '') {
+      const box = document.getElementById('sync-status-box');
+      const icon = document.getElementById('sync-status-icon');
+      const text = document.getElementById('sync-status-text');
+      const timeSpan = document.getElementById('sync-last-time');
+      const hasCreds = localStorage.getItem('google_client_id') && localStorage.getItem('google_api_key');
+
+      box.className = "p-3 rounded-lg border text-xs flex items-center justify-between ";
+
+      if (status === 'syncing') {
+        box.classList.add('bg-amber-500/10', 'border-amber-500/30');
+        icon.innerText = '🔄';
+        text.innerText = 'Drive Sync: Syncing in progress...';
+      } else if (status === 'success') {
+        box.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
+        icon.innerText = '🟢';
+        text.innerText = 'Drive Sync: Connected & Up-to-date';
+      } else if (status === 'error') {
+        box.classList.add('bg-red-500/10', 'border-red-500/30');
+        icon.innerText = '🔴';
+        text.innerText = `Drive Sync Error: ${message || 'Failed'}`;
+      } else {
+        if (hasCreds) {
+          box.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
+          icon.innerText = '🟢';
+          text.innerText = 'Drive Sync: Ready';
+        } else {
+          box.classList.add('bg-slate-100', 'dark:bg-slate-900', 'border-slate-200', 'dark:border-slate-700');
+          icon.innerText = '⚪';
+          text.innerText = 'Drive Sync: Not Configured';
+        }
+      }
+
+      if (time) timeSpan.innerText = time;
     }
 
     function saveSettings() {
@@ -472,6 +715,21 @@
       closeSettingsModal();
       initGoogleAuth();
     }
+
+    function downloadLocalBackup() {
+      const payload = getPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `heavydutysteve_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    }
+
+    /* --- GOOGLE DRIVE OAUTH & CONFLICT RESOLUTION --- */
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
 
     function gapiLoaded() { gapiInited = true; initGoogleAuth(); }
     function gisLoaded() { gisInited = true; initGoogleAuth(); }
@@ -499,32 +757,118 @@
       }
     }
 
+    function getPayload() {
+      return {
+        workoutDays: getWorkoutDays(),
+        history: JSON.parse(localStorage.getItem('workout_history') || '[]'),
+        creatineIntake: localStorage.getItem('creatineIntake') || '0g',
+        lastUpdated: new Date().toISOString()
+      };
+    }
+
+    function applyPayload(payload) {
+      if (payload.workoutDays) saveWorkoutDays(payload.workoutDays);
+      if (payload.history) localStorage.setItem('workout_history', JSON.stringify(payload.history));
+      if (payload.creatineIntake) {
+        localStorage.setItem('creatineIntake', payload.creatineIntake);
+        creatineIntake = payload.creatineIntake;
+        updateCreatineUI();
+      }
+      renderDashboard();
+      renderHistory();
+      renderWorkoutEditor();
+    }
+
+    async function fetchCloudData(accessToken) {
+      const listRes = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder", {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const listData = await listRes.json();
+      const file = listData.files?.find(f => f.name === 'heavydutysteve_v3.json');
+      if (!file) return null;
+
+      const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      return await fileRes.json();
+    }
+
+    function getLastWorkoutDate(historyArray) {
+      if (!historyArray || historyArray.length === 0) return null;
+      return new Date(historyArray[0].date);
+    }
+
+    function promptConflictResolution(localPayload, cloudPayload, onResolve) {
+      const localHistory = localPayload.history || [];
+      const cloudHistory = cloudPayload.history || [];
+
+      const localDate = getLastWorkoutDate(localHistory);
+      const cloudDate = getLastWorkoutDate(cloudHistory);
+
+      const localDateStr = localDate ? localDate.toLocaleDateString() : 'No workouts';
+      const cloudDateStr = cloudDate ? cloudDate.toLocaleDateString() : 'No workouts';
+
+      document.getElementById('conflict-local-date').innerText = localDateStr;
+      document.getElementById('conflict-local-count').innerText = `${localHistory.length} sessions logged`;
+
+      document.getElementById('conflict-cloud-date').innerText = cloudDateStr;
+      document.getElementById('conflict-cloud-count').innerText = `${cloudHistory.length} sessions logged`;
+
+      let diffText = 'Both datasets differ.';
+      if (localDate && cloudDate) {
+        const diffDays = Math.round(Math.abs((localDate - cloudDate) / (1000 * 60 * 60 * 24)));
+        if (diffDays === 0) diffText = 'Both versions have workouts from the same day, but contain different entries.';
+        else diffText = `Difference: The ${localDate > cloudDate ? 'Local' : 'Cloud'} version has a workout that is ${diffDays} day(s) newer.`;
+      }
+      document.getElementById('conflict-diff-summary').innerText = diffText;
+
+      const modal = document.getElementById('conflict-modal');
+      modal.classList.remove('hidden');
+
+      document.getElementById('btn-use-local').onclick = () => {
+        modal.classList.add('hidden');
+        onResolve('local');
+      };
+      document.getElementById('btn-use-cloud').onclick = () => {
+        modal.classList.add('hidden');
+        onResolve('cloud');
+      };
+    }
+
     async function syncWithDrive() {
       if (!tokenClient) { openSettingsModal(); return; }
 
+      updateSyncStatusUI('syncing');
+
       tokenClient.callback = async (resp) => {
-        if (resp.error) return;
-        const payload = {
-          workoutDays: getWorkoutDays(),
-          history: JSON.parse(localStorage.getItem('workout_history') || '[]'),
-          creatineIntake: localStorage.getItem('creatineIntake') || '0g'
-        };
+        if (resp.error) {
+          updateSyncStatusUI('error', resp.error);
+          return;
+        }
 
-        const file = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-        const metadata = { name: 'heavydutysteve_v3.json', parents: ['appDataFolder'] };
         const accessToken = gapi.client.getToken().access_token;
+        const localPayload = getPayload();
 
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', file);
+        try {
+          const cloudPayload = await fetchCloudData(accessToken);
 
-        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-          method: 'POST',
-          headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-          body: form
-        });
-
-        if (res.ok) alert('Successfully synced with Google Drive!');
+          if (cloudPayload && JSON.stringify(localPayload) !== JSON.stringify(cloudPayload)) {
+            promptConflictResolution(localPayload, cloudPayload, async (choice) => {
+              if (choice === 'cloud') {
+                applyPayload(cloudPayload);
+                updateSyncStatusUI('success', '', new Date().toLocaleTimeString());
+                alert('Cloud version loaded successfully!');
+              } else {
+                await uploadToCloud(accessToken, localPayload);
+              }
+            });
+          } else {
+            await uploadToCloud(accessToken, localPayload);
+          }
+        } catch (e) {
+          console.error(e);
+          updateSyncStatusUI('error', 'Sync network error');
+        }
       };
 
       if (gapi.client.getToken() === null) {
@@ -533,6 +877,31 @@
         tokenClient.requestAccessToken({ prompt: '' });
       }
     }
+
+    async function uploadToCloud(accessToken, payload) {
+      const file = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      const metadata = { name: 'heavydutysteve_v3.json', parents: ['appDataFolder'] };
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+        body: form
+      });
+
+      if (res.ok) {
+        downloadLocalBackup(); // Create local file backup simultaneously
+        updateSyncStatusUI('success', '', new Date().toLocaleTimeString());
+        alert('Successfully synced with Google Drive & downloaded local backup!');
+      } else {
+        updateSyncStatusUI('error', 'Upload failed');
+      }
+    }
+
+    /* --- TAB NAVIGATION CONTROL --- */
 
     function switchTab(targetTab) {
       const navButtons = document.querySelectorAll('.nav-btn');
@@ -574,4 +943,6 @@
     renderHistory();
     updateTimerDisplay();
   </script>
+</body>
+</html>
 
