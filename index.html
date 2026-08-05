@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Heavy Duty Tracker</title>
+
+  <!-- Dynamic Web App Manifest for PWA installation -->
+  <link rel="manifest" id="manifestPlaceholder">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #f59e0b;
+      --accent-hover: #d97706;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
+
+    header {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; color: var(--accent-color); letter-spacing: 0.5px; }
+
+    .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+    .card h2 { font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-main); }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: #000; font-weight: 600;
+      border: none; border-radius: 8px;
+      padding: 0.75rem 1rem;
+      width: 100%; cursor: pointer;
+      display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem;
+      transition: background 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-secondary { background-color: var(--border-color); color: var(--text-main); }
+    .btn-danger { background-color: var(--danger); color: #fff; }
+
+    .input-group { margin-bottom: 1rem; }
+    .input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%; padding: 0.75rem;
+      background: #0f172a; border: 1px solid var(--border-color);
+      border-radius: 8px; color: #fff; font-size: 1rem;
+    }
+
+    .form-row { display: flex; gap: 0.5rem; }
+    .form-row .input-group { flex: 1; }
+
+    /* Target Record Box */
+    .record-box {
+      background-color: rgba(245, 158, 11, 0.1);
+      border: 1px dashed var(--accent-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: #fcd34d;
+    }
+    .record-box strong { color: var(--accent-color); }
+
+    /* Timer Widget */
+    .timer-display { font-size: 2.2rem; font-weight: bold; text-align: center; font-family: monospace; color: var(--accent-color); margin: 0.5rem 0; }
+
+    /* History Session Styles */
+    .session-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+    .session-header {
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .set-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .set-row:last-child { border-bottom: none; }
+    .set-info { font-weight: 600; }
+    .set-notes { font-size: 0.8rem; color: var(--text-muted); font-style: italic; display: block; }
+
+    /* Tab Navigation */
+    .nav-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      display: flex; justify-content: space-around;
+      padding: 0.6rem 0;
+      z-index: 100;
+    }
+    .nav-item {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+      cursor: pointer; width: 33%;
+    }
+    .nav-item.active { color: var(--accent-color); font-weight: bold; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .status-badge {
+      font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+      background-color: var(--border-color); color: var(--text-muted);
+    }
+    .status-badge.online { background-color: rgba(34, 197, 94, 0.2); color: var(--success); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HEAVY DUTY FIT</h1>
+    <span id="syncStatus" class="status-badge">Local Storage</span>
+  </header>
+
+  <div class="container">
+    
+    <!-- TRACK LOG TAB -->
+    <div id="tab-log" class="tab-content active">
+      <!-- Rest Timer -->
+      <div class="card">
+        <h2>Rest Timer</h2>
+        <div class="timer-display" id="timer">02:00</div>
+        <div class="form-row">
+          <button class="btn btn-secondary" onclick="startTimer(90)">90s</button>
+          <button class="btn btn-secondary" onclick="startTimer(120)">2m</button>
+          <button class="btn btn-secondary" onclick="startTimer(180)">3m</button>
+          <button class="btn btn-danger" onclick="stopTimer()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Workout Entry Form -->
+      <div class="card">
+        <h2>Log Set</h2>
+        <form id="workoutForm">
+          <div class="input-group">
+            <label for="exercise">Exercise Name</label>
+            <input type="text" id="exercise" placeholder="e.g. Incline Chest Press" required autocomplete="off">
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label for="setNum">Set #</label>
+              <select id="setNum">
+                <option value="1">Set 1</option>
+                <option value="2">Set 2</option>
+                <option value="3">Set 3</option>
+                <option value="4">Set 4</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Record Baseline Banner -->
+          <div id="previousRecord" class="record-box" style="display:none;">
+            Target to beat: <strong id="recordDetails">--</strong>
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label for="weight">Weight (kg/lbs)</label>
+              <input type="number" id="weight" step="0.5" placeholder="80" required>
+            </div>
+            <div class="input-group">
+              <label for="reps">Reps</label>
+              <input type="number" id="reps" placeholder="8" required>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="notes">Notes (Failure type / Drop set / TUT)</label>
+            <input type="text" id="notes" placeholder="e.g. Positive failure at rep 7, 3s negative">
+          </div>
+          <button type="submit" class="btn">Save Set</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+        <h2 style="font-size:1.1rem;">Session History</h2>
+        <button class="btn btn-danger" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="clearHistory()">Clear Data</button>
+      </div>
+      <div id="historyList">
+        <p style="color:var(--text-muted);">No workouts logged yet.</p>
+      </div>
+    </div>
+
+    <!-- SETTINGS & CLOUD TAB -->
+    <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <h2>Google Drive Cloud Sync</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+          Back up your full local training log to your personal Google Drive account.
+        </p>
+        
+        <div class="input-group">
+          <label for="clientId">Google OAuth Client ID</label>
+          <input type="text" id="clientId" placeholder="Paste Client ID here">
+        </div>
+        
+        <button class="btn btn-secondary" onclick="saveClientId()" style="margin-bottom:1rem;">Save Client ID</button>
+        <button class="btn" onclick="handleAuthClick()" style="margin-bottom:0.5rem;">🔐 Connect Google Drive</button>
+        
+        <div class="form-row" style="margin-top:1rem;">
+          <button class="btn btn-secondary" onclick="backupToDrive()">⬆️ Cloud Backup</button>
+          <button class="btn btn-secondary" onclick="restoreFromDrive()">⬇️ Cloud Restore</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bar">
+    <button class="nav-item active" onclick="switchTab('tab-log', this)">
+      <span>⏱️</span> Track
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-history', this)">
+      <span>📊</span> History
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-settings', this)">
+      <span>⚙️</span> Sync
+    </button>
+  </nav>
+
+  <script>
+    // --- Local Data Management ---
+    const STORAGE_KEY = 'heavyduty_workouts_v2';
+    let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    const exerciseInput = document.getElementById('exercise');
+    const setNumSelect = document.getElementById('setNum');
+    const recordBox = document.getElementById('previousRecord');
+    const recordDetails = document.getElementById('recordDetails');
+
+    // Auto-lookup previous weight for selected Exercise + Set #
+    function updatePreviousRecord() {
+      const exerciseName = exerciseInput.value.trim().toLowerCase();
+      const setNum = setNumSelect.value;
+
+      if (!exerciseName) {
+        recordBox.style.display = 'none';
+        return;
+      }
+
+      // Find the most recent set matching Exercise AND Set #
+      const match = workouts.find(w => 
+        w.exercise.toLowerCase() === exerciseName && String(w.setNum) === String(setNum)
+      );
+
+      if (match) {
+        recordDetails.innerText = `${match.weight} kg/lbs × ${match.reps} reps (${match.date.split(',')[0]})`;
+        recordBox.style.display = 'block';
+      } else {
+        recordBox.style.display = 'none';
+      }
+    }
+
+    exerciseInput.addEventListener('input', updatePreviousRecord);
+    setNumSelect.addEventListener('change', updatePreviousRecord);
+
+    // Form submission
+    document.getElementById('workoutForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const now = new Date();
+      const entry = {
+        id: Date.now(),
+        timestamp: now.getTime(),
+        date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        dateKey: now.toISOString().split('T')[0],
+        exercise: exerciseInput.value.trim(),
+        setNum: setNumSelect.value,
+        weight: document.getElementById('weight').value,
+        reps: document.getElementById('reps').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+      
+      workouts.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+      
+      // Prep for next set
+      document.getElementById('weight').value = '';
+      document.getElementById('reps').value = '';
+      document.getElementById('notes').value = '';
+      setNumSelect.value = String(parseInt(entry.setNum) + 1 > 4 ? 1 : parseInt(entry.setNum) + 1);
+
+      updatePreviousRecord();
+      renderHistory();
+    });
+
+    // Render Sessions History
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      if (workouts.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No workouts logged yet.</p>';
+        return;
+      }
+
+      // Group sets by dateKey (Session Date)
+      const sessions = {};
+      workouts.forEach(item => {
+        const key = item.dateKey || item.date.split(',')[0];
+        if (!sessions[key]) sessions[key] = [];
+        sessions[key].push(item);
+      });
+
+      container.innerHTML = Object.keys(sessions).map(dateKey => {
+        const sessionSets = sessions[dateKey];
+        return `
+          <div class="session-card">
+            <div class="session-header">📅 Session: ${dateKey}</div>
+            ${sessionSets.map(item => `
+              <div class="set-row">
+                <div>
+                  <div class="set-info">${item.exercise} (Set ${item.setNum || 1})</div>
+                  ${item.notes ? `<span class="set-notes">"${item.notes}"</span>` : ''}
+                </div>
+                <div style="font-weight:bold; color:var(--accent-color);">
+                  ${item.weight} kg/lbs × ${item.reps}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+    renderHistory();
+
+    function clearHistory() {
+      if (confirm('Are you sure you want to delete all workout sessions?')) {
+        workouts = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderHistory();
+        updatePreviousRecord();
+      }
+    }
+
+    // --- Tab Navigation ---
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // --- Rest Timer ---
+    let timerInterval = null;
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      let remaining = seconds;
+      updateTimerDisplay(remaining);
+      
+      timerInterval = setInterval(() => {
+        remaining--;
+        updateTimerDisplay(remaining);
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Rest complete!');
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      updateTimerDisplay(120);
+    }
+
+    function updateTimerDisplay(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    // --- Google Drive Integration ---
+    let tokenClient;
+    let accessToken = null;
+    const BACKUP_FILENAME = 'heavyduty_workout_backup.json';
+
+    const savedClientId = localStorage.getItem('gdrive_client_id');
+    if (savedClientId) document.getElementById('clientId').value = savedClientId;
+
+    function saveClientId() {
+      const id = document.getElementById('clientId').value.trim();
+      localStorage.setItem('gdrive_client_id', id);
+      alert('Client ID saved!');
+    }
+
+    function initGoogleAuth() {
+      const clientId = localStorage.getItem('gdrive_client_id');
+      if (!clientId) {
+        alert('Please enter your Google OAuth Client ID in Settings first.');
+        return false;
+      }
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (response) => {
+          if (response.access_token) {
+            accessToken = response.access_token;
+            const badge = document.getElementById('syncStatus');
+            badge.innerText = 'Connected';
+            badge.classList.add('online');
+            alert('Connected to Google Drive!');
+          }
+        },
+      });
+      return true;
+    }
+
+    function handleAuthClick() {
+      if (initGoogleAuth()) tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    async function backupToDrive() {
+      if (!accessToken) { alert('Sign in with Google first.'); return; }
+      const content = JSON.stringify(workouts, null, 2);
+      const file = new Blob([content], { type: 'application/json' });
+      
+      try {
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FILENAME}' and trashed=false`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const searchData = await searchRes.json();
+        let fileId = searchData.files && searchData.files.length > 0 ? searchData.files[0].id : null;
+
+        if (fileId) {
+          await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: content
+          });
+        } else {
+          const metadata = { name: BACKUP_FILENAME, mimeType: 'application/json' };
+          const form = new FormData();
+          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+          form.append('file', file);
+
+          await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${accessToken}` },
+            body: form
+          });
+        }
+        alert('Backup successful!');
+      } catch (err) {
+        alert('Backup failed: ' + err.message);
+      }
+    }
+
+    async function restoreFromDrive() {
+      if (!accessToken) { alert('Sign in with Google first.'); return; }
+      try {
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FILENAME}' and trashed=false`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const searchData = await searchRes.json();
+        if (!searchData.files || searchData.files.length === 0) {
+          alert('No backup file found.');
+          return;
+        }
+        const fileId = searchData.files[0].id;
+        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const restoredData = await fileRes.json();
+        if (Array.isArray(restoredData)) {
+          workouts = restoredData;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+          renderHistory();
+          updatePreviousRecord();
+          alert('Restore complete!');
+        }
+      } catch (err) {
+        alert('Restore failed: ' + err.message);
+      }
+    }
+
+    // --- Dynamic PWA Registration & Manifest Generation ---
+    const manifestData = {
+      name: "Heavy Duty Fit",
+      short_name: "HeavyDuty",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#0f172a",
+      theme_color: "#0f172a",
+      icons: [{ src: "https://cdn-icons-png.flaticon.com/512/2548/2548537.png", sizes: "512x512", type: "image/png" }]
+    };
+    const stringManifest = JSON.stringify(manifestData);
+    const blobManifest = new Blob([stringManifest], {type: 'application/json'});
+    document.getElementById('manifestPlaceholder').setAttribute('href', URL.createObjectURL(blobManifest));
+
+    // Embedded Service Worker for full offline PWA execution
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE_NAME = 'heavyduty-v1';
+        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+        self.addEventListener('fetch', e => {
+          e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+        });
+      `;
+      const blobSW = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blobSW))
+        .catch(err => console.log('SW Registration bypassed:', err));
+    }
+  </script>
+</body>
+</html>
