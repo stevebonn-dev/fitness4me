@@ -28,13 +28,17 @@
 
   <!-- Header / Navigation -->
   <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center space-x-2">
         <span class="text-xl">🏋️‍♂️</span>
         <h1 class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">HeavyDuty</h1>
       </div>
       
       <div class="flex items-center space-x-2">
+        <button onclick="finishAndSaveWorkout()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition shadow flex items-center space-x-1">
+          <span>✓</span>
+          <span>Complete Workout</span>
+        </button>
         <button onclick="toggleCreatine()" id="creatine-btn" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
           Logged: 0g
         </button>
@@ -86,8 +90,8 @@
             <button onclick="addExerciseToActiveDay()" class="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold text-slate-800 dark:text-slate-200 rounded-lg">
               + Add Exercise
             </button>
-            <button onclick="finishAndSaveWorkout()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow">
-              ✓ Save Workout
+            <button onclick="finishAndSaveWorkout()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg shadow">
+              ✓ Save & Complete Workout
             </button>
           </div>
         </div>
@@ -132,7 +136,6 @@
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
       </div>
 
-      <!-- Sync Status Display -->
       <div class="p-3 rounded-lg border text-xs flex items-center justify-between" id="sync-status-box">
         <div class="flex items-center space-x-2">
           <span id="sync-status-icon">⚪</span>
@@ -213,11 +216,11 @@
         title: 'Workout Day 1 (Chest & Arms)',
         exercises: [
           {
-            id: 'ex_1', name: 'Incline Press', notes: 'Keep elbows slightly tucked', superset: false, cableSides: 'None', cableHeight: 'N/A',
+            id: 'ex_1', name: 'Incline Press', notes: 'Keep elbows slightly tucked', superset: false, cableSides: 'None', cableHeight: 0,
             sets: [{ reps: 10, weight: 20.0, lastReps: 10, lastWeight: 20.0 }, { reps: 8, weight: 25.0, lastReps: 8, lastWeight: 25.0 }]
           },
           {
-            id: 'ex_2', name: 'Cable Crossover', notes: 'Squeeze chest at peak contraction', superset: true, cableSides: 'Dual', cableHeight: 'Top',
+            id: 'ex_2', name: 'Cable Crossover', notes: 'Squeeze chest at peak contraction', superset: true, cableSides: 'Dual', cableHeight: 16,
             sets: [{ reps: 12, weight: 10.0, lastReps: 12, lastWeight: 10.0 }, { reps: 10, weight: 12.5, lastReps: 10, lastWeight: 12.5 }]
           }
         ]
@@ -227,7 +230,7 @@
         title: 'Workout Day 2 (Back & Rear Delts)',
         exercises: [
           {
-            id: 'ex_3', name: 'Lat Pull-Downs', notes: 'Full stretch at top', superset: false, cableSides: 'Dual', cableHeight: 'Top',
+            id: 'ex_3', name: 'Lat Pull-Downs', notes: 'Full stretch at top', superset: false, cableSides: 'Dual', cableHeight: 31,
             sets: [{ reps: 10, weight: 30.0, lastReps: 10, lastWeight: 30.0 }, { reps: 8, weight: 35.0, lastReps: 8, lastWeight: 35.0 }]
           }
         ]
@@ -237,7 +240,7 @@
         title: 'Workout Day 3 (Legs & Abs)',
         exercises: [
           {
-            id: 'ex_4', name: 'Leg Press', notes: 'Controlled eccentric tempo', superset: false, cableSides: 'None', cableHeight: 'N/A',
+            id: 'ex_4', name: 'Leg Press', notes: 'Controlled eccentric tempo', superset: false, cableSides: 'None', cableHeight: 0,
             sets: [{ reps: 10, weight: 80.0, lastReps: 10, lastWeight: 80.0 }, { reps: 8, weight: 100.0, lastReps: 8, lastWeight: 100.0 }]
           }
         ]
@@ -390,6 +393,8 @@
         return;
       }
 
+      const pinOptions = Array.from({ length: 32 }, (_, i) => `<option value="${i}">${i}</option>`).join('');
+
       container.innerHTML = activeDay.exercises.map((ex, index) => `
         <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border ${ex.superset ? 'border-amber-500' : 'border-slate-200 dark:border-slate-700'} shadow-sm space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -410,7 +415,7 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div class="flex items-center space-x-2">
-              <label class="text-slate-500 dark:text-slate-400">Cable Sides:</label>
+              <label class="text-slate-500 dark:text-slate-400">Cable Setup:</label>
               <select onchange="updateCableSetting('${ex.id}', 'cableSides', this.value)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white">
                 <option value="None" ${ex.cableSides==='None'?'selected':''}>N/A (Free Weight / Machine)</option>
                 <option value="Single" ${ex.cableSides==='Single'?'selected':''}>Single Side</option>
@@ -418,14 +423,9 @@
               </select>
             </div>
             <div class="flex items-center space-x-2">
-              <label class="text-slate-500 dark:text-slate-400">Cable Height:</label>
-              <select onchange="updateCableSetting('${ex.id}', 'cableHeight', this.value)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white">
-                <option value="N/A" ${ex.cableHeight==='N/A'?'selected':''}>N/A</option>
-                <option value="Top" ${ex.cableHeight==='Top'?'selected':''}>Top Position</option>
-                <option value="Upper" ${ex.cableHeight==='Upper'?'selected':''}>Upper Height</option>
-                <option value="Middle" ${ex.cableHeight==='Middle'?'selected':''}>Middle Height</option>
-                <option value="Lower" ${ex.cableHeight==='Lower'?'selected':''}>Lower Height</option>
-                <option value="Bottom" ${ex.cableHeight==='Bottom'?'selected':''}>Bottom Position</option>
+              <label class="text-slate-500 dark:text-slate-400">Cable Height Pin (0-31):</label>
+              <select onchange="updateCableSetting('${ex.id}', 'cableHeight', parseInt(this.value))" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white font-mono font-bold">
+                ${Array.from({ length: 32 }, (_, i) => `<option value="${i}" ${ex.cableHeight === i ? 'selected' : ''}>${i}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -435,16 +435,16 @@
               <span class="col-span-2">Set</span>
               <span class="col-span-4">Last Logged</span>
               <span class="col-span-3">Reps</span>
-              <span class="col-span-3">Weight (kg)</span>
+              <span class="col-span-3">Weight (kg / Plate)</span>
             </div>
 
             ${ex.sets.map((s, sIndex) => `
               <div class="grid grid-cols-12 items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
                 <span class="col-span-2 font-bold text-xs text-amber-500">Set ${sIndex + 1}</span>
-                <span class="col-span-4 text-xs text-slate-500 dark:text-slate-400 font-mono">${s.lastReps || '--'} reps × ${s.lastWeight || '--'} kg</span>
+                <span class="col-span-4 text-xs text-slate-500 dark:text-slate-400 font-mono">${s.lastReps || '--'} reps × ${s.lastWeight || '--'}</span>
                 <input type="number" value="${s.reps}" onchange="updateSetVal('${ex.id}', ${sIndex}, 'reps', this.value)" class="col-span-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded p-1.5 text-xs text-center font-bold text-slate-900 dark:text-white" />
                 <div class="col-span-3 flex items-center space-x-1">
-                  <input type="number" step="0.5" value="${s.weight}" onchange="updateSetVal('${ex.id}', ${sIndex}, 'weight', this.value)" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded p-1.5 text-xs text-center font-bold text-slate-900 dark:text-white" />
+                  <input type="number" step="0.5" value="${s.weight}" onchange="updateSetVal('${ex.id}', ${sIndex}, 'weight', this.value)" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded p-1.5 text-xs text-center font-bold text-slate-900 dark:text-white" placeholder="kg or plate" />
                   <button onclick="removeSet('${ex.id}', ${sIndex})" class="text-xs text-red-500 px-1">✕</button>
                 </div>
               </div>
@@ -478,7 +478,7 @@
           notes: '',
           superset: false,
           cableSides: 'None',
-          cableHeight: 'N/A',
+          cableHeight: 0,
           sets: [{ reps: 10, weight: 10, lastReps: 10, lastWeight: 10 }]
         });
         saveWorkoutDays(days);
@@ -573,7 +573,7 @@
       }
     }
 
-    function finishAndSaveWorkout() {
+    async function finishAndSaveWorkout() {
       const days = getWorkoutDays();
       const day = days.find(d => d.id === activeDayId);
       if (!day) return;
@@ -589,15 +589,27 @@
       const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
       history.unshift({
         title: day.title,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         exercises: JSON.parse(JSON.stringify(day.exercises))
       });
       localStorage.setItem('workout_history', JSON.stringify(history));
 
+      downloadLocalBackup();
       renderHistory();
       renderWorkoutEditor();
-      alert('Workout recorded!');
-      if (window.gapi && gapi.client && gapi.client.getToken()) syncWithDrive();
+
+      let backupStatus = "Saved locally & local JSON backup downloaded.";
+
+      if (window.gapi && gapi.client && gapi.client.getToken()) {
+        try {
+          await syncWithDrive();
+          backupStatus = "Successfully saved locally, backed up to Google Drive, and downloaded JSON backup!";
+        } catch(e) {
+          backupStatus = "Saved locally & downloaded JSON backup, but Google Drive sync failed.";
+        }
+      }
+
+      alert(`🎉 Workout Completed!\n\n${backupStatus}`);
     }
 
     let creatineIntake = localStorage.getItem('creatineIntake') || '0g';
@@ -642,8 +654,8 @@
           <div class="text-xs space-y-1 text-slate-600 dark:text-slate-300">
             ${h.exercises.map(e => `
               <div class="flex justify-between">
-                <span>• ${e.name}</span>
-                <span class="font-mono text-slate-400">${e.sets.map(s => `${s.reps}x${s.weight}kg`).join(', ')}</span>
+                <span>• ${e.name} ${e.cableHeight !== undefined ? `<span class="text-slate-400 text-[10px]">(Pin ${e.cableHeight})</span>` : ''}</span>
+                <span class="font-mono text-slate-400">${e.sets.map(s => `${s.reps}x${s.weight}`).join(', ')}</span>
               </div>
             `).join('')}
           </div>
@@ -657,8 +669,6 @@
         renderHistory();
       }
     }
-
-    /* --- SETTINGS & SYNC MODAL CONTROLS --- */
 
     function openSettingsModal() {
       document.getElementById('setting-client-id').value = localStorage.getItem('google_client_id') || '';
@@ -721,11 +731,9 @@
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `heavydutysteve_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `heavyduty_backup_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
     }
-
-    /* --- GOOGLE DRIVE OAUTH & CONFLICT RESOLUTION --- */
 
     let tokenClient;
     let gapiInited = false;
@@ -857,7 +865,6 @@
               if (choice === 'cloud') {
                 applyPayload(cloudPayload);
                 updateSyncStatusUI('success', '', new Date().toLocaleTimeString());
-                alert('Cloud version loaded successfully!');
               } else {
                 await uploadToCloud(accessToken, localPayload);
               }
@@ -893,15 +900,11 @@
       });
 
       if (res.ok) {
-        downloadLocalBackup(); // Create local file backup simultaneously
         updateSyncStatusUI('success', '', new Date().toLocaleTimeString());
-        alert('Successfully synced with Google Drive & downloaded local backup!');
       } else {
         updateSyncStatusUI('error', 'Upload failed');
       }
     }
-
-    /* --- TAB NAVIGATION CONTROL --- */
 
     function switchTab(targetTab) {
       const navButtons = document.querySelectorAll('.nav-btn');
