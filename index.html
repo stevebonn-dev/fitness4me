@@ -1,543 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
-  <title>Heavy Duty Tracker</title>
-
-  <!-- Dynamic Web App Manifest for PWA installation -->
-  <link rel="manifest" id="manifestPlaceholder">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeavyDutySteve | HIT Workout Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google API Libraries -->
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
   <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --accent-color: #f59e0b;
-      --accent-hover: #d97706;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --danger: #ef4444;
-      --success: #22c55e;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
-
-    header {
-      background-color: var(--card-bg);
-      padding: 1rem;
-      position: sticky; top: 0; z-index: 100;
-      border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    header h1 { font-size: 1.15rem; font-weight: 700; color: var(--accent-color); letter-spacing: 0.5px; }
-
-    .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-
-    .card {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border-color);
-    }
-    .card h2 { font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-main); }
-
-    .btn {
-      background-color: var(--accent-color);
-      color: #000; font-weight: 600;
-      border: none; border-radius: 8px;
-      padding: 0.75rem 1rem;
-      width: 100%; cursor: pointer;
-      display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem;
-      transition: background 0.2s;
-    }
-    .btn:active { transform: scale(0.98); }
-    .btn-secondary { background-color: var(--border-color); color: var(--text-main); }
-    .btn-danger { background-color: var(--danger); color: #fff; }
-
-    .input-group { margin-bottom: 1rem; }
-    .input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem; }
-    .input-group input, .input-group select, .input-group textarea {
-      width: 100%; padding: 0.75rem;
-      background: #0f172a; border: 1px solid var(--border-color);
-      border-radius: 8px; color: #fff; font-size: 1rem;
-    }
-
-    .form-row { display: flex; gap: 0.5rem; }
-    .form-row .input-group { flex: 1; }
-
-    /* Target Record Box */
-    .record-box {
-      background-color: rgba(245, 158, 11, 0.1);
-      border: 1px dashed var(--accent-color);
-      border-radius: 8px;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      color: #fcd34d;
-    }
-    .record-box strong { color: var(--accent-color); }
-
-    /* Timer Widget */
-    .timer-display { font-size: 2.2rem; font-weight: bold; text-align: center; font-family: monospace; color: var(--accent-color); margin: 0.5rem 0; }
-
-    /* History Session Styles */
-    .session-card {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border-color);
-    }
-    .session-header {
-      font-size: 0.85rem;
-      color: var(--accent-color);
-      font-weight: 600;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .set-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.4rem 0;
-      font-size: 0.9rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .set-row:last-child { border-bottom: none; }
-    .set-info { font-weight: 600; }
-    .set-notes { font-size: 0.8rem; color: var(--text-muted); font-style: italic; display: block; }
-
-    /* Tab Navigation */
-    .nav-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background-color: var(--card-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex; justify-content: space-around;
-      padding: 0.6rem 0;
-      z-index: 100;
-    }
-    .nav-item {
-      background: none; border: none; color: var(--text-muted);
-      font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-      cursor: pointer; width: 33%;
-    }
-    .nav-item.active { color: var(--accent-color); font-weight: bold; }
-
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-
-    .status-badge {
-      font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px;
-      background-color: var(--border-color); color: var(--text-muted);
-    }
-    .status-badge.online { background-color: rgba(34, 197, 94, 0.2); color: var(--success); }
   </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-  <header>
-    <h1>HEAVY DUTY FIT</h1>
-    <span id="syncStatus" class="status-badge">Local Storage</span>
+  <!-- Header & Navigation -->
+  <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">🏋️‍♂️</span>
+        <h1 class="text-xl font-bold tracking-wide text-amber-500">HeavyDutySteve</h1>
+      </div>
+      
+      <!-- Nav Tabs & Sync -->
+      <div class="flex flex-wrap items-center gap-3">
+        <nav class="flex space-x-1 bg-gray-900 p-1 rounded-lg border border-gray-700" id="nav-tabs">
+          <button data-tab="dashboard" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-amber-500 text-gray-900">
+            Dashboard
+          </button>
+          <button data-tab="workout" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">
+            Workout Log
+          </button>
+          <button data-tab="history" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">
+            History
+          </button>
+        </nav>
+
+        <!-- Google Drive Sync Buttons -->
+        <div class="flex items-center space-x-2">
+          <button id="authorize_button" onclick="handleAuthClick()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors">
+            Connect Drive
+          </button>
+          <button id="sync_button" onclick="syncWithDrive()" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md transition-colors flex items-center gap-1">
+            <span>🔄 Sync</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <div class="container">
+  <!-- Main Content Area -->
+  <main class="flex-grow max-w-4xl w-full mx-auto p-4">
     
-    <!-- TRACK LOG TAB -->
-    <div id="tab-log" class="tab-content active">
-      <!-- Rest Timer -->
-      <div class="card">
-        <h2>Rest Timer</h2>
-        <div class="timer-display" id="timer">02:00</div>
-        <div class="form-row">
-          <button class="btn btn-secondary" onclick="startTimer(90)">90s</button>
-          <button class="btn btn-secondary" onclick="startTimer(120)">2m</button>
-          <button class="btn btn-secondary" onclick="startTimer(180)">3m</button>
-          <button class="btn btn-danger" onclick="stopTimer()">Reset</button>
+    <!-- DASHBOARD TAB -->
+    <section id="dashboard" class="tab-content active space-y-6">
+      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+        <h2 class="text-xl font-bold mb-2 text-amber-400">Mike Mentzer High-Intensity Training (HIT)</h2>
+        <p class="text-gray-300 text-sm leading-relaxed">
+          1 working set to total muscular failure. High intensity, brief duration, and maximum recovery effort.
+        </p>
+      </div>
+
+      <!-- Daily Tracker / Creatine & Recovery -->
+      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md space-y-4">
+        <h3 class="text-lg font-semibold text-white">Daily Recovery & Supplements</h3>
+        <div class="flex items-center justify-between bg-gray-900 p-4 rounded-lg border border-gray-700">
+          <div>
+            <p class="font-medium">Creatine Monohydrate</p>
+            <p class="text-xs text-gray-400">Daily intake target: 3g - 5g for recovery</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="creatine-btn" onclick="toggleCreatine()" class="px-4 py-2 rounded-lg font-bold text-sm bg-gray-700 text-gray-300 hover:bg-gray-600 transition">
+              Logged: 0g
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Workout Entry Form -->
-      <div class="card">
-        <h2>Log Set</h2>
-        <form id="workoutForm">
-          <div class="input-group">
-            <label for="exercise">Exercise Name</label>
-            <input type="text" id="exercise" placeholder="e.g. Incline Chest Press" required autocomplete="off">
+      <!-- Sync Status Card -->
+      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+        <h3 class="text-lg font-semibold text-white mb-2">Cloud Backup Status</h3>
+        <p id="sync-status-text" class="text-sm text-gray-400">Initializing Google Auth...</p>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-center">
+          <p class="text-gray-400 text-sm">Total HIT Sessions Logged</p>
+          <p id="stat-sessions" class="text-3xl font-extrabold text-amber-500 mt-2">0</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-center">
+          <p class="text-gray-400 text-sm">Last Workout Date</p>
+          <p id="stat-last-date" class="text-3xl font-extrabold text-amber-500 mt-2">--</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKOUT LOG TAB -->
+    <section id="workout" class="tab-content space-y-6">
+      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+        <h2 class="text-xl font-bold mb-4 text-amber-400">Log Heavy Duty Set</h2>
+        
+        <form id="workout-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1 text-gray-300">Exercise Name</label>
+            <input type="text" id="exercise-name" placeholder="e.g., Incline Chest Press, Pulldown, Squat" required
+                   class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
           </div>
 
-          <div class="form-row">
-            <div class="input-group">
-              <label for="setNum">Set #</label>
-              <select id="setNum">
-                <option value="1">Set 1</option>
-                <option value="2">Set 2</option>
-                <option value="3">Set 3</option>
-                <option value="4">Set 4</option>
-              </select>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1 text-gray-300">Weight (kg)</label>
+              <input type="number" step="0.5" id="exercise-weight" placeholder="0" required
+                     class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-gray-300">Reps (To Failure)</label>
+              <input type="number" id="exercise-reps" placeholder="0" required
+                     class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
             </div>
           </div>
 
-          <!-- Dynamic Record Baseline Banner -->
-          <div id="previousRecord" class="record-box" style="display:none;">
-            Target to beat: <strong id="recordDetails">--</strong>
+          <div class="flex items-center space-x-3 pt-2">
+            <input type="checkbox" id="exercise-dropset" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
+            <label for="exercise-dropset" class="text-sm text-gray-300 cursor-pointer">Include Drop Set / Beyond Failure Reps</label>
           </div>
 
-          <div class="form-row">
-            <div class="input-group">
-              <label for="weight">Weight (kg/lbs)</label>
-              <input type="number" id="weight" step="0.5" placeholder="80" required>
-            </div>
-            <div class="input-group">
-              <label for="reps">Reps</label>
-              <input type="number" id="reps" placeholder="8" required>
-            </div>
+          <div>
+            <label class="block text-sm font-medium mb-1 text-gray-300">Notes / Technique Details</label>
+            <textarea id="exercise-notes" rows="3" placeholder="Rest-pause details, tempo, or machine settings..."
+                      class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"></textarea>
           </div>
-          <div class="input-group">
-            <label for="notes">Notes (Failure type / Drop set / TUT)</label>
-            <input type="text" id="notes" placeholder="e.g. Positive failure at rep 7, 3s negative">
-          </div>
-          <button type="submit" class="btn">Save Set</button>
+
+          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">
+            Save High-Intensity Set
+          </button>
         </form>
       </div>
-    </div>
+    </section>
 
     <!-- HISTORY TAB -->
-    <div id="tab-history" class="tab-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-        <h2 style="font-size:1.1rem;">Session History</h2>
-        <button class="btn btn-danger" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="clearHistory()">Clear Data</button>
+    <section id="history" class="tab-content space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-amber-400">Workout History</h2>
+        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline">Clear History</button>
       </div>
-      <div id="historyList">
-        <p style="color:var(--text-muted);">No workouts logged yet.</p>
+
+      <div id="history-list" class="space-y-3">
+        <!-- Dynamic History Cards Inserted Here -->
       </div>
-    </div>
+    </section>
 
-    <!-- SETTINGS & CLOUD TAB -->
-    <div id="tab-settings" class="tab-content">
-      <div class="card">
-        <h2>Google Drive Cloud Sync</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
-          Back up your full local training log to your personal Google Drive account.
-        </p>
-        
-        <div class="input-group">
-          <label for="clientId">Google OAuth Client ID</label>
-          <input type="text" id="clientId" placeholder="Paste Client ID here">
-        </div>
-        
-        <button class="btn btn-secondary" onclick="saveClientId()" style="margin-bottom:1rem;">Save Client ID</button>
-        <button class="btn" onclick="handleAuthClick()" style="margin-bottom:0.5rem;">🔐 Connect Google Drive</button>
-        
-        <div class="form-row" style="margin-top:1rem;">
-          <button class="btn btn-secondary" onclick="backupToDrive()">⬆️ Cloud Backup</button>
-          <button class="btn btn-secondary" onclick="restoreFromDrive()">⬇️ Cloud Restore</button>
-        </div>
-      </div>
-    </div>
+  </main>
 
-  </div>
+  <!-- Footer -->
+  <footer class="bg-gray-800 border-t border-gray-700 py-4 text-center text-xs text-gray-500">
+    HeavyDutySteve App • Built for High-Intensity Progress
+  </footer>
 
-  <!-- Bottom Navigation -->
-  <nav class="nav-bar">
-    <button class="nav-item active" onclick="switchTab('tab-log', this)">
-      <span>⏱️</span> Track
-    </button>
-    <button class="nav-item" onclick="switchTab('tab-history', this)">
-      <span>📊</span> History
-    </button>
-    <button class="nav-item" onclick="switchTab('tab-settings', this)">
-      <span>⚙️</span> Sync
-    </button>
-  </nav>
-
+  <!-- App Script with Google OAuth 2.0 Integration -->
   <script>
-    // --- Local Data Management ---
-    const STORAGE_KEY = 'heavyduty_workouts_v2';
-    let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // -------------------------------------------------------------
+    // GOOGLE DRIVE API & OAUTH 2.0 SETUP
+    // -------------------------------------------------------------
+    // Replace these values with your Google Cloud Credentials
+    const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+    const API_KEY = 'YOUR_API_KEY';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 
-    const exerciseInput = document.getElementById('exercise');
-    const setNumSelect = document.getElementById('setNum');
-    const recordBox = document.getElementById('previousRecord');
-    const recordDetails = document.getElementById('recordDetails');
-
-    // Auto-lookup previous weight for selected Exercise + Set #
-    function updatePreviousRecord() {
-      const exerciseName = exerciseInput.value.trim().toLowerCase();
-      const setNum = setNumSelect.value;
-
-      if (!exerciseName) {
-        recordBox.style.display = 'none';
-        return;
-      }
-
-      // Find the most recent set matching Exercise AND Set #
-      const match = workouts.find(w => 
-        w.exercise.toLowerCase() === exerciseName && String(w.setNum) === String(setNum)
-      );
-
-      if (match) {
-        recordDetails.innerText = `${match.weight} kg/lbs × ${match.reps} reps (${match.date.split(',')[0]})`;
-        recordBox.style.display = 'block';
-      } else {
-        recordBox.style.display = 'none';
-      }
-    }
-
-    exerciseInput.addEventListener('input', updatePreviousRecord);
-    setNumSelect.addEventListener('change', updatePreviousRecord);
-
-    // Form submission
-    document.getElementById('workoutForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const now = new Date();
-      const entry = {
-        id: Date.now(),
-        timestamp: now.getTime(),
-        date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        dateKey: now.toISOString().split('T')[0],
-        exercise: exerciseInput.value.trim(),
-        setNum: setNumSelect.value,
-        weight: document.getElementById('weight').value,
-        reps: document.getElementById('reps').value,
-        notes: document.getElementById('notes').value.trim()
-      };
-      
-      workouts.unshift(entry);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-      
-      // Prep for next set
-      document.getElementById('weight').value = '';
-      document.getElementById('reps').value = '';
-      document.getElementById('notes').value = '';
-      setNumSelect.value = String(parseInt(entry.setNum) + 1 > 4 ? 1 : parseInt(entry.setNum) + 1);
-
-      updatePreviousRecord();
-      renderHistory();
-    });
-
-    // Render Sessions History
-    function renderHistory() {
-      const container = document.getElementById('historyList');
-      if (workouts.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);">No workouts logged yet.</p>';
-        return;
-      }
-
-      // Group sets by dateKey (Session Date)
-      const sessions = {};
-      workouts.forEach(item => {
-        const key = item.dateKey || item.date.split(',')[0];
-        if (!sessions[key]) sessions[key] = [];
-        sessions[key].push(item);
-      });
-
-      container.innerHTML = Object.keys(sessions).map(dateKey => {
-        const sessionSets = sessions[dateKey];
-        return `
-          <div class="session-card">
-            <div class="session-header">📅 Session: ${dateKey}</div>
-            ${sessionSets.map(item => `
-              <div class="set-row">
-                <div>
-                  <div class="set-info">${item.exercise} (Set ${item.setNum || 1})</div>
-                  ${item.notes ? `<span class="set-notes">"${item.notes}"</span>` : ''}
-                </div>
-                <div style="font-weight:bold; color:var(--accent-color);">
-                  ${item.weight} kg/lbs × ${item.reps}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }).join('');
-    }
-    renderHistory();
-
-    function clearHistory() {
-      if (confirm('Are you sure you want to delete all workout sessions?')) {
-        workouts = [];
-        localStorage.removeItem(STORAGE_KEY);
-        renderHistory();
-        updatePreviousRecord();
-      }
-    }
-
-    // --- Tab Navigation ---
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-    }
-
-    // --- Rest Timer ---
-    let timerInterval = null;
-    function startTimer(seconds) {
-      clearInterval(timerInterval);
-      let remaining = seconds;
-      updateTimerDisplay(remaining);
-      
-      timerInterval = setInterval(() => {
-        remaining--;
-        updateTimerDisplay(remaining);
-        if (remaining <= 0) {
-          clearInterval(timerInterval);
-          alert('Rest complete!');
-        }
-      }, 1000);
-    }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-      updateTimerDisplay(120);
-    }
-
-    function updateTimerDisplay(sec) {
-      const m = String(Math.floor(sec / 60)).padStart(2, '0');
-      const s = String(sec % 60).padStart(2, '0');
-      document.getElementById('timer').innerText = `${m}:${s}`;
-    }
-
-    // --- Google Drive Integration ---
     let tokenClient;
-    let accessToken = null;
-    const BACKUP_FILENAME = 'heavyduty_workout_backup.json';
+    let gapiInited = false;
+    let gisInited = false;
+    let driveFileId = null;
 
-    const savedClientId = localStorage.getItem('gdrive_client_id');
-    if (savedClientId) document.getElementById('clientId').value = savedClientId;
-
-    function saveClientId() {
-      const id = document.getElementById('clientId').value.trim();
-      localStorage.setItem('gdrive_client_id', id);
-      alert('Client ID saved!');
+    function gapiLoaded() {
+      gapi.load('client', async () => {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      });
     }
 
-    function initGoogleAuth() {
-      const clientId = localStorage.getItem('gdrive_client_id');
-      if (!clientId) {
-        alert('Please enter your Google OAuth Client ID in Settings first.');
-        return false;
-      }
+    function gisLoaded() {
       tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: (response) => {
-          if (response.access_token) {
-            accessToken = response.access_token;
-            const badge = document.getElementById('syncStatus');
-            badge.innerText = 'Connected';
-            badge.classList.add('online');
-            alert('Connected to Google Drive!');
-          }
-        },
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined at request time
       });
-      return true;
+      gisInited = true;
+      maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('authorize_button').classList.remove('hidden');
+        document.getElementById('sync-status-text').innerText = 'Ready to connect to Google Drive.';
+      }
     }
 
     function handleAuthClick() {
-      if (initGoogleAuth()) tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
-
-    async function backupToDrive() {
-      if (!accessToken) { alert('Sign in with Google first.'); return; }
-      const content = JSON.stringify(workouts, null, 2);
-      const file = new Blob([content], { type: 'application/json' });
-      
-      try {
-        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FILENAME}' and trashed=false`, {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        });
-        const searchData = await searchRes.json();
-        let fileId = searchData.files && searchData.files.length > 0 ? searchData.files[0].id : null;
-
-        if (fileId) {
-          await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
-            method: 'PATCH',
-            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: content
-          });
-        } else {
-          const metadata = { name: BACKUP_FILENAME, mimeType: 'application/json' };
-          const form = new FormData();
-          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-          form.append('file', file);
-
-          await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${accessToken}` },
-            body: form
-          });
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw (resp);
         }
-        alert('Backup successful!');
-      } catch (err) {
-        alert('Backup failed: ' + err.message);
+        document.getElementById('authorize_button').classList.add('hidden');
+        document.getElementById('sync_button').classList.remove('hidden');
+        document.getElementById('sync-status-text').innerText = 'Connected to Google Drive! Syncing enabled.';
+        await loadFromDrive();
+      };
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      } else {
+        tokenClient.requestAccessToken({ prompt: '' });
       }
     }
 
-    async function restoreFromDrive() {
-      if (!accessToken) { alert('Sign in with Google first.'); return; }
+    // Google Drive Sync Engine (AppData Folder)
+    async function findDriveFile() {
+      const response = await gapi.client.drive.files.list({
+        spaces: 'appDataFolder',
+        fields: 'files(id, name)',
+        pageSize: 10
+      });
+      const files = response.result.files;
+      if (files && files.length > 0) {
+        return files[0].id;
+      }
+      return null;
+    }
+
+    async function syncWithDrive() {
+      document.getElementById('sync-status-text').innerText = 'Syncing to Google Drive...';
       try {
-        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FILENAME}' and trashed=false`, {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        });
-        const searchData = await searchRes.json();
-        if (!searchData.files || searchData.files.length === 0) {
-          alert('No backup file found.');
-          return;
+        const payload = {
+          workouts: getWorkouts(),
+          creatineIntake: localStorage.getItem('creatineIntake') || '0g'
+        };
+
+        const fileContent = JSON.stringify(payload);
+        const file = new Blob([fileContent], { type: 'application/json' });
+        const metadata = {
+          name: 'heavydutysteve_data.json',
+          parents: ['appDataFolder']
+        };
+
+        const accessToken = gapi.client.getToken().access_token;
+
+        if (!driveFileId) {
+          driveFileId = await findDriveFile();
         }
-        const fileId = searchData.files[0].id;
-        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-          headers: { Authorization: `Bearer ${accessToken}` }
+
+        let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+        let method = 'POST';
+
+        if (driveFileId) {
+          url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
+          method = 'PATCH';
+        }
+
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+
+        const res = await fetch(url, {
+          method: method,
+          headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+          body: form
         });
-        const restoredData = await fileRes.json();
-        if (Array.isArray(restoredData)) {
-          workouts = restoredData;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-          renderHistory();
-          updatePreviousRecord();
-          alert('Restore complete!');
+
+        if (res.ok) {
+          const data = await res.json();
+          driveFileId = data.id;
+          document.getElementById('sync-status-text').innerText = `Last synced: ${new Date().toLocaleTimeString()}`;
         }
       } catch (err) {
-        alert('Restore failed: ' + err.message);
+        document.getElementById('sync-status-text').innerText = 'Sync failed. Check console.';
+        console.error('Drive Sync Error:', err);
       }
     }
 
-    // --- Dynamic PWA Registration & Manifest Generation ---
-    const manifestData = {
-      name: "Heavy Duty Fit",
-      short_name: "HeavyDuty",
-      start_url: "./",
-      display: "standalone",
-      background_color: "#0f172a",
-      theme_color: "#0f172a",
-      icons: [{ src: "https://cdn-icons-png.flaticon.com/512/2548/2548537.png", sizes: "512x512", type: "image/png" }]
-    };
-    const stringManifest = JSON.stringify(manifestData);
-    const blobManifest = new Blob([stringManifest], {type: 'application/json'});
-    document.getElementById('manifestPlaceholder').setAttribute('href', URL.createObjectURL(blobManifest));
-
-    // Embedded Service Worker for full offline PWA execution
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE_NAME = 'heavyduty-v1';
-        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-        self.addEventListener('fetch', e => {
-          e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-        });
-      `;
-      const blobSW = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blobSW))
-        .catch(err => console.log('SW Registration bypassed:', err));
+    async function loadFromDrive() {
+      try {
+        driveFileId = await findDriveFile();
+        if (driveFileId) {
+          const res = await gapi.client.drive.files.get({
+            fileId: driveFileId,
+            alt: 'media'
+          });
+          
+          if (res.result) {
+            if (res.result.workouts) {
+              localStorage.setItem('workouts', JSON.stringify(res.result.workouts));
+            }
+            if (res.result.creatineIntake) {
+              localStorage.setItem('creatineIntake', res.result.creatineIntake);
+              creatineIntake = res.result.creatineIntake;
+              updateCreatineUI();
+            }
+            renderHistory();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load from Drive:', err);
+      }
     }
+
+    // -------------------------------------------------------------
+    // UI TAB NAVIGATION LOGIC
+    // -------------------------------------------------------------
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    navButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+
+        navButtons.forEach(btn => {
+          btn.classList.remove('bg-amber-500', 'text-gray-900');
+          btn.classList.add('text-gray-400');
+        });
+        button.classList.add('bg-amber-500', 'text-gray-900');
+        button.classList.remove('text-gray-400');
+
+        tabContents.forEach(content => {
+          if (content.id === targetTab) {
+            content.classList.add('active');
+          } else {
+            content.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // -------------------------------------------------------------
+    // APP DATA MANAGEMENT & LOGGING
+    // -------------------------------------------------------------
+    let creatineIntake = localStorage.getItem('creatineIntake') || '0g';
+
+    function updateCreatineUI() {
+      const btn = document.getElementById('creatine-btn');
+      btn.innerText = `Logged: ${creatineIntake}`;
+      if (creatineIntake !== '0g') {
+        btn.classList.remove('bg-gray-700', 'text-gray-300');
+        btn.classList.add('bg-amber-500', 'text-gray-900');
+      } else {
+        btn.classList.remove('bg-amber-500', 'text-gray-900');
+        btn.classList.add('bg-gray-700', 'text-gray-300');
+      }
+    }
+
+    function toggleCreatine() {
+      if (creatineIntake === '0g') creatineIntake = '3g';
+      else if (creatineIntake === '3g') creatineIntake = '5g';
+      else creatineIntake = '0g';
+
+      localStorage.setItem('creatineIntake', creatineIntake);
+      updateCreatineUI();
+      if (gapi.client && gapi.client.getToken()) syncWithDrive();
+    }
+
+    function getWorkouts() {
+      return JSON.parse(localStorage.getItem('workouts') || '[]');
+    }
+
+    function renderHistory() {
+      const workouts = getWorkouts();
+      const historyList = document.getElementById('history-list');
+      const statSessions = document.getElementById('stat-sessions');
+      const statLastDate = document.getElementById('stat-last-date');
+
+      statSessions.innerText = workouts.length;
+      statLastDate.innerText = workouts.length > 0 ? workouts[0].date : '--';
+
+      if (workouts.length === 0) {
+        historyList.innerHTML = `<div class="p-6 text-center bg-gray-800 rounded-xl text-gray-400 border border-gray-700">No workout records found. Log a session to get started.</div>`;
+        return;
+      }
+
+      historyList.innerHTML = workouts.map(w => `
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-lg text-white">${w.exercise}</h3>
+              ${w.dropset ? '<span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/40">Drop Set</span>' : ''}
+            </div>
+            <p class="text-sm text-gray-400">${w.weight} kg × ${w.reps} reps to failure</p>
+            ${w.notes ? `<p class="text-xs text-gray-500 mt-1">"${w.notes}"</p>` : ''}
+          </div>
+          <span class="text-xs text-gray-500 self-end sm:self-center">${w.date}</span>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('workout-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const exercise = document.getElementById('exercise-name').value;
+      const weight = document.getElementById('exercise-weight').value;
+      const reps = document.getElementById('exercise-reps').value;
+      const dropset = document.getElementById('exercise-dropset').checked;
+      const notes = document.getElementById('exercise-notes').value;
+
+      const newWorkout = {
+        exercise,
+        weight,
+        reps,
+        dropset,
+        notes,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      };
+
+      const workouts = getWorkouts();
+      workouts.unshift(newWorkout);
+      localStorage.setItem('workouts', JSON.stringify(workouts));
+
+      document.getElementById('workout-form').reset();
+      renderHistory();
+
+      // Automatically push update to Google Drive if connected
+      if (gapi.client && gapi.client.getToken()) {
+        syncWithDrive();
+      }
+
+      // Switch to history tab
+      document.querySelector('[data-tab="history"]').click();
+    });
+
+    function clearHistory() {
+      if (confirm('Clear all recorded workouts?')) {
+        localStorage.removeItem('workouts');
+        renderHistory();
+        if (gapi.client && gapi.client.getToken()) syncWithDrive();
+      }
+    }
+
+    // Initialize App
+    updateCreatineUI();
+    renderHistory();
   </script>
 </body>
 </html>
