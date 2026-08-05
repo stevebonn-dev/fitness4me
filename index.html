@@ -1,447 +1,956 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeavyDutySteve | HIT Workout Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google API Libraries -->
-  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
-  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
-  <style>
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-  </style>
-</head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
+{\rtf1\ansi\ansicpg1252\cocoartf2905
+\cocoatextscaling1\cocoaplatform1{\fonttbl\f0\froman\fcharset0 TimesNewRomanPSMT;\f1\froman\fcharset0 TimesNewRomanPS-BoldMT;\f2\fmodern\fcharset0 Courier;
+\f3\fmodern\fcharset0 Courier-Bold;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid2\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\deftab720
+\pard\pardeftab720\sa240\partightenfactor0
 
-  <!-- Header & Navigation -->
-  <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div class="flex items-center space-x-3">
-        <span class="text-2xl">🏋️‍♂️</span>
-        <h1 class="text-xl font-bold tracking-wide text-amber-500">HeavyDutySteve</h1>
-      </div>
-      
-      <!-- Nav Tabs & Sync -->
-      <div class="flex flex-wrap items-center gap-3">
-        <nav class="flex space-x-1 bg-gray-900 p-1 rounded-lg border border-gray-700" id="nav-tabs">
-          <button data-tab="dashboard" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-amber-500 text-gray-900">
-            Dashboard
-          </button>
-          <button data-tab="workout" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">
-            Workout Log
-          </button>
-          <button data-tab="history" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">
-            History
-          </button>
-        </nav>
+\f0\fs24 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Here is the complete, single-file application code updated to resolve the Google OAuth auth-loop bug, add custom Client ID configuration, and fully incorporate the requested workout structure, rest timer, superset tags, cable settings, and pre-populated workout routines extracted directly from your images.\
+\pard\pardeftab720\sa280\partightenfactor0
 
-        <!-- Google Drive Sync Buttons -->
-        <div class="flex items-center space-x-2">
-          <button id="authorize_button" onclick="handleAuthClick()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors">
-            Connect Drive
-          </button>
-          <button id="sync_button" onclick="syncWithDrive()" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md transition-colors flex items-center gap-1">
-            <span>🔄 Sync</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+\f1\b\fs28 \cf2 \strokec2 Key Fixes & Upgrades\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl0
+\fs24 \cf2 \strokec2 {\listtext	1.	}Google Auth Fix & Settings Modal:\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl1
+\f0\b0 \cf2 \strokec2 {\listtext	\uc0\u9702 	}The auth setup was hanging because placeholder credentials (
+\f2 \cf2 \strokec2 YOUR_CLIENT_ID
+\f0 \cf2 \strokec2 ) caused client initialization errors before 
+\f2 \cf2 \strokec2 gapi
+\f0 \cf2 \strokec2  finished loading.\
+{\listtext	\uc0\u9702 	}Added a 
+\f1\b \cf2 \strokec2 Settings Modal
+\f0\b0 \cf2 \strokec2  where you can paste your custom Google Client ID and API Key. Settings are stored in 
+\f2 \cf2 \strokec2 localStorage
+\f0 \cf2 \strokec2  so Google Drive initialization executes cleanly once credentials are provided.\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl0
+\f1\b \cf2 \strokec2 {\listtext	2.	}Preset Workout Days (Extracted from Images):\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl1\cf2 \strokec2 {\listtext	\uc0\u9702 	}Workout Day 1 (Legs & Abs):
+\f0\b0 \cf2 \strokec2  One-Leg Leg Presses, Cable Pull Through, Barbell Front Squats, Plate Sissy Squats, Step Up On Bench, Standing Calf Raises, Kneeling Cable Crunches.\
+\ls1\ilvl1
+\f1\b \cf2 \strokec2 {\listtext	\uc0\u9702 	}Workout Day 2 (Chest, Back & Core):
+\f0\b0 \cf2 \strokec2  Cable Crossover, Incline Dumbbell Bench Presses, Low Cable Flys, Close-Grip Lat Pull-Downs, Wide-Grip Seated Machine Rows, Machine Shrugs, Barbell Deadlifts, Pallof Cable Press.\
+\ls1\ilvl1
+\f1\b \cf2 \strokec2 {\listtext	\uc0\u9702 	}Workout Day 3 (Shoulders, Arms & Core):
+\f0\b0 \cf2 \strokec2  Dumbbell Lateral Raises, Machine Presses, Cable Front Raises, Reverse High Cable Flys, Dumbbell Curls, Machine Dips, Incline Low Cable Triceps Extensions, Incline W raises, Pallof Cable Press.\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl0
+\f1\b \cf2 \strokec2 {\listtext	3.	}Flexible Exercise Management:\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl1
+\f0\b0 \cf2 \strokec2 {\listtext	\uc0\u9702 	}Add/remove sets dynamically for any exercise.\
+{\listtext	\uc0\u9702 	}Reorder exercises within a day (Move Up / Move Down) or delete/add exercises as needed.\
+{\listtext	\uc0\u9702 	}Toggle 
+\f1\b \cf2 \strokec2 Superset
+\f0\b0 \cf2 \strokec2  pairing with visual badges.\
+{\listtext	\uc0\u9702 	}Record cable settings per exercise: 
+\f1\b \cf2 \strokec2 Cable Sides
+\f0\b0 \cf2 \strokec2  (Single / Dual) and 
+\f1\b \cf2 \strokec2 Cable Height
+\f0\b0 \cf2 \strokec2  (Top, Upper, Middle, Lower, Bottom).\
+{\listtext	\uc0\u9702 	}Shows "Last Target / Previous Performance" per set for clear progress tracking.\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl0
+\f1\b \cf2 \strokec2 {\listtext	4.	}Rest Timer with Audio Alert:\
+\pard\pardeftab720\partightenfactor0
+\ls1\ilvl1
+\f0\b0 \cf2 \strokec2 {\listtext	\uc0\u9702 	}Integrated Start/Pause/Reset timer with customizable target duration in seconds. Uses Web Audio API synthesizers so it generates an audible alarm without needing external MP3 asset downloads.\
+\pard\pardeftab720\sa280\partightenfactor0
 
-  <!-- Main Content Area -->
-  <main class="flex-grow max-w-4xl w-full mx-auto p-4">
-    
-    <!-- DASHBOARD TAB -->
-    <section id="dashboard" class="tab-content active space-y-6">
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
-        <h2 class="text-xl font-bold mb-2 text-amber-400">Mike Mentzer High-Intensity Training (HIT)</h2>
-        <p class="text-gray-300 text-sm leading-relaxed">
-          1 working set to total muscular failure. High intensity, brief duration, and maximum recovery effort.
-        </p>
-      </div>
+\f1\b\fs28 \cf2 \strokec2 Complete Code (
+\f3 \cf2 \strokec2 index.html
+\f1 \cf2 \strokec2 )\
+\pard\pardeftab720\partightenfactor0
 
-      <!-- Daily Tracker / Creatine & Recovery -->
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md space-y-4">
-        <h3 class="text-lg font-semibold text-white">Daily Recovery & Supplements</h3>
-        <div class="flex items-center justify-between bg-gray-900 p-4 rounded-lg border border-gray-700">
-          <div>
-            <p class="font-medium">Creatine Monohydrate</p>
-            <p class="text-xs text-gray-400">Daily intake target: 3g - 5g for recovery</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button id="creatine-btn" onclick="toggleCreatine()" class="px-4 py-2 rounded-lg font-bold text-sm bg-gray-700 text-gray-300 hover:bg-gray-600 transition">
-              Logged: 0g
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sync Status Card -->
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
-        <h3 class="text-lg font-semibold text-white mb-2">Cloud Backup Status</h3>
-        <p id="sync-status-text" class="text-sm text-gray-400">Initializing Google Auth...</p>
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-center">
-          <p class="text-gray-400 text-sm">Total HIT Sessions Logged</p>
-          <p id="stat-sessions" class="text-3xl font-extrabold text-amber-500 mt-2">0</p>
-        </div>
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-center">
-          <p class="text-gray-400 text-sm">Last Workout Date</p>
-          <p id="stat-last-date" class="text-3xl font-extrabold text-amber-500 mt-2">--</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- WORKOUT LOG TAB -->
-    <section id="workout" class="tab-content space-y-6">
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
-        <h2 class="text-xl font-bold mb-4 text-amber-400">Log Heavy Duty Set</h2>
-        
-        <form id="workout-form" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-1 text-gray-300">Exercise Name</label>
-            <input type="text" id="exercise-name" placeholder="e.g., Incline Chest Press, Pulldown, Squat" required
-                   class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1 text-gray-300">Weight (kg)</label>
-              <input type="number" step="0.5" id="exercise-weight" placeholder="0" required
-                     class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1 text-gray-300">Reps (To Failure)</label>
-              <input type="number" id="exercise-reps" placeholder="0" required
-                     class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500" />
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-3 pt-2">
-            <input type="checkbox" id="exercise-dropset" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
-            <label for="exercise-dropset" class="text-sm text-gray-300 cursor-pointer">Include Drop Set / Beyond Failure Reps</label>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-1 text-gray-300">Notes / Technique Details</label>
-            <textarea id="exercise-notes" rows="3" placeholder="Rest-pause details, tempo, or machine settings..."
-                      class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"></textarea>
-          </div>
-
-          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">
-            Save High-Intensity Set
-          </button>
-        </form>
-      </div>
-    </section>
-
-    <!-- HISTORY TAB -->
-    <section id="history" class="tab-content space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-amber-400">Workout History</h2>
-        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline">Clear History</button>
-      </div>
-
-      <div id="history-list" class="space-y-3">
-        <!-- Dynamic History Cards Inserted Here -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-gray-800 border-t border-gray-700 py-4 text-center text-xs text-gray-500">
-    HeavyDutySteve App • Built for High-Intensity Progress
-  </footer>
-
-  <!-- App Script with Google OAuth 2.0 Integration -->
-  <script>
-    // -------------------------------------------------------------
-    // GOOGLE DRIVE API & OAUTH 2.0 SETUP
-    // -------------------------------------------------------------
-    // Replace these values with your Google Cloud Credentials
-    const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
-    const API_KEY = 'YOUR_API_KEY';
-    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
-
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
-    let driveFileId = null;
-
-    function gapiLoaded() {
-      gapi.load('client', async () => {
-        await gapi.client.init({
-          apiKey: API_KEY,
-          discoveryDocs: [DISCOVERY_DOC],
-        });
-        gapiInited = true;
-        maybeEnableButtons();
-      });
-    }
-
-    function gisLoaded() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // defined at request time
-      });
-      gisInited = true;
-      maybeEnableButtons();
-    }
-
-    function maybeEnableButtons() {
-      if (gapiInited && gisInited) {
-        document.getElementById('authorize_button').classList.remove('hidden');
-        document.getElementById('sync-status-text').innerText = 'Ready to connect to Google Drive.';
-      }
-    }
-
-    function handleAuthClick() {
-      tokenClient.callback = async (resp) => {
-        if (resp.error !== undefined) {
-          throw (resp);
-        }
-        document.getElementById('authorize_button').classList.add('hidden');
-        document.getElementById('sync_button').classList.remove('hidden');
-        document.getElementById('sync-status-text').innerText = 'Connected to Google Drive! Syncing enabled.';
-        await loadFromDrive();
-      };
-
-      if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-      } else {
-        tokenClient.requestAccessToken({ prompt: '' });
-      }
-    }
-
-    // Google Drive Sync Engine (AppData Folder)
-    async function findDriveFile() {
-      const response = await gapi.client.drive.files.list({
-        spaces: 'appDataFolder',
-        fields: 'files(id, name)',
-        pageSize: 10
-      });
-      const files = response.result.files;
-      if (files && files.length > 0) {
-        return files[0].id;
-      }
-      return null;
-    }
-
-    async function syncWithDrive() {
-      document.getElementById('sync-status-text').innerText = 'Syncing to Google Drive...';
-      try {
-        const payload = {
-          workouts: getWorkouts(),
-          creatineIntake: localStorage.getItem('creatineIntake') || '0g'
-        };
-
-        const fileContent = JSON.stringify(payload);
-        const file = new Blob([fileContent], { type: 'application/json' });
-        const metadata = {
-          name: 'heavydutysteve_data.json',
-          parents: ['appDataFolder']
-        };
-
-        const accessToken = gapi.client.getToken().access_token;
-
-        if (!driveFileId) {
-          driveFileId = await findDriveFile();
-        }
-
-        let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-        let method = 'POST';
-
-        if (driveFileId) {
-          url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
-          method = 'PATCH';
-        }
-
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', file);
-
-        const res = await fetch(url, {
-          method: method,
-          headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-          body: form
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          driveFileId = data.id;
-          document.getElementById('sync-status-text').innerText = `Last synced: ${new Date().toLocaleTimeString()}`;
-        }
-      } catch (err) {
-        document.getElementById('sync-status-text').innerText = 'Sync failed. Check console.';
-        console.error('Drive Sync Error:', err);
-      }
-    }
-
-    async function loadFromDrive() {
-      try {
-        driveFileId = await findDriveFile();
-        if (driveFileId) {
-          const res = await gapi.client.drive.files.get({
-            fileId: driveFileId,
-            alt: 'media'
-          });
-          
-          if (res.result) {
-            if (res.result.workouts) {
-              localStorage.setItem('workouts', JSON.stringify(res.result.workouts));
-            }
-            if (res.result.creatineIntake) {
-              localStorage.setItem('creatineIntake', res.result.creatineIntake);
-              creatineIntake = res.result.creatineIntake;
-              updateCreatineUI();
-            }
-            renderHistory();
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load from Drive:', err);
-      }
-    }
-
-    // -------------------------------------------------------------
-    // UI TAB NAVIGATION LOGIC
-    // -------------------------------------------------------------
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    navButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const targetTab = button.getAttribute('data-tab');
-
-        navButtons.forEach(btn => {
-          btn.classList.remove('bg-amber-500', 'text-gray-900');
-          btn.classList.add('text-gray-400');
-        });
-        button.classList.add('bg-amber-500', 'text-gray-900');
-        button.classList.remove('text-gray-400');
-
-        tabContents.forEach(content => {
-          if (content.id === targetTab) {
-            content.classList.add('active');
-          } else {
-            content.classList.remove('active');
-          }
-        });
-      });
-    });
-
-    // -------------------------------------------------------------
-    // APP DATA MANAGEMENT & LOGGING
-    // -------------------------------------------------------------
-    let creatineIntake = localStorage.getItem('creatineIntake') || '0g';
-
-    function updateCreatineUI() {
-      const btn = document.getElementById('creatine-btn');
-      btn.innerText = `Logged: ${creatineIntake}`;
-      if (creatineIntake !== '0g') {
-        btn.classList.remove('bg-gray-700', 'text-gray-300');
-        btn.classList.add('bg-amber-500', 'text-gray-900');
-      } else {
-        btn.classList.remove('bg-amber-500', 'text-gray-900');
-        btn.classList.add('bg-gray-700', 'text-gray-300');
-      }
-    }
-
-    function toggleCreatine() {
-      if (creatineIntake === '0g') creatineIntake = '3g';
-      else if (creatineIntake === '3g') creatineIntake = '5g';
-      else creatineIntake = '0g';
-
-      localStorage.setItem('creatineIntake', creatineIntake);
-      updateCreatineUI();
-      if (gapi.client && gapi.client.getToken()) syncWithDrive();
-    }
-
-    function getWorkouts() {
-      return JSON.parse(localStorage.getItem('workouts') || '[]');
-    }
-
-    function renderHistory() {
-      const workouts = getWorkouts();
-      const historyList = document.getElementById('history-list');
-      const statSessions = document.getElementById('stat-sessions');
-      const statLastDate = document.getElementById('stat-last-date');
-
-      statSessions.innerText = workouts.length;
-      statLastDate.innerText = workouts.length > 0 ? workouts[0].date : '--';
-
-      if (workouts.length === 0) {
-        historyList.innerHTML = `<div class="p-6 text-center bg-gray-800 rounded-xl text-gray-400 border border-gray-700">No workout records found. Log a session to get started.</div>`;
-        return;
-      }
-
-      historyList.innerHTML = workouts.map(w => `
-        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <div class="flex items-center space-x-2">
-              <h3 class="font-bold text-lg text-white">${w.exercise}</h3>
-              ${w.dropset ? '<span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/40">Drop Set</span>' : ''}
-            </div>
-            <p class="text-sm text-gray-400">${w.weight} kg × ${w.reps} reps to failure</p>
-            ${w.notes ? `<p class="text-xs text-gray-500 mt-1">"${w.notes}"</p>` : ''}
-          </div>
-          <span class="text-xs text-gray-500 self-end sm:self-center">${w.date}</span>
-        </div>
-      `).join('');
-    }
-
-    document.getElementById('workout-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const exercise = document.getElementById('exercise-name').value;
-      const weight = document.getElementById('exercise-weight').value;
-      const reps = document.getElementById('exercise-reps').value;
-      const dropset = document.getElementById('exercise-dropset').checked;
-      const notes = document.getElementById('exercise-notes').value;
-
-      const newWorkout = {
-        exercise,
-        weight,
-        reps,
-        dropset,
-        notes,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      };
-
-      const workouts = getWorkouts();
-      workouts.unshift(newWorkout);
-      localStorage.setItem('workouts', JSON.stringify(workouts));
-
-      document.getElementById('workout-form').reset();
-      renderHistory();
-
-      // Automatically push update to Google Drive if connected
-      if (gapi.client && gapi.client.getToken()) {
-        syncWithDrive();
-      }
-
-      // Switch to history tab
-      document.querySelector('[data-tab="history"]').click();
-    });
-
-    function clearHistory() {
-      if (confirm('Clear all recorded workouts?')) {
-        localStorage.removeItem('workouts');
-        renderHistory();
-        if (gapi.client && gapi.client.getToken()) syncWithDrive();
-      }
-    }
-
-    // Initialize App
-    updateCreatineUI();
-    renderHistory();
-  </script>
-</body>
-</html>
+\f2\b0\fs24 \cf2 \strokec2 <!DOCTYPE html>\
+<html lang="en">\
+<head>\
+  <meta charset="UTF-8" />\
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\
+  <title>HeavyDutySteve | Workout & HIT Tracker</title>\
+  <script src="https://cdn.tailwindcss.com"></script>\
+  <!-- Google API Libraries -->\
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>\
+  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>\
+  <style>\
+    .tab-content \{ display: none; \}\
+    .tab-content.active \{ display: block; \}\
+  </style>\
+</head>\
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">\
+\
+  <!-- Header -->\
+  <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">\
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">\
+      <div class="flex items-center space-x-3">\
+        <span class="text-2xl">\uc0\u55356 \u57291 \u65039 \u8205 \u9794 \u65039 </span>\
+        <h1 class="text-xl font-bold tracking-wide text-amber-500">HeavyDutySteve</h1>\
+      </div>\
+      \
+      <!-- Nav Tabs & Controls -->\
+      <div class="flex flex-wrap items-center gap-2">\
+        <nav class="flex space-x-1 bg-gray-900 p-1 rounded-lg border border-gray-700">\
+          <button data-tab="dashboard" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-amber-500 text-gray-900">\
+            Dashboard\
+          </button>\
+          <button data-tab="workout" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">\
+            Workout Log\
+          </button>\
+          <button data-tab="history" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-400 hover:text-white">\
+            History\
+          </button>\
+        </nav>\
+\
+        <button onclick="openSettingsModal()" class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs font-semibold rounded-md border border-gray-600 transition">\
+          \uc0\u9881 \u65039  Settings\
+        </button>\
+        <button id="sync_button" onclick="syncWithDrive()" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md transition flex items-center gap-1">\
+          \uc0\u55357 \u56580  Sync Drive\
+        </button>\
+      </div>\
+    </div>\
+  </header>\
+\
+  <!-- Rest Timer Widget Bar -->\
+  <div class="bg-gray-800/90 border-b border-gray-700 py-2 px-4 sticky top-[61px] z-40 backdrop-blur-sm">\
+    <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">\
+      <div class="flex items-center space-x-2">\
+        <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Rest Timer:</span>\
+        <span id="timer-display" class="font-mono text-lg font-bold text-amber-400">01:30</span>\
+      </div>\
+      <div class="flex items-center space-x-2">\
+        <input type="number" id="timer-input-seconds" value="90" min="5" step="5" class="w-16 bg-gray-900 border border-gray-700 text-center text-xs rounded py-1 text-white" />\
+        <span class="text-xs text-gray-400">sec</span>\
+        <button onclick="startTimer()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-gray-900 text-xs font-bold rounded">Start</button>\
+        <button onclick="pauseTimer()" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 text-xs rounded">Pause</button>\
+        <button onclick="resetTimer()" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 text-xs rounded">Reset</button>\
+      </div>\
+    </div>\
+  </div>\
+\
+  <!-- Main Content Area -->\
+  <main class="flex-grow max-w-5xl w-full mx-auto p-4">\
+    \
+    <!-- DASHBOARD TAB -->\
+    <section id="dashboard" class="tab-content active space-y-6">\
+      <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">\
+        <div>\
+          <h2 class="text-xl font-bold text-amber-400">Select Workout Program</h2>\
+          <p class="text-gray-300 text-sm mt-1">Select a pre-configured training day to edit or start your workout.</p>\
+        </div>\
+        <button onclick="createNewDay()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gray-900 text-xs font-bold rounded-lg transition">\
+          + Add New Workout Day\
+        </button>\
+      </div>\
+\
+      <!-- Workout Days Grid -->\
+      <div id="workout-days-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">\
+        <!-- Rendered via JS -->\
+      </div>\
+\
+      <!-- Daily Tracker & Recovery -->\
+      <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 space-y-3">\
+        <h3 class="text-md font-semibold text-white">Daily Recovery & Creatine Log</h3>\
+        <div class="flex items-center justify-between bg-gray-900 p-3.5 rounded-lg border border-gray-700">\
+          <div>\
+            <p class="font-medium text-sm">Creatine Monohydrate</p>\
+            <p class="text-xs text-gray-400">Daily intake target: 3g - 5g</p>\
+          </div>\
+          <button id="creatine-btn" onclick="toggleCreatine()" class="px-4 py-1.5 rounded-lg font-bold text-xs bg-gray-700 text-gray-300">\
+            Logged: 0g\
+          </button>\
+        </div>\
+      </div>\
+    </section>\
+\
+    <!-- WORKOUT LOG / EDITOR TAB -->\
+    <section id="workout" class="tab-content space-y-6">\
+      <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 flex flex-wrap justify-between items-center gap-3">\
+        <div class="flex items-center space-x-3">\
+          <input type="text" id="active-day-title" class="bg-gray-900 text-lg font-bold text-amber-400 border border-gray-700 rounded px-3 py-1 focus:outline-none focus:border-amber-500" value="Workout Day" onchange="updateDayTitle(this.value)" />\
+          <span id="active-day-id" class="text-xs text-gray-500 hidden"></span>\
+        </div>\
+        <div class="flex items-center space-x-2">\
+          <button onclick="addExerciseToActiveDay()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-gray-900 text-xs font-bold rounded-lg transition">\
+            + Add Exercise\
+          </button>\
+          <button onclick="finishAndSaveWorkout()" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition">\
+            \uc0\u10003  Log Completed Session\
+          </button>\
+        </div>\
+      </div>\
+\
+      <!-- Exercises Container -->\
+      <div id="exercises-list" class="space-y-4">\
+        <!-- Dynamic Exercises Rendered Here -->\
+      </div>\
+    </section>\
+\
+    <!-- HISTORY TAB -->\
+    <section id="history" class="tab-content space-y-6">\
+      <div class="flex justify-between items-center">\
+        <h2 class="text-xl font-bold text-amber-400">Workout Logs History</h2>\
+        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline">Clear History</button>\
+      </div>\
+\
+      <div id="history-list" class="space-y-3">\
+        <!-- History Logs Inserted Here -->\
+      </div>\
+    </section>\
+\
+  </main>\
+\
+  <!-- Settings Modal -->\
+  <div id="settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">\
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 max-w-md w-full space-y-4">\
+      <h3 class="text-lg font-bold text-amber-400">Google Drive & Sync Settings</h3>\
+      <p class="text-xs text-gray-300">Enter your Google OAuth 2.0 Credentials to enable Google Drive AppData synchronization.</p>\
+      \
+      <div class="space-y-3">\
+        <div>\
+          <label class="block text-xs font-medium text-gray-400 mb-1">Google OAuth Client ID</label>\
+          <input type="text" id="setting-client-id" placeholder="123456...apps.googleusercontent.com" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-white" />\
+        </div>\
+        <div>\
+          <label class="block text-xs font-medium text-gray-400 mb-1">Google API Key</label>\
+          <input type="text" id="setting-api-key" placeholder="AIzaSy..." class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-white" />\
+        </div>\
+      </div>\
+\
+      <div class="flex justify-end space-x-2 pt-2">\
+        <button onclick="closeSettingsModal()" class="px-3 py-1.5 bg-gray-700 text-xs font-semibold rounded">Cancel</button>\
+        <button onclick="saveSettings()" class="px-4 py-1.5 bg-amber-500 text-gray-900 text-xs font-bold rounded">Save Credentials</button>\
+      </div>\
+    </div>\
+  </div>\
+\
+  <script>\
+    // -------------------------------------------------------------\
+    // DEFAULT PRESET WORKOUT DATA (EXTRACTED FROM IMAGES)\
+    // -------------------------------------------------------------\
+    const initialDays = [\
+      \{\
+        id: 'day_1',\
+        title: 'Workout Day 1 (Legs & Abs)',\
+        exercises: [\
+          \{\
+            id: 'ex_1', name: 'One-Leg Leg Presses', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 8.0, lastReps: 10, lastWeight: 8.0 \},\
+              \{ reps: 10, weight: 10.0, lastReps: 10, lastWeight: 10.0 \},\
+              \{ reps: 10, weight: 15.0, lastReps: 10, lastWeight: 15.0 \},\
+              \{ reps: 8, weight: 18.0, lastReps: 8, lastWeight: 18.0 \},\
+              \{ reps: 8, weight: 18.0, lastReps: 8, lastWeight: 18.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_2', name: 'Cable Pull Through', notes: '', superset: false, cableSides: 'Dual', cableHeight: 'Bottom',\
+            sets: [\
+              \{ reps: 10, weight: 5.0, lastReps: 10, lastWeight: 5.0 \},\
+              \{ reps: 10, weight: 8.0, lastReps: 10, lastWeight: 8.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_3', name: 'Barbell Front Squats', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 9, weight: 14.0, lastReps: 9, lastWeight: 14.0 \}]\
+          \},\
+          \{\
+            id: 'ex_4', name: 'Plate Sissy Squats', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 10, weight: 16.0, lastReps: 10, lastWeight: 16.0 \}]\
+          \},\
+          \{\
+            id: 'ex_5', name: 'Step Up On Bench', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 10, weight: 4.0, lastReps: 10, lastWeight: 4.0 \}]\
+          \},\
+          \{\
+            id: 'ex_6', name: 'Standing Calf Raises', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 25, weight: 17.0, lastReps: 25, lastWeight: 17.0 \}]\
+          \},\
+          \{\
+            id: 'ex_7', name: 'Kneeling Cable Crunches', notes: '', superset: false, cableSides: 'Dual', cableHeight: 'Top',\
+            sets: [\{ reps: 15, weight: 17.0, lastReps: 15, lastWeight: 17.0 \}]\
+          \}\
+        ]\
+      \},\
+      \{\
+        id: 'day_2',\
+        title: 'Workout Day 2 (Chest, Back & Core)',\
+        exercises: [\
+          \{\
+            id: 'ex_8', name: 'Cable Crossover', notes: '', superset: true, cableSides: 'Dual', cableHeight: 'Top',\
+            sets: [\
+              \{ reps: 10, weight: 4.0, lastReps: 10, lastWeight: 4.0 \},\
+              \{ reps: 6, weight: 9.0, lastReps: 6, lastWeight: 9.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_9', name: 'Incline Dumbbell Bench Presses', notes: '', superset: true, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 5.0, lastReps: 10, lastWeight: 5.0 \},\
+              \{ reps: 10, weight: 7.0, lastReps: 10, lastWeight: 7.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_10', name: 'Low Cable Flys', notes: '', superset: false, cableSides: 'Dual', cableHeight: 'Bottom',\
+            sets: [\
+              \{ reps: 6, weight: 4.0, lastReps: 6, lastWeight: 4.0 \},\
+              \{ reps: 10, weight: 6.0, lastReps: 10, lastWeight: 6.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_11', name: 'Close-Grip Lat Pull-Downs', notes: '', superset: false, cableSides: 'Dual', cableHeight: 'Top',\
+            sets: [\
+              \{ reps: 10, weight: 10.0, lastReps: 10, lastWeight: 10.0 \},\
+              \{ reps: 7, weight: 14.0, lastReps: 7, lastWeight: 14.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_12', name: 'Wide-Grip Seated Machine Rows', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 5.0, lastReps: 10, lastWeight: 5.0 \},\
+              \{ reps: 10, weight: 12.0, lastReps: 10, lastWeight: 12.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_13', name: 'Machine Shrugs', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 10, weight: 10.0, lastReps: 10, lastWeight: 10.0 \}]\
+          \},\
+          \{\
+            id: 'ex_14', name: 'Barbell Deadlifts', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 8.0, lastReps: 10, lastWeight: 8.0 \},\
+              \{ reps: 10, weight: 10.0, lastReps: 10, lastWeight: 10.0 \},\
+              \{ reps: 9, weight: 15.0, lastReps: 9, lastWeight: 15.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_15', name: 'Pallof Cable Press', notes: '', superset: false, cableSides: 'Single', cableHeight: 'Middle',\
+            sets: [\{ reps: 15, weight: 8.0, lastReps: 15, lastWeight: 8.0 \}]\
+          \}\
+        ]\
+      \},\
+      \{\
+        id: 'day_3',\
+        title: 'Workout Day 3 (Shoulders, Arms & Core)',\
+        exercises: [\
+          \{\
+            id: 'ex_16', name: 'Dumbbell Lateral Raises', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 1.0, lastReps: 10, lastWeight: 1.0 \},\
+              \{ reps: 10, weight: 2.0, lastReps: 10, lastWeight: 2.0 \},\
+              \{ reps: 4, weight: 3.0, lastReps: 4, lastWeight: 3.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_17', name: 'Machine Presses', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 9, weight: 5.0, lastReps: 9, lastWeight: 5.0 \},\
+              \{ reps: 9, weight: 9.0, lastReps: 9, lastWeight: 9.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_18', name: 'Cable Front Raises', notes: '', superset: false, cableSides: 'Single', cableHeight: 'Bottom',\
+            sets: [\{ reps: 10, weight: 3.0, lastReps: 10, lastWeight: 3.0 \}]\
+          \},\
+          \{\
+            id: 'ex_19', name: 'Reverse High Cable Flys', notes: '', superset: false, cableSides: 'Dual', cableHeight: 'Upper',\
+            sets: [\
+              \{ reps: 10, weight: 3.0, lastReps: 10, lastWeight: 3.0 \},\
+              \{ reps: 6, weight: 4.0, lastReps: 6, lastWeight: 4.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_20', name: 'Dumbbell Curls', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 3.0, lastReps: 10, lastWeight: 3.0 \},\
+              \{ reps: 5, weight: 7.0, lastReps: 5, lastWeight: 7.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_21', name: 'Machine Dips', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\
+              \{ reps: 10, weight: 7.0, lastReps: 10, lastWeight: 7.0 \},\
+              \{ reps: 10, weight: 9.0, lastReps: 10, lastWeight: 9.0 \},\
+              \{ reps: 4, weight: 12.0, lastReps: 4, lastWeight: 12.0 \}\
+            ]\
+          \},\
+          \{\
+            id: 'ex_22', name: 'Incline Low Cable Triceps Extensions', notes: '', superset: false, cableSides: 'Single', cableHeight: 'Bottom',\
+            sets: [\{ reps: 10, weight: 8.0, lastReps: 10, lastWeight: 8.0 \}]\
+          \},\
+          \{\
+            id: 'ex_23', name: 'Incline W raises', notes: '', superset: false, cableSides: 'None', cableHeight: 'N/A',\
+            sets: [\{ reps: 10, weight: 2.0, lastReps: 10, lastWeight: 2.0 \}]\
+          \},\
+          \{\
+            id: 'ex_24', name: 'Pallof Cable Press', notes: '', superset: false, cableSides: 'Single', cableHeight: 'Middle',\
+            sets: [\{ reps: 10, weight: 3.0, lastReps: 10, lastWeight: 3.0 \}]\
+          \}\
+        ]\
+      \}\
+    ];\
+\
+    // State Management\
+    function getWorkoutDays() \{\
+      const stored = localStorage.getItem('workout_days');\
+      return stored ? JSON.parse(stored) : initialDays;\
+    \}\
+\
+    function saveWorkoutDays(days) \{\
+      localStorage.setItem('workout_days', JSON.stringify(days));\
+    \}\
+\
+    let activeDayId = 'day_1';\
+\
+    // -------------------------------------------------------------\
+    // REST TIMER & AUDIO ALARM\
+    // -------------------------------------------------------------\
+    let timerInterval = null;\
+    let timerTimeLeft = 90;\
+\
+    function startTimer() \{\
+      clearInterval(timerInterval);\
+      const inputVal = parseInt(document.getElementById('timer-input-seconds').value) || 90;\
+      if (timerTimeLeft <= 0 || timerTimeLeft === 90) timerTimeLeft = inputVal;\
+\
+      timerInterval = setInterval(() => \{\
+        timerTimeLeft--;\
+        updateTimerDisplay();\
+        if (timerTimeLeft <= 0) \{\
+          clearInterval(timerInterval);\
+          playAlarmSound();\
+          alert('Rest Period Completed!');\
+          resetTimer();\
+        \}\
+      \}, 1000);\
+    \}\
+\
+    function pauseTimer() \{\
+      clearInterval(timerInterval);\
+    \}\
+\
+    function resetTimer() \{\
+      clearInterval(timerInterval);\
+      const inputVal = parseInt(document.getElementById('timer-input-seconds').value) || 90;\
+      timerTimeLeft = inputVal;\
+      updateTimerDisplay();\
+    \}\
+\
+    function updateTimerDisplay() \{\
+      const mins = Math.floor(timerTimeLeft / 60);\
+      const secs = timerTimeLeft % 60;\
+      document.getElementById('timer-display').innerText = \
+        `$\{String(mins).padStart(2, '0')\}:$\{String(secs).padStart(2, '0')\}`;\
+    \}\
+\
+    function playAlarmSound() \{\
+      try \{\
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();\
+        const osc = audioCtx.createOscillator();\
+        const gain = audioCtx.createGain();\
+        osc.type = 'sine';\
+        osc.frequency.value = 880; // A5 note\
+        osc.connect(gain);\
+        gain.connect(audioCtx.destination);\
+        osc.start();\
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1.5);\
+      \} catch (e) \{\
+        console.log('Audio playback error:', e);\
+      \}\
+    \}\
+\
+    // -------------------------------------------------------------\
+    // DASHBOARD & WORKOUT EDITOR RENDERERS\
+    // -------------------------------------------------------------\
+    function renderDashboard() \{\
+      const days = getWorkoutDays();\
+      const container = document.getElementById('workout-days-container');\
+      \
+      container.innerHTML = days.map(d => `\
+        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 flex flex-col justify-between space-y-4">\
+          <div>\
+            <h3 class="font-bold text-lg text-white mb-1">$\{d.title\}</h3>\
+            <p class="text-xs text-amber-500 font-semibold">$\{d.exercises.length\} Exercises Configured</p>\
+            <ul class="text-xs text-gray-400 mt-3 space-y-1">\
+              $\{d.exercises.slice(0, 4).map(e => `<li>\'95 $\{e.name\}</li>`).join('')\}\
+              $\{d.exercises.length > 4 ? `<li class="text-gray-500">+ $\{d.exercises.length - 4\} more...</li>` : ''\}\
+            </ul>\
+          </div>\
+          <div class="flex items-center space-x-2 pt-2 border-t border-gray-700">\
+            <button onclick="openWorkoutDay('$\{d.id\}')" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs rounded-lg transition">\
+              Open & Track Session\
+            </button>\
+            <button onclick="deleteWorkoutDay('$\{d.id\}')" class="px-2.5 py-2 bg-red-900/40 text-red-400 hover:bg-red-800/60 font-bold text-xs rounded-lg">\
+              \uc0\u55357 \u56785 \u65039 \
+            </button>\
+          </div>\
+        </div>\
+      `).join('');\
+    \}\
+\
+    function openWorkoutDay(dayId) \{\
+      activeDayId = dayId;\
+      document.querySelector('[data-tab="workout"]').click();\
+      renderWorkoutEditor();\
+    \}\
+\
+    function createNewDay() \{\
+      const days = getWorkoutDays();\
+      const newId = 'day_' + Date.now();\
+      const newDay = \{\
+        id: newId,\
+        title: `Workout Day $\{days.length + 1\}`,\
+        exercises: []\
+      \};\
+      days.push(newDay);\
+      saveWorkoutDays(days);\
+      renderDashboard();\
+      openWorkoutDay(newId);\
+    \}\
+\
+    function deleteWorkoutDay(dayId) \{\
+      if (confirm('Delete this workout day routine?')) \{\
+        let days = getWorkoutDays().filter(d => d.id !== dayId);\
+        saveWorkoutDays(days);\
+        renderDashboard();\
+      \}\
+    \}\
+\
+    function renderWorkoutEditor() \{\
+      const days = getWorkoutDays();\
+      const activeDay = days.find(d => d.id === activeDayId) || days[0];\
+      if (!activeDay) return;\
+\
+      document.getElementById('active-day-title').value = activeDay.title;\
+      document.getElementById('active-day-id').innerText = activeDay.id;\
+\
+      const container = document.getElementById('exercises-list');\
+      if (activeDay.exercises.length === 0) \{\
+        container.innerHTML = `<div class="p-8 text-center bg-gray-800 rounded-xl border border-gray-700 text-gray-400">No exercises added to this workout yet. Click "+ Add Exercise" above.</div>`;\
+        return;\
+      \}\
+\
+      container.innerHTML = activeDay.exercises.map((ex, index) => `\
+        <div class="bg-gray-800 p-5 rounded-xl border $\{ex.superset ? 'border-amber-500/80 shadow-amber-500/10' : 'border-gray-700'\} shadow-md space-y-4">\
+          <!-- Exercise Header -->\
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-900/60 p-3 rounded-lg border border-gray-700">\
+            <div class="flex items-center space-x-2 flex-grow">\
+              <span class="text-xs font-bold text-gray-500">#$\{index + 1\}</span>\
+              <input type="text" value="$\{ex.name\}" onchange="updateExerciseName('$\{ex.id\}', this.value)" class="bg-transparent font-bold text-lg text-white focus:outline-none focus:border-amber-500 border-b border-transparent w-full" />\
+              $\{ex.superset ? '<span class="text-[10px] bg-amber-500 text-gray-900 font-extrabold px-2 py-0.5 rounded uppercase">Superset</span>' : ''\}\
+            </div>\
+\
+            <!-- Controls & Reorder -->\
+            <div class="flex items-center space-x-2">\
+              <button onclick="toggleSuperset('$\{ex.id\}')" class="px-2 py-1 text-xs font-semibold rounded border $\{ex.superset ? 'bg-amber-500/20 text-amber-400 border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-600'\}">\
+                $\{ex.superset ? '\uc0\u10003  Superset' : 'Link Superset'\}\
+              </button>\
+              <button onclick="moveExercise('$\{ex.id\}', -1)" class="p-1 bg-gray-800 text-xs rounded border border-gray-700">\uc0\u9650 </button>\
+              <button onclick="moveExercise('$\{ex.id\}', 1)" class="p-1 bg-gray-800 text-xs rounded border border-gray-700">\uc0\u9660 </button>\
+              <button onclick="removeExercise('$\{ex.id\}')" class="p-1 text-red-400 text-xs hover:underline">Remove</button>\
+            </div>\
+          </div>\
+\
+          <!-- Cable Configuration Options -->\
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">\
+            <div class="flex items-center space-x-2">\
+              <label class="text-gray-400">Cable Sides:</label>\
+              <select onchange="updateCableSetting('$\{ex.id\}', 'cableSides', this.value)" class="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-white">\
+                <option value="None" $\{ex.cableSides==='None'?'selected':''\}>N/A (Free Weight / Machine)</option>\
+                <option value="Single" $\{ex.cableSides==='Single'?'selected':''\}>Single Side</option>\
+                <option value="Dual" $\{ex.cableSides==='Dual'?'selected':''\}>Both Sides (Dual)</option>\
+              </select>\
+            </div>\
+            <div class="flex items-center space-x-2">\
+              <label class="text-gray-400">Cable Height:</label>\
+              <select onchange="updateCableSetting('$\{ex.id\}', 'cableHeight', this.value)" class="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-white">\
+                <option value="N/A" $\{ex.cableHeight==='N/A'?'selected':''\}>N/A</option>\
+                <option value="Top" $\{ex.cableHeight==='Top'?'selected':''\}>Top Position</option>\
+                <option value="Upper" $\{ex.cableHeight==='Upper'?'selected':''\}>Upper Height</option>\
+                <option value="Middle" $\{ex.cableHeight==='Middle'?'selected':''\}>Middle Height</option>\
+                <option value="Lower" $\{ex.cableHeight==='Lower'?'selected':''\}>Lower Height</option>\
+                <option value="Bottom" $\{ex.cableHeight==='Bottom'?'selected':''\}>Bottom Position</option>\
+              </select>\
+            </div>\
+          </div>\
+\
+          <!-- Sets Table -->\
+          <div class="space-y-2">\
+            <div class="grid grid-cols-12 text-[11px] font-semibold text-gray-400 uppercase px-2">\
+              <span class="col-span-2">Set</span>\
+              <span class="col-span-4">Last Logged</span>\
+              <span class="col-span-3">Reps</span>\
+              <span class="col-span-3">Weight (kg/Stack)</span>\
+            </div>\
+\
+            $\{ex.sets.map((s, sIndex) => `\
+              <div class="grid grid-cols-12 items-center gap-2 bg-gray-900 p-2 rounded-lg border border-gray-700">\
+                <span class="col-span-2 font-bold text-xs text-amber-500">Set $\{sIndex + 1\}</span>\
+                <span class="col-span-4 text-xs text-gray-400 font-mono">$\{s.lastReps || '--'\} reps \'d7 $\{s.lastWeight || '--'\} kg</span>\
+                <input type="number" value="$\{s.reps\}" onchange="updateSetVal('$\{ex.id\}', $\{sIndex\}, 'reps', this.value)" class="col-span-3 bg-gray-800 border border-gray-700 rounded p-1.5 text-xs text-center font-bold text-white" />\
+                <div class="col-span-3 flex items-center space-x-1">\
+                  <input type="number" step="0.5" value="$\{s.weight\}" onchange="updateSetVal('$\{ex.id\}', $\{sIndex\}, 'weight', this.value)" class="w-full bg-gray-800 border border-gray-700 rounded p-1.5 text-xs text-center font-bold text-white" />\
+                  <button onclick="removeSet('$\{ex.id\}', $\{sIndex\})" class="text-xs text-red-400 hover:text-red-300 px-1">\uc0\u10005 </button>\
+                </div>\
+              </div>\
+            `).join('')\}\
+\
+            <button onclick="addSet('$\{ex.id\}')" class="w-full py-1.5 bg-gray-700 hover:bg-gray-600 text-xs font-semibold rounded-lg text-gray-300">\
+              + Add Set\
+            </button>\
+          </div>\
+\
+          <!-- Notes -->\
+          <div>\
+            <textarea placeholder="Exercise notes, machine seat setup, grip details..." onchange="updateExerciseNotes('$\{ex.id\}', this.value)" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500" rows="2">$\{ex.notes || ''\}</textarea>\
+          </div>\
+        </div>\
+      `).join('');\
+    \}\
+\
+    // Workout Day Data Mutators\
+    function updateDayTitle(val) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      if (day) \{ day.title = val; saveWorkoutDays(days); renderDashboard(); \}\
+    \}\
+\
+    function addExerciseToActiveDay() \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      if (day) \{\
+        day.exercises.push(\{\
+          id: 'ex_' + Date.now(),\
+          name: 'New Exercise',\
+          notes: '',\
+          superset: false,\
+          cableSides: 'None',\
+          cableHeight: 'N/A',\
+          sets: [\{ reps: 10, weight: 10, lastReps: 10, lastWeight: 10 \}]\
+        \});\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function removeExercise(exId) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      if (day) \{\
+        day.exercises = day.exercises.filter(e => e.id !== exId);\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function moveExercise(exId, dir) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      if (!day) return;\
+      const idx = day.exercises.findIndex(e => e.id === exId);\
+      if (idx < 0) return;\
+      const targetIdx = idx + dir;\
+      if (targetIdx >= 0 && targetIdx < day.exercises.length) \{\
+        const temp = day.exercises[idx];\
+        day.exercises[idx] = day.exercises[targetIdx];\
+        day.exercises[targetIdx] = temp;\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function toggleSuperset(exId) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex) \{\
+        ex.superset = !ex.superset;\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function updateCableSetting(exId, key, val) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex) \{\
+        ex[key] = val;\
+        saveWorkoutDays(days);\
+      \}\
+    \}\
+\
+    function updateExerciseNotes(exId, val) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex) \{\
+        ex.notes = val;\
+        saveWorkoutDays(days);\
+      \}\
+    \}\
+\
+    function updateExerciseName(exId, val) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex) \{\
+        ex.name = val;\
+        saveWorkoutDays(days);\
+      \}\
+    \}\
+\
+    function addSet(exId) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex) \{\
+        const lastSet = ex.sets[ex.sets.length - 1] || \{ reps: 10, weight: 10 \};\
+        ex.sets.push(\{ reps: lastSet.reps, weight: lastSet.weight, lastReps: lastSet.reps, lastWeight: lastSet.weight \});\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function removeSet(exId, sIndex) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex && ex.sets.length > 1) \{\
+        ex.sets.splice(sIndex, 1);\
+        saveWorkoutDays(days);\
+        renderWorkoutEditor();\
+      \}\
+    \}\
+\
+    function updateSetVal(exId, sIndex, key, val) \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      const ex = day?.exercises.find(e => e.id === exId);\
+      if (ex && ex.sets[sIndex]) \{\
+        ex.sets[sIndex][key] = parseFloat(val) || 0;\
+        saveWorkoutDays(days);\
+      \}\
+    \}\
+\
+    function finishAndSaveWorkout() \{\
+      const days = getWorkoutDays();\
+      const day = days.find(d => d.id === activeDayId);\
+      if (!day) return;\
+\
+      // Update last logged targets\
+      day.exercises.forEach(ex => \{\
+        ex.sets.forEach(s => \{\
+          s.lastReps = s.reps;\
+          s.lastWeight = s.weight;\
+        \});\
+      \});\
+      saveWorkoutDays(days);\
+\
+      // Save into history log\
+      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');\
+      history.unshift(\{\
+        title: day.title,\
+        date: new Date().toLocaleDateString('en-US', \{ month: 'short', day: 'numeric', year: 'numeric' \}),\
+        exercises: JSON.parse(JSON.stringify(day.exercises))\
+      \});\
+      localStorage.setItem('workout_history', JSON.stringify(history));\
+\
+      renderHistory();\
+      renderWorkoutEditor();\
+      alert('Workout session saved successfully!');\
+      if (gapi.client && gapi.client.getToken()) syncWithDrive();\
+    \}\
+\
+    // -------------------------------------------------------------\
+    // HISTORY & CREATINE LOGIC\
+    // -------------------------------------------------------------\
+    let creatineIntake = localStorage.getItem('creatineIntake') || '0g';\
+\
+    function updateCreatineUI() \{\
+      const btn = document.getElementById('creatine-btn');\
+      btn.innerText = `Logged: $\{creatineIntake\}`;\
+      if (creatineIntake !== '0g') \{\
+        btn.classList.remove('bg-gray-700', 'text-gray-300');\
+        btn.classList.add('bg-amber-500', 'text-gray-900');\
+      \} else \{\
+        btn.classList.remove('bg-amber-500', 'text-gray-900');\
+        btn.classList.add('bg-gray-700', 'text-gray-300');\
+      \}\
+    \}\
+\
+    function toggleCreatine() \{\
+      if (creatineIntake === '0g') creatineIntake = '3g';\
+      else if (creatineIntake === '3g') creatineIntake = '5g';\
+      else creatineIntake = '0g';\
+\
+      localStorage.setItem('creatineIntake', creatineIntake);\
+      updateCreatineUI();\
+      if (gapi.client && gapi.client.getToken()) syncWithDrive();\
+    \}\
+\
+    function renderHistory() \{\
+      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');\
+      const container = document.getElementById('history-list');\
+\
+      if (history.length === 0) \{\
+        container.innerHTML = `<div class="p-6 text-center bg-gray-800 rounded-xl text-gray-400 border border-gray-700">No workout records found. Complete a workout log to view history.</div>`;\
+        return;\
+      \}\
+\
+      container.innerHTML = history.map(h => `\
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 space-y-2">\
+          <div class="flex justify-between items-center border-b border-gray-700 pb-2">\
+            <h3 class="font-bold text-amber-400">$\{h.title\}</h3>\
+            <span class="text-xs text-gray-500">$\{h.date\}</span>\
+          </div>\
+          <div class="text-xs space-y-1 text-gray-300">\
+            $\{h.exercises.map(e => `\
+              <div class="flex justify-between">\
+                <span>\'95 $\{e.name\}</span>\
+                <span class="font-mono text-gray-400">$\{e.sets.map(s => `$\{s.reps\}x$\{s.weight\}kg`).join(', ')\}</span>\
+              </div>\
+            `).join('')\}\
+          </div>\
+        </div>\
+      `).join('');\
+    \}\
+\
+    function clearHistory() \{\
+      if (confirm('Clear all recorded workout history?')) \{\
+        localStorage.removeItem('workout_history');\
+        renderHistory();\
+      \}\
+    \}\
+\
+    // -------------------------------------------------------------\
+    // GOOGLE DRIVE API & OAUTH 2.0 (SETTINGS SAFE INITIALIZATION)\
+    // -------------------------------------------------------------\
+    let tokenClient;\
+    let gapiInited = false;\
+    let gisInited = false;\
+    let driveFileId = null;\
+\
+    function openSettingsModal() \{\
+      document.getElementById('setting-client-id').value = localStorage.getItem('google_client_id') || '';\
+      document.getElementById('setting-api-key').value = localStorage.getItem('google_api_key') || '';\
+      document.getElementById('settings-modal').classList.remove('hidden');\
+    \}\
+\
+    function closeSettingsModal() \{\
+      document.getElementById('settings-modal').classList.add('hidden');\
+    \}\
+\
+    function saveSettings() \{\
+      const clientId = document.getElementById('setting-client-id').value.trim();\
+      const apiKey = document.getElementById('setting-api-key').value.trim();\
+      localStorage.setItem('google_client_id', clientId);\
+      localStorage.setItem('google_api_key', apiKey);\
+      closeSettingsModal();\
+      initGoogleAuth();\
+    \}\
+\
+    function gapiLoaded() \{ gapiInited = true; initGoogleAuth(); \}\
+    function gisLoaded() \{ gisInited = true; initGoogleAuth(); \}\
+\
+    function initGoogleAuth() \{\
+      const clientId = localStorage.getItem('google_client_id');\
+      const apiKey = localStorage.getItem('google_api_key');\
+\
+      if (!clientId || !apiKey || !gapiInited || !gisInited) return;\
+\
+      try \{\
+        gapi.client.init(\{\
+          apiKey: apiKey,\
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],\
+        \}).then(() => \{\
+          tokenClient = google.accounts.oauth2.initTokenClient(\{\
+            client_id: clientId,\
+            scope: 'https://www.googleapis.com/auth/drive.appdata',\
+            callback: '',\
+          \});\
+          document.getElementById('sync_button').classList.remove('hidden');\
+        \});\
+      \} catch(err) \{\
+        console.error('Google Auth Init Error:', err);\
+      \}\
+    \}\
+\
+    async function syncWithDrive() \{\
+      if (!tokenClient) \{\
+        openSettingsModal();\
+        return;\
+      \}\
+\
+      tokenClient.callback = async (resp) => \{\
+        if (resp.error) return;\
+        const payload = \{\
+          workoutDays: getWorkoutDays(),\
+          history: JSON.parse(localStorage.getItem('workout_history') || '[]'),\
+          creatineIntake: localStorage.getItem('creatineIntake') || '0g'\
+        \};\
+\
+        const file = new Blob([JSON.stringify(payload)], \{ type: 'application/json' \});\
+        const metadata = \{ name: 'heavydutysteve_v2.json', parents: ['appDataFolder'] \};\
+        const accessToken = gapi.client.getToken().access_token;\
+\
+        const form = new FormData();\
+        form.append('metadata', new Blob([JSON.stringify(metadata)], \{ type: 'application/json' \}));\
+        form.append('file', file);\
+\
+        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', \{\
+          method: 'POST',\
+          headers: new Headers(\{ 'Authorization': 'Bearer ' + accessToken \}),\
+          body: form\
+        \});\
+\
+        if (res.ok) alert('Successfully synced data with Google Drive!');\
+      \};\
+\
+      if (gapi.client.getToken() === null) \{\
+        tokenClient.requestAccessToken(\{ prompt: 'consent' \});\
+      \} else \{\
+        tokenClient.requestAccessToken(\{ prompt: '' \});\
+      \}\
+    \}\
+\
+    // -------------------------------------------------------------\
+    // UI TAB NAVIGATION LOGIC\
+    // -------------------------------------------------------------\
+    const navButtons = document.querySelectorAll('.nav-btn');\
+    const tabContents = document.querySelectorAll('.tab-content');\
+\
+    navButtons.forEach(button => \{\
+      button.addEventListener('click', () => \{\
+        const targetTab = button.getAttribute('data-tab');\
+\
+        navButtons.forEach(btn => \{\
+          btn.classList.remove('bg-amber-500', 'text-gray-900');\
+          btn.classList.add('text-gray-400');\
+        \});\
+        button.classList.add('bg-amber-500', 'text-gray-900');\
+        button.classList.remove('text-gray-400');\
+\
+        tabContents.forEach(content => \{\
+          if (content.id === targetTab) content.classList.add('active');\
+          else content.classList.remove('active');\
+        \});\
+      \});\
+    \});\
+\
+    // Initialize App\
+    updateCreatineUI();\
+    renderDashboard();\
+    renderHistory();\
+    updateTimerDisplay();\
+  </script>\
+</body>\
+</html>\
+}
