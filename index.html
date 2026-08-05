@@ -1,180 +1,4 @@
-The issue is that raw Rich Text Format (RTF) string markup (such as {\rtf1\ansi...}, \pard, \f0\b0, and raw Unicode escape sequences like \uc0\u55356) was pasted directly into the index.html file alongside raw text, rather than using standard HTML code.
-Here is the clean, production-ready index.html file with all RTF markup and conversational artifacts stripped out.
-index.html
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeavyDutySteve | Workout Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
-  <!-- Google API Libraries -->
-  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
-  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
-  <style>
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-  </style>
-</head>
-<body class="bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
-
-  <!-- Header -->
-  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
-      <div class="flex items-center space-x-3">
-        <span class="text-2xl">🏋️‍♂️</span>
-        <h1 class="text-xl font-bold tracking-wide text-amber-500">HeavyDutySteve</h1>
-      </div>
-      
-      <!-- Navigation & Controls -->
-      <div class="flex flex-wrap items-center gap-2">
-        <nav class="flex space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-          <button data-tab="dashboard" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-amber-500 text-slate-900">
-            Dashboard
-          </button>
-          <button data-tab="workout" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-            Workout Log
-          </button>
-          <button data-tab="history" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-            History
-          </button>
-        </nav>
-
-        <!-- Theme Toggle -->
-        <button onclick="toggleTheme()" class="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-semibold rounded-md transition">
-          <span id="theme-icon">🌙 Mode</span>
-        </button>
-
-        <button onclick="openSettingsModal()" class="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-semibold rounded-md transition">
-          ⚙️ Settings
-        </button>
-        
-        <button id="sync_button" onclick="syncWithDrive()" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md transition flex items-center gap-1">
-          🔄 Sync Drive
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Rest Timer Bar -->
-  <div class="bg-slate-200/80 dark:bg-slate-800/80 border-b border-slate-300 dark:border-slate-700 py-2 px-4 sticky top-[61px] z-40 backdrop-blur-sm">
-    <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center space-x-2">
-        <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Rest Timer:</span>
-        <span id="timer-display" class="font-mono text-lg font-bold text-amber-500">01:30</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <input type="number" id="timer-input-seconds" value="90" min="5" step="5" class="w-16 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-center text-xs rounded py-1 text-slate-900 dark:text-white" />
-        <span class="text-xs text-slate-500 dark:text-slate-400">sec</span>
-        <button onclick="startTimer()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded">Start</button>
-        <button onclick="pauseTimer()" class="px-2.5 py-1 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-xs rounded">Pause</button>
-        <button onclick="resetTimer()" class="px-2.5 py-1 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-xs rounded">Reset</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Area -->
-  <main class="flex-grow max-w-5xl w-full mx-auto p-4">
-    
-    <!-- DASHBOARD TAB -->
-    <section id="dashboard" class="tab-content active space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-amber-500">Workout Days</h2>
-          <p class="text-slate-600 dark:text-slate-300 text-sm mt-1">Select or create a training day to log sets and track progress.</p>
-        </div>
-        <button onclick="createNewDay()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded-lg transition">
-          + Add New Workout Day
-        </button>
-      </div>
-
-      <!-- Workout Days Grid -->
-      <div id="workout-days-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Dynamic Workout Cards -->
-      </div>
-
-      <!-- Daily Tracker & Recovery -->
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-        <h3 class="text-md font-semibold text-slate-900 dark:text-white">Daily Recovery Log</h3>
-        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700">
-          <div>
-            <p class="font-medium text-sm">Creatine Monohydrate</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Daily intake target: 3g - 5g</p>
-          </div>
-          <button id="creatine-btn" onclick="toggleCreatine()" class="px-4 py-1.5 rounded-lg font-bold text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-            Logged: 0g
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- WORKOUT LOG / EDITOR TAB -->
-    <section id="workout" class="tab-content space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-wrap justify-between items-center gap-3">
-        <div class="flex items-center space-x-3">
-          <input type="text" id="active-day-title" class="bg-slate-50 dark:bg-slate-900 text-lg font-bold text-amber-500 border border-slate-300 dark:border-slate-700 rounded px-3 py-1 focus:outline-none focus:border-amber-500" value="Workout Day" onchange="updateDayTitle(this.value)" />
-        </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="addExerciseToActiveDay()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded-lg transition">
-            + Add Exercise
-          </button>
-          <button onclick="finishAndSaveWorkout()" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition">
-            ✓ Log Completed Session
-          </button>
-        </div>
-      </div>
-
-      <!-- Exercises Container -->
-      <div id="exercises-list" class="space-y-4">
-        <!-- Dynamic Exercises Rendered Here -->
-      </div>
-    </section>
-
-    <!-- HISTORY TAB -->
-    <section id="history" class="tab-content space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-amber-500">Workout Logs History</h2>
-        <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline">Clear History</button>
-      </div>
-
-      <div id="history-list" class="space-y-3">
-        <!-- History Logs -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Settings Modal -->
-  <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 max-w-md w-full space-y-4 shadow-lg">
-      <h3 class="text-lg font-bold text-amber-500">Google Drive Integration</h3>
-      <p class="text-xs text-slate-600 dark:text-slate-300">Enter your Google OAuth 2.0 Credentials to sync your workouts across devices.</p>
-      
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Google Client ID</label>
-          <input type="text" id="setting-client-id" placeholder="123456...apps.googleusercontent.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-2 text-xs text-slate-900 dark:text-white" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Google API Key</label>
-          <input type="text" id="setting-api-key" placeholder="AIzaSy..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-2 text-xs text-slate-900 dark:text-white" />
-        </div>
-      </div>
-
-      <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeSettingsModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-xs font-semibold rounded">Cancel</button>
-        <button onclick="saveSettings()" class="px-4 py-1.5 bg-amber-500 text-slate-900 text-xs font-bold rounded">Save Credentials</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Initial Structure
     const initialDays = [
       {
         id: 'day_1',
@@ -182,17 +6,11 @@ index.html
         exercises: [
           {
             id: 'ex_1', name: 'Incline Press', notes: 'Keep elbows slightly tucked', superset: false, cableSides: 'None', cableHeight: 'N/A',
-            sets: [
-              { reps: 10, weight: 20.0, lastReps: 10, lastWeight: 20.0 },
-              { reps: 8, weight: 25.0, lastReps: 8, lastWeight: 25.0 }
-            ]
+            sets: [{ reps: 10, weight: 20.0, lastReps: 10, lastWeight: 20.0 }, { reps: 8, weight: 25.0, lastReps: 8, lastWeight: 25.0 }]
           },
           {
             id: 'ex_2', name: 'Cable Crossover', notes: 'Squeeze chest at peak contraction', superset: true, cableSides: 'Dual', cableHeight: 'Top',
-            sets: [
-              { reps: 12, weight: 10.0, lastReps: 12, lastWeight: 10.0 },
-              { reps: 10, weight: 12.5, lastReps: 10, lastWeight: 12.5 }
-            ]
+            sets: [{ reps: 12, weight: 10.0, lastReps: 12, lastWeight: 10.0 }, { reps: 10, weight: 12.5, lastReps: 10, lastWeight: 12.5 }]
           }
         ]
       },
@@ -202,10 +20,7 @@ index.html
         exercises: [
           {
             id: 'ex_3', name: 'Lat Pull-Downs', notes: 'Full stretch at top', superset: false, cableSides: 'Dual', cableHeight: 'Top',
-            sets: [
-              { reps: 10, weight: 30.0, lastReps: 10, lastWeight: 30.0 },
-              { reps: 8, weight: 35.0, lastReps: 8, lastWeight: 35.0 }
-            ]
+            sets: [{ reps: 10, weight: 30.0, lastReps: 10, lastWeight: 30.0 }, { reps: 8, weight: 35.0, lastReps: 8, lastWeight: 35.0 }]
           }
         ]
       },
@@ -215,16 +30,12 @@ index.html
         exercises: [
           {
             id: 'ex_4', name: 'Leg Press', notes: 'Controlled eccentric tempo', superset: false, cableSides: 'None', cableHeight: 'N/A',
-            sets: [
-              { reps: 10, weight: 80.0, lastReps: 10, lastWeight: 80.0 },
-              { reps: 8, weight: 100.0, lastReps: 8, lastWeight: 100.0 }
-            ]
+            sets: [{ reps: 10, weight: 80.0, lastReps: 10, lastWeight: 80.0 }, { reps: 8, weight: 100.0, lastReps: 8, lastWeight: 100.0 }]
           }
         ]
       }
     ];
 
-    // Theme Switcher Logic
     function initTheme() {
       const theme = localStorage.getItem('theme') || 'dark';
       if (theme === 'light') {
@@ -248,7 +59,6 @@ index.html
       }
     }
 
-    // State Persistence
     function getWorkoutDays() {
       const stored = localStorage.getItem('workout_days');
       return stored ? JSON.parse(stored) : initialDays;
@@ -259,8 +69,6 @@ index.html
     }
 
     let activeDayId = 'day_1';
-
-    // Rest Timer System
     let timerInterval = null;
     let timerTimeLeft = 90;
 
@@ -293,8 +101,7 @@ index.html
     function updateTimerDisplay() {
       const mins = Math.floor(timerTimeLeft / 60);
       const secs = timerTimeLeft % 60;
-      document.getElementById('timer-display').innerText = 
-        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      document.getElementById('timer-display').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
     function playAlarmSound() {
@@ -313,7 +120,6 @@ index.html
       }
     }
 
-    // UI Renderers
     function renderDashboard() {
       const days = getWorkoutDays();
       const container = document.getElementById('workout-days-container');
@@ -342,18 +148,13 @@ index.html
 
     function openWorkoutDay(dayId) {
       activeDayId = dayId;
-      document.querySelector('[data-tab="workout"]').click();
-      renderWorkoutEditor();
+      switchTab('workout');
     }
 
     function createNewDay() {
       const days = getWorkoutDays();
       const newId = 'day_' + Date.now();
-      const newDay = {
-        id: newId,
-        title: `Workout Day ${days.length + 1}`,
-        exercises: []
-      };
+      const newDay = { id: newId, title: `Workout Day ${days.length + 1}`, exercises: [] };
       days.push(newDay);
       saveWorkoutDays(days);
       renderDashboard();
@@ -374,8 +175,8 @@ index.html
       if (!activeDay) return;
 
       document.getElementById('active-day-title').value = activeDay.title;
-
       const container = document.getElementById('exercises-list');
+
       if (activeDay.exercises.length === 0) {
         container.innerHTML = `<div class="p-8 text-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">No exercises added yet. Click "+ Add Exercise" above to start building this session.</div>`;
         return;
@@ -383,15 +184,12 @@ index.html
 
       container.innerHTML = activeDay.exercises.map((ex, index) => `
         <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border ${ex.superset ? 'border-amber-500' : 'border-slate-200 dark:border-slate-700'} shadow-sm space-y-4">
-          <!-- Header -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
             <div class="flex items-center space-x-2 flex-grow">
               <span class="text-xs font-bold text-slate-400">#${index + 1}</span>
               <input type="text" value="${ex.name}" onchange="updateExerciseName('${ex.id}', this.value)" class="bg-transparent font-bold text-base text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 border-b border-transparent w-full" />
               ${ex.superset ? '<span class="text-[10px] bg-amber-500 text-slate-900 font-extrabold px-2 py-0.5 rounded uppercase">Superset</span>' : ''}
             </div>
-
-            <!-- Reorder & Action Controls -->
             <div class="flex items-center space-x-2">
               <button onclick="toggleSuperset('${ex.id}')" class="px-2 py-1 text-xs font-semibold rounded border ${ex.superset ? 'bg-amber-500/20 text-amber-500 border-amber-500' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'}">
                 ${ex.superset ? '✓ Superset' : 'Link Superset'}
@@ -402,7 +200,6 @@ index.html
             </div>
           </div>
 
-          <!-- Cable Station Setup -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div class="flex items-center space-x-2">
               <label class="text-slate-500 dark:text-slate-400">Cable Sides:</label>
@@ -425,7 +222,6 @@ index.html
             </div>
           </div>
 
-          <!-- Sets Table -->
           <div class="space-y-2">
             <div class="grid grid-cols-12 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase px-2">
               <span class="col-span-2">Set</span>
@@ -451,15 +247,13 @@ index.html
             </button>
           </div>
 
-          <!-- Notes -->
           <div>
-            <textarea placeholder="Exercise notes, seat height, stance..." onchange="updateExerciseNotes('${ex.id}', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-amber-500" rows="2">${ex.notes || ''}</textarea>
+            <textarea placeholder="Exercise notes..." onchange="updateExerciseNotes('${ex.id}', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-amber-500" rows="2">${ex.notes || ''}</textarea>
           </div>
         </div>
       `).join('');
     }
 
-    // Workout Mutators
     function updateDayTitle(val) {
       const days = getWorkoutDays();
       const day = days.find(d => d.id === activeDayId);
@@ -514,11 +308,7 @@ index.html
       const days = getWorkoutDays();
       const day = days.find(d => d.id === activeDayId);
       const ex = day?.exercises.find(e => e.id === exId);
-      if (ex) {
-        ex.superset = !ex.superset;
-        saveWorkoutDays(days);
-        renderWorkoutEditor();
-      }
+      if (ex) { ex.superset = !ex.superset; saveWorkoutDays(days); renderWorkoutEditor(); }
     }
 
     function updateCableSetting(exId, key, val) {
@@ -602,7 +392,6 @@ index.html
       if (window.gapi && gapi.client && gapi.client.getToken()) syncWithDrive();
     }
 
-    // Creatine & History
     let creatineIntake = localStorage.getItem('creatineIntake') || '0g';
 
     function updateCreatineUI() {
@@ -661,7 +450,6 @@ index.html
       }
     }
 
-    // Google Drive Integration
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
@@ -746,35 +534,44 @@ index.html
       }
     }
 
-    // Navigation Tabs
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    function switchTab(targetTab) {
+      const navButtons = document.querySelectorAll('.nav-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
 
-    navButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const targetTab = button.getAttribute('data-tab');
-
-        navButtons.forEach(btn => {
+      navButtons.forEach(btn => {
+        if (btn.getAttribute('data-tab') === targetTab) {
+          btn.classList.add('bg-amber-500', 'text-slate-900');
+          btn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        } else {
           btn.classList.remove('bg-amber-500', 'text-slate-900');
           btn.classList.add('text-slate-600', 'dark:text-slate-400');
-        });
-        button.classList.add('bg-amber-500', 'text-slate-900');
-        button.classList.remove('text-slate-600', 'dark:text-slate-400');
+        }
+      });
 
-        tabContents.forEach(content => {
-          if (content.id === targetTab) content.classList.add('active');
-          else content.classList.remove('active');
-        });
+      tabContents.forEach(content => {
+        if (content.id === targetTab) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+
+      if (targetTab === 'dashboard') renderDashboard();
+      if (targetTab === 'workout') renderWorkoutEditor();
+      if (targetTab === 'history') renderHistory();
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+        switchTab(targetTab);
       });
     });
 
-    // App Init
     initTheme();
     updateCreatineUI();
     renderDashboard();
     renderHistory();
     updateTimerDisplay();
   </script>
-</body>
-</html>
 
