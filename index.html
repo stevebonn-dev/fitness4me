@@ -57,6 +57,7 @@
         .btn:hover { background: #0056b3; }
         .btn-success { background: #34c759; }
         .btn-warning { background: #ff9500; }
+        .btn-danger { background: #ff3b30; }
         
         .timer-display { font-size: 26px; font-weight: 700; margin: 15px 0; text-align: center; color: #007aff; }
         .status-display { font-size: 13px; text-align: center; color: #8e8e93; margin-top: 10px; font-weight: 500; }
@@ -66,7 +67,7 @@
         
         .hidden { display: none; }
     </style>
-    <!-- Google OAuth / GDrive API -->
+    <!-- Google OAuth Client API Script -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -142,14 +143,24 @@
 
     <!-- TAB 4: ONE-TIME GOOGLE DRIVE RESTORE & MIGRATION -->
     <div id="view-settings" class="hidden">
-        <h3>Google Drive Recovery & Backup</h3>
-        <p style="font-size: 13px; color: #3a3a3c;">If your previous workouts were saved before the profile update, click below to perform a one-time migration directly from Google Cloud / Drive.</p>
+        <h3>Google OAuth Settings</h3>
+        <p style="font-size: 12px; color: #636366; margin-top: 0;">Configure your Client ID from Google Cloud Console to enable Google Drive sync.</p>
         
+        <div style="margin-bottom: 15px;">
+            <label for="client-id-input" style="font-size: 12px; font-weight: 600;">Google Client ID:</label>
+            <input type="text" id="client-id-input" placeholder="e.g. 123456...apps.googleusercontent.com" style="margin-top: 4px; margin-bottom: 8px;">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn" onclick="saveClientId()" style="flex: 1;">Save Client ID</button>
+                <button type="button" class="btn btn-danger" onclick="clearClientId()" style="padding: 10px;">Reset</button>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #e5e5ea; margin: 15px 0;">
+
+        <h3>Cloud & Local Data Migration</h3>
         <button type="button" class="btn btn-success" onclick="restoreFromGoogleDrive()" style="width: 100%; margin-bottom: 10px; padding: 12px;">
             ☁️ One-Time Restore from Google Drive
         </button>
-
-        <hr style="border: 0; border-top: 1px solid #e5e5ea; margin: 15px 0;">
 
         <button type="button" class="btn" onclick="exportLocalBackup()" style="width: 100%; margin-bottom: 8px; background: #8e8e93;">💾 Export Local JSON Backup</button>
         <button type="button" class="btn" onclick="triggerImport()" style="width: 100%; background: #5856d6;">📂 Restore from Local JSON File</button>
@@ -160,8 +171,6 @@
 </div>
 
 <script>
-    // Configuration
-    const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // Set your Google OAuth Client ID here if using direct API
     let activeProfile = "Default";
     let audioCtx = null;
     let timerInterval = null;
@@ -174,6 +183,7 @@
         initProfiles();
         loadRoutines();
         loadHistory();
+        loadSavedClientId();
         autoMigrateLocalLegacyData();
     });
 
@@ -225,7 +235,46 @@
         switchProfile();
     }
 
-    // 2. Tab Navigation
+    // 2. Google OAuth Client ID Management
+    function loadSavedClientId() {
+        const savedId = localStorage.getItem('GOOGLE_CLIENT_ID') || '';
+        document.getElementById('client-id-input').value = savedId;
+    }
+
+    function saveClientId() {
+        const inputVal = document.getElementById('client-id-input').value.trim();
+        if (!inputVal) {
+            alert("Please enter a valid Google OAuth Client ID.");
+            return;
+        }
+        localStorage.setItem('GOOGLE_CLIENT_ID', inputVal);
+        alert("Client ID saved successfully!");
+        document.getElementById('sync-status').textContent = "Status: Google Client ID Updated";
+    }
+
+    function clearClientId() {
+        localStorage.removeItem('GOOGLE_CLIENT_ID');
+        document.getElementById('client-id-input').value = '';
+        alert("Saved Google Client ID removed.");
+        document.getElementById('sync-status').textContent = "Status: Google Client ID Cleared";
+    }
+
+    function getOrPromptClientId() {
+        let clientId = localStorage.getItem('GOOGLE_CLIENT_ID');
+        if (!clientId || !clientId.trim()) {
+            clientId = prompt("Enter your Google OAuth Client ID (from Google Cloud Console):");
+            if (clientId && clientId.trim()) {
+                clientId = clientId.trim();
+                localStorage.setItem('GOOGLE_CLIENT_ID', clientId);
+                document.getElementById('client-id-input').value = clientId;
+            } else {
+                return null;
+            }
+        }
+        return clientId;
+    }
+
+    // 3. Tab Navigation
     function showTab(tabName) {
         ['workout', 'builder', 'history', 'settings'].forEach(t => {
             document.getElementById(`view-${t}`).classList.add('hidden');
@@ -235,7 +284,7 @@
         document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // 3. Dropdown Population
+    // 4. Dropdown Population
     function populateDropdowns() {
         const repsSelect = document.getElementById('reps-input');
         const weightSelect = document.getElementById('weight-input');
@@ -252,7 +301,7 @@
         }
     }
 
-    // 4. Workout & Routine Management
+    // 5. Workout & Routine Management
     function saveNewRoutine() {
         const name = document.getElementById('routine-name').value.trim();
         const exName = document.getElementById('exercise-name').value.trim();
@@ -303,7 +352,7 @@
         }
     }
 
-    // 5. Logging Sets & Rest Timer
+    // 6. Logging Sets & Rest Timer
     function logSet() {
         const title = document.getElementById('current-exercise-title').textContent;
         const reps = document.getElementById('reps-input').value;
@@ -393,7 +442,7 @@
         `).join('');
     }
 
-    // 6. Migration & Google Drive One-Time Recovery
+    // 7. Migration & Google Drive Recovery
     function autoMigrateLocalLegacyData() {
         const legacyKeys = ['workout_data_cache', 'heavydutysteve_v3_cache', 'workout_data'];
         let defaultData = JSON.parse(localStorage.getItem('workout_cache_Default') || "[]");
@@ -421,34 +470,46 @@
 
     async function restoreFromGoogleDrive() {
         const statusEl = document.getElementById('sync-status');
-        statusEl.textContent = "Status: Initiating Google Drive One-Time Migration...";
-
-        if (typeof google === 'undefined') {
-            alert("Google Identity Services script not loaded. Check internet connection.");
+        
+        const clientId = getOrPromptClientId();
+        if (!clientId) {
+            statusEl.textContent = "Status: Restore cancelled (No Google Client ID provided).";
             return;
         }
 
-        // Initialize Google OAuth Token Client
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.readonly',
-            callback: async (response) => {
-                if (response.error) {
-                    statusEl.textContent = "Status: Google authentication failed.";
-                    return;
-                }
-                accessToken = response.access_token;
-                await fetchFilesFromDrive();
-            },
-        });
+        statusEl.textContent = "Status: Initiating Google Drive Authentication...";
 
-        tokenClient.requestAccessToken();
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+            alert("Google Identity Services script is still loading or blocked. Please check your network connection.");
+            return;
+        }
+
+        try {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: clientId,
+                scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.readonly',
+                callback: async (response) => {
+                    if (response.error) {
+                        statusEl.textContent = `Status: Auth error (${response.error_description || response.error})`;
+                        alert(`Authorization error: ${response.error_description || response.error}`);
+                        return;
+                    }
+                    accessToken = response.access_token;
+                    await fetchFilesFromDrive();
+                },
+            });
+
+            tokenClient.requestAccessToken();
+        } catch (err) {
+            console.error("Token client initialization error:", err);
+            alert("Failed to initialize Google Auth. Please check that your Client ID is formatted correctly.");
+        }
     }
 
     async function fetchFilesFromDrive() {
         const statusEl = document.getElementById('sync-status');
         try {
-            // Search for heavydutysteve files in user Drive and AppData
+            statusEl.textContent = "Status: Searching Google Drive for backups...";
             const query = "name contains 'heavydutysteve' or name contains 'workout'";
             const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&spaces=drive,appDataFolder`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -461,14 +522,12 @@
                 return;
             }
 
-            // Download the most recent backup file
             const targetFile = data.files[0];
             const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${targetFile.id}?alt=media`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             const cloudData = await fileRes.json();
 
-            // Import recovered cloud data into Default profile
             let defaultData = JSON.parse(localStorage.getItem('workout_cache_Default') || "[]");
             if (Array.isArray(cloudData)) {
                 defaultData = defaultData.concat(cloudData);
@@ -487,7 +546,7 @@
         }
     }
 
-    // 7. Manual File Backups
+    // 8. Manual File Backups
     function exportLocalBackup() {
         let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
         let fullExport = { exportDate: new Date().toISOString(), profiles, workoutData: {} };
