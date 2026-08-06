@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeavyDutySteve Workout Tracker</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 650px; margin: auto; background-color: #f2f2f7; color: #1c1c1e; }
+        
+        .card { 
+            background: #ffffff; 
+            padding: 18px; 
+            border-radius: 14px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            margin-bottom: 15px; 
+            border: 1px solid #e5e5ea;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid #efeff4;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .status-banner {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status-connected { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .status-disconnected { background-color: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
+
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; background: #e5e5ea; border: none; border-radius: 8px; font-weight: 600; color: #007aff; cursor: pointer; }
+        .tab-btn.active { background: #007aff; color: #fff; }
+        
+        .set-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+        .input-group { display: flex; align-items: center; gap: 6px; }
+        select, input { padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1px solid #c7c7cc; background-color: #fff; width: 100%; }
+        
+        .btn { background: #007aff; color: white; border: none; padding: 10px 14px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; text-align: center; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #34c759; }
+        .btn-warning { background: #ff9500; }
+        .btn-danger { background: #ff3b30; }
+        
+        .timer-display { font-size: 26px; font-weight: 700; margin: 15px 0; text-align: center; color: #007aff; }
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item { padding: 10px; border-bottom: 1px solid #e5e5ea; display: flex; justify-content: space-between; font-size: 14px; }
+        
+        .hidden { display: none !important; }
+        .toggle-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #e5e5ea; margin-top: 10px; }
+
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-body { background: white; padding: 24px; border-radius: 14px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        .active-session-card { background: #eef7ff; border: 1px solid #b3d7ff; padding: 15px; border-radius: 10px; margin-top: 10px; }
+    </style>
+    <!-- Google Identity Services Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- MODAL: INITIAL SETUP & STORAGE MODE SELECTION -->
+<div id="setup-modal" class="modal-overlay hidden">
+    <div class="modal-body">
+        <h3 style="margin-top:0;" id="modal-title">Welcome to HeavyDutySteve</h3>
+        <p style="font-size: 14px; color: #48484a; line-height: 1.4;" id="modal-desc">
+            Choose how you would like to store and backup your workout history:
+        </p>
+        
+        <div id="drive-setup-fields">
+            <label for="modal-client-id" style="font-size: 12px; font-weight: 600;">Google OAuth Client ID:</label>
+            <input type="text" id="modal-client-id" placeholder="123456...apps.googleusercontent.com" style="margin-top: 4px; margin-bottom: 12px;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-success" onclick="saveStorageChoice('drive')">🌐 Connect & Sync with Google Drive</button>
+            <button class="btn" style="background: #8e8e93;" onclick="saveStorageChoice('local')">💾 Use Local Storage Only</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <!-- DASHBOARD HEADER -->
+    <div class="dashboard-header">
+        <div>
+            <h2 style="margin: 0; font-size: 20px;">Dashboard</h2>
+            <span style="font-size: 12px; color: #8e8e93;">HeavyDutySteve Tracker</span>
+        </div>
+        <div style="text-align: right;">
+            <label for="profile-select" style="font-size: 12px; display: block; font-weight: 600;">Active Profile</label>
+            <select id="profile-select" onchange="switchProfile()" style="width: auto; padding: 4px 8px;">
+            </select>
+            <button type="button" class="btn" style="padding: 2px 6px; font-size: 11px; margin-top: 4px;" onclick="addNewProfile()">+ New Profile</button>
+        </div>
+    </div>
+
+    <!-- CLOUD STATUS BANNER -->
+    <div id="status-banner" class="status-banner status-disconnected">
+        <span id="banner-text">Storage Mode: Local Only</span>
+        <button id="banner-btn" class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="openStorageModal()">Configure</button>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="tab-home" onclick="showTab('home')">Home Screen</button>
+        <button class="tab-btn" id="tab-workout" onclick="showTab('workout')">Workout</button>
+        <button class="tab-btn" id="tab-builder" onclick="showTab('builder')">Builder</button>
+        <button class="tab-btn" id="tab-history" onclick="showTab('history')">History</button>
+        <button class="tab-btn" id="tab-settings" onclick="showTab('settings')">Sync</button>
+    </div>
+
+    <!-- TAB 1: HOME SCREEN (CREATE WORKOUT DAY FIRST) -->
+    <div id="view-home">
+        <h3>Create Workout Day</h3>
+        <p style="font-size: 13px; color: #8e8e93;">Start a new training session day for active profile: <strong id="home-profile-display">Default</strong></p>
+        
+        <input type="text" id="workout-day-name" placeholder="Workout Day Name (e.g., Heavy Duty Chest & Arms)" style="margin-bottom: 10px;">
+        <button class="btn btn-success" style="width: 100%; padding: 12px;" onclick="createWorkoutDay()">➕ Initialize Workout Session</button>
+
+        <div id="active-day-container" class="hidden" style="margin-top: 20px;">
+            <div class="active-session-card">
+                <h4 style="margin: 0 0 5px 0;">Active Session: <span id="active-day-title"></span></h4>
+                <p style="font-size: 12px; color: #48484a; margin: 0 0 10px 0;">Ready to record exercises for this session?</p>
+                <button class="btn" style="width: 100%;" onclick="goToWorkoutScreen()">🏋️ Go to Exercises & Log Sets</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: WORKOUT EXECUTION (ENTER EXERCISES) -->
+    <div id="view-workout" class="hidden">
+        <div id="no-active-session-warning" style="background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;" class="hidden">
+            ⚠️ No active Workout Day selected. <a href="#" onclick="showTab('home')" style="color: #664d03; font-weight: bold;">Create one on Home Screen</a>.
+        </div>
+
+        <label for="workout-picker"><strong>Select Exercise / Routine:</strong></label>
+        <select id="workout-picker" onchange="loadSelectedRoutine()" style="margin-bottom: 15px;">
+            <option value="">-- Choose an Exercise --</option>
+        </select>
+
+        <div id="exercise-runner">
+            <h3 id="current-exercise-title" style="margin-bottom: 5px;">Select an exercise above</h3>
+            <p id="current-exercise-target" style="font-size: 13px; color: #8e8e93; margin-top: 0;"></p>
+
+            <div class="set-row">
+                <div class="input-group">
+                    <label for="reps-input">Reps:</label>
+                    <select id="reps-input"></select>
+                </div>
+                <div class="input-group">
+                    <label for="weight-input">Weight (kg):</label>
+                    <select id="weight-input"></select>
+                </div>
+                <button type="button" class="btn btn-success" onclick="logSet()">Log Set</button>
+            </div>
+        </div>
+
+        <div class="timer-display" id="timer">Rest Timer: 00:00</div>
+    </div>
+
+    <!-- TAB 3: ROUTINE BUILDER -->
+    <div id="view-builder" class="hidden">
+        <h3>Create New Exercise Routine</h3>
+        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Chest & Back)" style="margin-bottom: 10px;">
+        <input type="text" id="exercise-name" placeholder="Exercise Name (e.g., Cable Crossover)" style="margin-bottom: 10px;">
+        <input type="text" id="exercise-target" placeholder="Target Muscle (e.g., Pectorals)" style="margin-bottom: 10px;">
+        
+        <button type="button" class="btn btn-warning" onclick="saveNewRoutine()" style="width: 100%;">Save Routine to Active Profile</button>
+    </div>
+
+    <!-- TAB 4: WORKOUT HISTORY -->
+    <div id="view-history" class="hidden">
+        <h3>Workout History (<span id="history-profile-tag">Default</span>)</h3>
+        <ul id="history-container" class="history-list">
+            <li style="color: #8e8e93; font-size: 13px;">No workouts logged yet.</li>
+        </ul>
+    </div>
+
+    <!-- TAB 5: SYNC & MIGRATION -->
+    <div id="view-settings" class="hidden">
+        <h3>Google OAuth Settings</h3>
+        <div style="margin-bottom: 15px;">
+            <label for="client-id-input" style="font-size: 12px; font-weight: 600;">Google Client ID:</label>
+            <input type="text" id="client-id-input" placeholder="e.g. 123456...apps.googleusercontent.com" style="margin-top: 4px; margin-bottom: 8px;">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn" onclick="saveClientId()" style="flex: 1;">Save Client ID</button>
+                <button type="button" class="btn btn-danger" onclick="clearClientId()" style="padding: 10px;">Reset</button>
+            </div>
+        </div>
+
+        <div class="toggle-box">
+            <span style="font-size: 14px; font-weight: 600;">Enable Automatic Background Syncing</span>
+            <input type="checkbox" id="autosync-toggle" style="width: 20px; height: 20px;" onchange="toggleAutoSync(this.checked)">
+        </div>
+
+        <button type="button" class="btn" id="btn-auth-cloud" onclick="authorizeCloudSync()" style="width: 100%; margin-top: 8px; margin-bottom: 15px; background: #5856d6;">
+            🔑 Authorize Google Drive Session
+        </button>
+
+        <hr style="border: 0; border-top: 1px solid #e5e5ea; margin: 15px 0;">
+
+        <h3>Cloud Restore & Local File Operations</h3>
+        <button type="button" class="btn btn-success" onclick="restoreFromGoogleDrive()" style="width: 100%; margin-bottom: 10px; padding: 12px;">
+            🔍 Scan Cloud Restore from Google Drive
+        </button>
+
+        <button type="button" class="btn" onclick="exportLocalBackup()" style="width: 100%; margin-bottom: 8px; background: #8e8e93;">💾 Export Local JSON Backup</button>
+        <button type="button" class="btn" onclick="triggerImport()" style="width: 100%; background: #5856d6;">📂 Manual Pick JSON File (Local)</button>
+        <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+    </div>
+</div>
+
+<script>
+    let activeProfile = "Default";
+    let activeWorkoutDay = null;
+    let audioCtx = null;
+    let timerInterval = null;
+    let tokenClient = null;
+    let accessToken = sessionStorage.getItem('gdrive_access_token') || null;
+    let autoSyncEnabled = localStorage.getItem('heavyduty_autosync') !== 'false';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        populateDropdowns();
+        checkAndPromptProfile();
+        initProfiles();
+        loadRoutines();
+        loadHistory();
+        loadSavedClientId();
+
+        document.getElementById('autosync-toggle').checked = autoSyncEnabled;
+        
+        // Initial Storage Mode Evaluation
+        const storageMode = localStorage.getItem('heavyduty_storage_mode');
+        if (!storageMode) {
+            openStorageModal();
+        } else if (storageMode === 'drive' && accessToken) {
+            updateStatusBanner(true, "Google Drive Connected");
+        } else if (storageMode === 'drive') {
+            updateStatusBanner(false, "Google Drive Disconnected");
+        } else {
+            updateStatusBanner(false, "Storage Mode: Local Only");
+        }
+    });
+
+    // 1/ PROMPT FOR PROFILE NAME IF NONE SAVED
+    function checkAndPromptProfile() {
+        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '[]');
+        if (profiles.length === 0) {
+            let name = prompt("Welcome! Please enter your Profile Name:", "Default");
+            if (!name || !name.trim()) name = "Default";
+            profiles = [name.trim()];
+            localStorage.setItem('heavyduty_profiles', JSON.stringify(profiles));
+            localStorage.setItem('heavyduty_active_profile', name.trim());
+        }
+        activeProfile = localStorage.getItem('heavyduty_active_profile') || profiles[0];
+        document.getElementById('home-profile-display').textContent = activeProfile;
+    }
+
+    // 2/ STORAGE CHOICE SELECTION
+    function openStorageModal() {
+        document.getElementById('setup-modal').classList.remove('hidden');
+    }
+
+    function saveStorageChoice(mode) {
+        localStorage.setItem('heavyduty_storage_mode', mode);
+        if (mode === 'drive') {
+            const clientVal = document.getElementById('modal-client-id').value.trim();
+            if (clientVal) {
+                localStorage.setItem('GOOGLE_CLIENT_ID', clientVal);
+                document.getElementById('client-id-input').value = clientVal;
+                authorizeCloudSync();
+            } else if (!localStorage.getItem('GOOGLE_CLIENT_ID')) {
+                alert("Please enter a Google Client ID to enable Cloud Drive Sync.");
+                return;
+            }
+        } else {
+            updateStatusBanner(false, "Storage Mode: Local Only");
+        }
+        closeModal();
+    }
+
+    // 3/ CREATE WORKOUT DAY ON HOME SCREEN
+    function createWorkoutDay() {
+        const input = document.getElementById('workout-day-name');
+        const dayName = input.value.trim();
+        if (!dayName) {
+            alert("Please enter a name for your Workout Day.");
+            return;
+        }
+
+        activeWorkoutDay = `${dayName} (${new Date().toLocaleDateString()})`;
+        document.getElementById('active-day-title').textContent = activeWorkoutDay;
+        document.getElementById('active-day-container').classList.remove('hidden');
+        input.value = '';
+    }
+
+    function goToWorkoutScreen() {
+        if (!activeWorkoutDay) {
+            alert("Please create a Workout Day first.");
+            return;
+        }
+        showTab('workout');
+    }
+
+    function updateStatusBanner(connected, text) {
+        const banner = document.getElementById('status-banner');
+        const bannerText = document.getElementById('banner-text');
+        const bannerBtn = document.getElementById('banner-btn');
+        
+        if (bannerText) bannerText.textContent = text;
+        if (banner) {
+            if (connected) {
+                banner.className = "status-banner status-connected";
+                if (bannerBtn) bannerBtn.textContent = "Re-Auth";
+            } else {
+                banner.className = "status-banner status-disconnected";
+                if (bannerBtn) bannerBtn.textContent = "Configure";
+            }
+        }
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('setup-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function loadSavedClientId() {
+        const savedId = localStorage.getItem('GOOGLE_CLIENT_ID') || '';
+        document.getElementById('client-id-input').value = savedId;
+        document.getElementById('modal-client-id').value = savedId;
+    }
+
+    function saveClientId() {
+        const inputVal = document.getElementById('client-id-input').value.trim();
+        if (!inputVal) {
+            alert("Please enter a valid Google OAuth Client ID.");
+            return;
+        }
+        localStorage.setItem('GOOGLE_CLIENT_ID', inputVal);
+        localStorage.setItem('heavyduty_storage_mode', 'drive');
+        alert("Client ID saved successfully!");
+        updateStatusBanner(false, "Client ID Saved. Click Connect to Authorize.");
+    }
+
+    function clearClientId() {
+        localStorage.removeItem('GOOGLE_CLIENT_ID');
+        sessionStorage.removeItem('gdrive_access_token');
+        accessToken = null;
+        document.getElementById('client-id-input').value = '';
+        document.getElementById('modal-client-id').value = '';
+        localStorage.setItem('heavyduty_storage_mode', 'local');
+        updateStatusBanner(false, "Storage Mode: Local Only");
+        alert("Saved Client ID cleared.");
+    }
+
+    function authorizeCloudSync() {
+        const clientId = localStorage.getItem('GOOGLE_CLIENT_ID');
+        if (!clientId || !clientId.trim()) {
+            openStorageModal();
+            return;
+        }
+
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+            alert("Google API script has not loaded yet.");
+            return;
+        }
+
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId.trim(),
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata',
+            prompt: 'select_account',
+            callback: (response) => {
+                if (response.error) {
+                    alert("Authorization Error: " + (response.error_description || response.error));
+                    updateStatusBanner(false, "Auth Failed");
+                    return;
+                }
+                accessToken = response.access_token;
+                sessionStorage.setItem('gdrive_access_token', accessToken);
+                localStorage.setItem('heavyduty_storage_mode', 'drive');
+                updateStatusBanner(true, "Google Drive Connected");
+            }
+        });
+
+        tokenClient.requestAccessToken();
+    }
+
+    function toggleAutoSync(enabled) {
+        autoSyncEnabled = enabled;
+        localStorage.setItem('heavyduty_autosync', enabled);
+        if (enabled && !accessToken && localStorage.getItem('heavyduty_storage_mode') === 'drive') {
+            authorizeCloudSync();
+        }
+    }
+
+    function initProfiles() {
+        try {
+            let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
+            activeProfile = localStorage.getItem('heavyduty_active_profile') || profiles[0];
+            renderProfileDropdown(profiles);
+        } catch (e) {
+            renderProfileDropdown(["Default"]);
+        }
+    }
+
+    function renderProfileDropdown(profiles) {
+        const select = document.getElementById('profile-select');
+        if (!select) return;
+        select.innerHTML = '';
+        profiles.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (name === activeProfile) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function switchProfile() {
+        const select = document.getElementById('profile-select');
+        activeProfile = select.value;
+        localStorage.setItem('heavyduty_active_profile', activeProfile);
+        document.getElementById('home-profile-display').textContent = activeProfile;
+        loadRoutines();
+        loadHistory();
+    }
+
+    function addNewProfile() {
+        const name = prompt("Enter new profile name:");
+        if (!name || !name.trim()) return;
+        const cleanName = name.trim();
+        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
+        if (!profiles.includes(cleanName)) {
+            profiles.push(cleanName);
+            localStorage.setItem('heavyduty_profiles', JSON.stringify(profiles));
+        }
+        activeProfile = cleanName;
+        localStorage.setItem('heavyduty_active_profile', activeProfile);
+        renderProfileDropdown(profiles);
+        switchProfile();
+    }
+
+    function showTab(tabName) {
+        ['home', 'workout', 'builder', 'history', 'settings'].forEach(t => {
+            document.getElementById(`view-${t}`).classList.add('hidden');
+            document.getElementById(`tab-${t}`).classList.remove('active');
+        });
+        document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+
+        if (tabName === 'workout') {
+            const warn = document.getElementById('no-active-session-warning');
+            if (!activeWorkoutDay) {
+                warn.classList.remove('hidden');
+            } else {
+                warn.classList.add('hidden');
+            }
+        }
+    }
+
+    function populateDropdowns() {
+        const repsSelect = document.getElementById('reps-input');
+        const weightSelect = document.getElementById('weight-input');
+        if (!repsSelect || !weightSelect) return;
+
+        repsSelect.innerHTML = '';
+        weightSelect.innerHTML = '';
+
+        for (let i = 1; i <= 35; i++) {
+            const opt = document.createElement('option');
+            opt.value = i; opt.textContent = i;
+            repsSelect.appendChild(opt);
+        }
+        for (let i = 0; i <= 300; i += 2.5) {
+            const opt = document.createElement('option');
+            opt.value = i; opt.textContent = `${i} kg`;
+            weightSelect.appendChild(opt);
+        }
+    }
+
+    function saveNewRoutine() {
+        const name = document.getElementById('routine-name').value.trim();
+        const exName = document.getElementById('exercise-name').value.trim();
+        const exTarget = document.getElementById('exercise-target').value.trim();
+
+        if (!name || !exName) {
+            alert("Please provide both routine and exercise names.");
+            return;
+        }
+
+        const key = `routines_${activeProfile}`;
+        let routines = JSON.parse(localStorage.getItem(key) || "[]");
+        routines.push({ name, exercise: exName, target: exTarget });
+        localStorage.setItem(key, JSON.stringify(routines));
+
+        alert("Routine saved successfully!");
+        document.getElementById('routine-name').value = '';
+        document.getElementById('exercise-name').value = '';
+        document.getElementById('exercise-target').value = '';
+        loadRoutines();
+        showTab('workout');
+    }
+
+    function loadRoutines() {
+        const picker = document.getElementById('workout-picker');
+        if (!picker) return;
+        picker.innerHTML = '<option value="">-- Choose an Exercise --</option>';
+        const key = `routines_${activeProfile}`;
+        const routines = JSON.parse(localStorage.getItem(key) || "[]");
+
+        routines.forEach((r, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${r.name} - ${r.exercise}`;
+            picker.appendChild(opt);
+        });
+    }
+
+    function loadSelectedRoutine() {
+        const picker = document.getElementById('workout-picker');
+        const idx = picker.value;
+        if (idx === "") return;
+
+        const routines = JSON.parse(localStorage.getItem(`routines_${activeProfile}`) || "[]");
+        const selected = routines[idx];
+        if (selected) {
+            document.getElementById('current-exercise-title').textContent = selected.exercise;
+            document.getElementById('current-exercise-target').textContent = `Target: ${selected.target || 'General'}`;
+        }
+    }
+
+    function logSet() {
+        const title = document.getElementById('current-exercise-title').textContent;
+        const reps = document.getElementById('reps-input').value;
+        const weight = document.getElementById('weight-input').value;
+
+        if (title === "Select an exercise above") {
+            alert("Please select or build an exercise routine first.");
+            return;
+        }
+
+        const entry = {
+            profile: activeProfile,
+            workoutDay: activeWorkoutDay || "General Session",
+            exercise: title,
+            reps: parseInt(reps, 10),
+            weight: parseFloat(weight),
+            timestamp: new Date().toISOString()
+        };
+
+        const key = `workout_cache_${activeProfile}`;
+        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        history.push(entry);
+        localStorage.setItem(key, JSON.stringify(history));
+
+        loadHistory();
+        startTimer(90);
+
+        if (autoSyncEnabled && localStorage.getItem('heavyduty_storage_mode') === 'drive') {
+            triggerBackgroundCloudSync();
+        }
+    }
+
+    async function triggerBackgroundCloudSync() {
+        if (!accessToken) return;
+        updateStatusBanner(true, "Auto-syncing to Google Drive...");
+
+        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
+        let fullExport = { exportDate: new Date().toISOString(), profiles, workoutData: {} };
+        profiles.forEach(p => {
+            fullExport.workoutData[p] = JSON.parse(localStorage.getItem(`workout_cache_${p}`) || "[]");
+        });
+
+        const fileName = "heavydutysteve_autosync_backup.json";
+
+        try {
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}' and trashed=false`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const searchData = await searchRes.json();
+
+            if (searchData.files && searchData.files.length > 0) {
+                const fileId = searchData.files[0].id;
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fullExport)
+                });
+            } else {
+                const metadata = { name: fileName, mimeType: 'application/json' };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', new Blob([JSON.stringify(fullExport)], { type: 'application/json' }));
+
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    body: form
+                });
+            }
+
+            updateStatusBanner(true, `Synced at ${new Date().toLocaleTimeString()}`);
+        } catch (err) {
+            console.error("Auto-sync error:", err);
+            updateStatusBanner(false, "Auto-sync failed (Token expired)");
+        }
+    }
+
+    function getAudioContext() {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function startTimer(seconds) {
+        clearInterval(timerInterval);
+        let remaining = seconds;
+        getAudioContext();
+
+        const timerDisplay = document.getElementById('timer');
+        timerInterval = setInterval(() => {
+            remaining--;
+            if (remaining >= 0) {
+                const mins = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const secs = String(remaining % 60).padStart(2, '0');
+                timerDisplay.textContent = `Rest Timer: ${mins}:${secs}`;
+            } else {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "Rest Complete!";
+                playBeep();
+            }
+        }, 1000);
+    }
+
+    function playBeep() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.6);
+        } catch(e) {}
+    }
+
+    function loadHistory() {
+        const tag = document.getElementById('history-profile-tag');
+        if (tag) tag.textContent = activeProfile;
+        const container = document.getElementById('history-container');
+        if (!container) return;
+        
+        const history = JSON.parse(localStorage.getItem(`workout_cache_${activeProfile}`) || "[]");
+
+        if (history.length === 0) {
+            container.innerHTML = '<li style="color: #8e8e93; font-size: 13px;">No workouts logged yet.</li>';
+            return;
+        }
+
+        container.innerHTML = history.slice(-15).reverse().map(item => `
+            <li class="history-item">
+                <span><strong>${item.workoutDay || 'Session'}</strong> - ${item.exercise || 'Set Log'}: ${item.reps} reps @ ${item.weight} kg</span>
+                <span style="color:#8e8e93; font-size:12px;">${new Date(item.timestamp).toLocaleDateString()}</span>
+            </li>
+        `).join('');
+    }
+
+    async function restoreFromGoogleDrive() {
+        if (!accessToken) {
+            authorizeCloudSync();
+            return;
+        }
+
+        updateStatusBanner(true, "Scanning Drive for backups...");
+        try {
+            const query = "trashed = false and (name contains 'heavydutysteve' or name contains 'workout' or name contains '.json')";
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&spaces=drive,appDataFolder&fields=files(id,name,modifiedTime)`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const data = await res.json();
+
+            if (!data.files || data.files.length === 0) {
+                alert("No cloud backup files found in this Google Account.");
+                updateStatusBanner(true, "Google Drive Connected");
+                return;
+            }
+
+            data.files.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+            let restoredCount = 0;
+            let defaultData = JSON.parse(localStorage.getItem('workout_cache_Default') || "[]");
+
+            for (const file of data.files) {
+                try {
+                    const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    });
+                    const cloudData = await fileRes.json();
+
+                    if (Array.isArray(cloudData) && cloudData.length > 0) {
+                        defaultData = defaultData.concat(cloudData);
+                        restoredCount += cloudData.length;
+                    } else if (cloudData.workoutData) {
+                        Object.keys(cloudData.workoutData).forEach(p => {
+                            const pKey = `workout_cache_${p}`;
+                            let existingP = JSON.parse(localStorage.getItem(pKey) || "[]");
+                            localStorage.setItem(pKey, JSON.stringify(existingP.concat(cloudData.workoutData[p])));
+                            restoredCount += cloudData.workoutData[p].length;
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`File ${file.name} skipped.`);
+                }
+            }
+
+            localStorage.setItem('workout_cache_Default', JSON.stringify(defaultData));
+            alert(`Restore Completed!\nRecovered ${restoredCount} set records.`);
+            loadHistory();
+            updateStatusBanner(true, "Google Drive Connected");
+
+        } catch (err) {
+            console.error(err);
+            updateStatusBanner(false, "Cloud Restore Failed");
+        }
+    }
+
+    function exportLocalBackup() {
+        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
+        let fullExport = { exportDate: new Date().toISOString(), profiles, workoutData: {} };
+        profiles.forEach(p => {
+            fullExport.workoutData[p] = JSON.parse(localStorage.getItem(`workout_cache_${p}`) || "[]");
+        });
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullExport, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `heavydutysteve_backup_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function triggerImport() { document.getElementById('import-file-input').click(); }
+
+    function handleFileImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                if (Array.isArray(parsed)) {
+                    localStorage.setItem('workout_cache_Default', JSON.stringify(parsed));
+                } else if (parsed.workoutData) {
+                    Object.keys(parsed.workoutData).forEach(p => {
+                        localStorage.setItem(`workout_cache_${p}`, JSON.stringify(parsed.workoutData[p]));
+                    });
+                }
+                alert("File backup imported successfully!");
+                loadHistory();
+            } catch(err) {
+                alert("Invalid JSON backup file.");
+            }
+        };
+        reader.readAsText(file);
+    }
+</script>
+
+</body>
+</html>
