@@ -18,10 +18,6 @@
         }
         
         .dashboard-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
             border-bottom: 1px solid #efeff4;
             padding-bottom: 12px;
             margin-bottom: 15px;
@@ -70,20 +66,10 @@
 </head>
 <body>
 
-<!-- MODAL 1: MANDATORY INITIAL PROFILE STEP -->
-<div id="profile-modal" class="modal-overlay hidden">
-    <div class="modal-body">
-        <h3 style="margin-top:0;">Step 1: Welcome!</h3>
-        <p style="font-size: 14px; color: #48484a;">Enter your Profile Name to begin:</p>
-        <input type="text" id="init-profile-input" placeholder="e.g. Steve" style="margin-bottom: 12px;">
-        <button class="btn btn-success" style="width: 100%;" onclick="submitInitialProfile()">Continue</button>
-    </div>
-</div>
-
-<!-- MODAL 2: MANDATORY STORAGE MODE SELECTION -->
+<!-- MANDATORY STORAGE MODE SELECTION -->
 <div id="storage-modal" class="modal-overlay hidden">
     <div class="modal-body">
-        <h3 style="margin-top:0;">Step 2: Storage Setup</h3>
+        <h3 style="margin-top:0;">Storage Setup</h3>
         <p style="font-size: 14px; color: #48484a;">Choose how to manage your data sync:</p>
         
         <div style="margin-bottom: 12px;">
@@ -100,15 +86,8 @@
 
 <div class="card">
     <div class="dashboard-header">
-        <div>
-            <h2 style="margin: 0; font-size: 20px;">Dashboard</h2>
-            <span style="font-size: 12px; color: #8e8e93;">HeavyDutySteve Tracker</span>
-        </div>
-        <div style="text-align: right;">
-            <label for="profile-select" style="font-size: 12px; display: block; font-weight: 600;">Active Profile</label>
-            <select id="profile-select" onchange="switchProfile()" style="width: auto; padding: 4px 8px;"></select>
-            <button type="button" class="btn" style="padding: 2px 6px; font-size: 11px; margin-top: 4px;" onclick="addNewProfile()">+ New Profile</button>
-        </div>
+        <h2 style="margin: 0; font-size: 20px;">Dashboard</h2>
+        <span style="font-size: 12px; color: #8e8e93;">HeavyDutySteve Tracker</span>
     </div>
 
     <div id="status-banner" class="status-banner status-disconnected">
@@ -127,9 +106,9 @@
     <!-- HOME TAB: CREATE WORKOUT DAY FIRST -->
     <div id="view-home">
         <h3>Create Workout Day</h3>
-        <p style="font-size: 13px; color: #8e8e93;">Start a training session for: <strong id="home-profile-display">Default</strong></p>
+        <p style="font-size: 13px; color: #8e8e93;">Initialize a workout session before logging exercises.</p>
         
-        <input type="text" id="workout-day-name" placeholder="Workout Day Name (e.g., Heavy Duty Push)" style="margin-bottom: 10px;">
+        <input type="text" id="workout-day-name" placeholder="Workout Day Name (e.g., Chest & Back Routine)" style="margin-bottom: 10px;">
         <button class="btn btn-success" style="width: 100%; padding: 12px;" onclick="createWorkoutDay()">➕ Initialize Workout Session</button>
 
         <div id="active-day-container" class="hidden">
@@ -175,7 +154,7 @@
     <!-- BUILDER TAB -->
     <div id="view-builder" class="hidden">
         <h3>Create New Exercise Routine</h3>
-        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Chest & Back)" style="margin-bottom: 10px;">
+        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Heavy Duty Routine)" style="margin-bottom: 10px;">
         <input type="text" id="exercise-name" placeholder="Exercise Name (e.g., Cable Crossover)" style="margin-bottom: 10px;">
         <input type="text" id="exercise-target" placeholder="Target Muscle (e.g., Pectorals)" style="margin-bottom: 10px;">
         <button type="button" class="btn btn-warning" onclick="saveNewRoutine()" style="width: 100%;">Save Routine</button>
@@ -183,7 +162,7 @@
 
     <!-- HISTORY TAB -->
     <div id="view-history" class="hidden">
-        <h3>Workout History (<span id="history-profile-tag">Default</span>)</h3>
+        <h3>Workout History</h3>
         <ul id="history-container" class="history-list">
             <li style="color: #8e8e93; font-size: 13px;">No workouts logged yet.</li>
         </ul>
@@ -223,7 +202,6 @@
 </div>
 
 <script>
-    let activeProfile = null;
     let activeWorkoutDay = null;
     let audioCtx = null;
     let timerInterval = null;
@@ -233,35 +211,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         populateDropdowns();
-        runAppInitializationFlow();
-    });
-
-    // STEP 1 & 2 ORDERED INITIALIZATION FLOW
-    function runAppInitializationFlow() {
-        const profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '[]');
-        
-        if (profiles.length === 0) {
-            document.getElementById('profile-modal').classList.remove('hidden');
-        } else {
-            activeProfile = localStorage.getItem('heavyduty_active_profile') || profiles[0];
-            initProfilesUI();
-            checkStorageModeStep();
-        }
-    }
-
-    function submitInitialProfile() {
-        const input = document.getElementById('init-profile-input');
-        let val = input.value.trim();
-        if (!val) val = "Default";
-
-        localStorage.setItem('heavyduty_profiles', JSON.stringify([val]));
-        localStorage.setItem('heavyduty_active_profile', val);
-        activeProfile = val;
-
-        document.getElementById('profile-modal').classList.add('hidden');
-        initProfilesUI();
         checkStorageModeStep();
-    }
+    });
 
     function checkStorageModeStep() {
         const mode = localStorage.getItem('heavyduty_storage_mode');
@@ -338,42 +289,6 @@
         }
     }
 
-    function initProfilesUI() {
-        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
-        const select = document.getElementById('profile-select');
-        select.innerHTML = '';
-        profiles.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p; opt.textContent = p;
-            if (p === activeProfile) opt.selected = true;
-            select.appendChild(opt);
-        });
-        document.getElementById('home-profile-display').textContent = activeProfile;
-    }
-
-    function switchProfile() {
-        activeProfile = document.getElementById('profile-select').value;
-        localStorage.setItem('heavyduty_active_profile', activeProfile);
-        document.getElementById('home-profile-display').textContent = activeProfile;
-        loadRoutines();
-        loadHistory();
-    }
-
-    function addNewProfile() {
-        const name = prompt("Enter new profile name:");
-        if (!name || !name.trim()) return;
-        const clean = name.trim();
-        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '[]');
-        if (!profiles.includes(clean)) {
-            profiles.push(clean);
-            localStorage.setItem('heavyduty_profiles', JSON.stringify(profiles));
-        }
-        activeProfile = clean;
-        localStorage.setItem('heavyduty_active_profile', activeProfile);
-        initProfilesUI();
-        switchProfile();
-    }
-
     function updateBannerStatus() {
         const mode = localStorage.getItem('heavyduty_storage_mode');
         const banner = document.getElementById('status-banner');
@@ -411,10 +326,9 @@
         const exTarget = document.getElementById('exercise-target').value.trim();
         if (!name || !exName) { alert("Please enter routine and exercise names."); return; }
 
-        const key = `routines_${activeProfile}`;
-        let routines = JSON.parse(localStorage.getItem(key) || "[]");
+        let routines = JSON.parse(localStorage.getItem('routines') || "[]");
         routines.push({ name, exercise: exName, target: exTarget });
-        localStorage.setItem(key, JSON.stringify(routines));
+        localStorage.setItem('routines', JSON.stringify(routines));
 
         alert("Routine saved!");
         document.getElementById('routine-name').value = '';
@@ -427,7 +341,7 @@
     function loadRoutines() {
         const picker = document.getElementById('workout-picker');
         picker.innerHTML = '<option value="">-- Choose an Exercise --</option>';
-        const routines = JSON.parse(localStorage.getItem(`routines_${activeProfile}`) || "[]");
+        const routines = JSON.parse(localStorage.getItem('routines') || "[]");
         routines.forEach((r, idx) => {
             const opt = document.createElement('option');
             opt.value = idx; opt.textContent = `${r.name} - ${r.exercise}`;
@@ -438,7 +352,7 @@
     function loadSelectedRoutine() {
         const idx = document.getElementById('workout-picker').value;
         if (idx === "") return;
-        const routines = JSON.parse(localStorage.getItem(`routines_${activeProfile}`) || "[]");
+        const routines = JSON.parse(localStorage.getItem('routines') || "[]");
         if (routines[idx]) {
             document.getElementById('current-exercise-title').textContent = routines[idx].exercise;
             document.getElementById('current-exercise-target').textContent = `Target: ${routines[idx].target || 'General'}`;
@@ -450,7 +364,6 @@
         if (title === "Select an exercise above") { alert("Select an exercise first."); return; }
 
         const entry = {
-            profile: activeProfile,
             workoutDay: activeWorkoutDay || "General Session",
             exercise: title,
             reps: parseInt(document.getElementById('reps-input').value, 10),
@@ -458,19 +371,17 @@
             timestamp: new Date().toISOString()
         };
 
-        const key = `workout_cache_${activeProfile}`;
-        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        let history = JSON.parse(localStorage.getItem('workout_cache') || "[]");
         history.push(entry);
-        localStorage.setItem(key, JSON.stringify(history));
+        localStorage.setItem('workout_cache', JSON.stringify(history));
 
         loadHistory();
         startTimer(90);
     }
 
     function loadHistory() {
-        document.getElementById('history-profile-tag').textContent = activeProfile;
         const container = document.getElementById('history-container');
-        const history = JSON.parse(localStorage.getItem(`workout_cache_${activeProfile}`) || "[]");
+        const history = JSON.parse(localStorage.getItem('workout_cache') || "[]");
 
         if (history.length === 0) {
             container.innerHTML = '<li style="color: #8e8e93; font-size: 13px;">No workouts logged yet.</li>';
@@ -560,9 +471,11 @@
     }
 
     function exportLocalBackup() {
-        let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
-        let fullExport = { exportDate: new Date().toISOString(), profiles, workoutData: {} };
-        profiles.forEach(p => { fullExport.workoutData[p] = JSON.parse(localStorage.getItem(`workout_cache_${p}`) || "[]"); });
+        let fullExport = { 
+            exportDate: new Date().toISOString(), 
+            workoutData: JSON.parse(localStorage.getItem('workout_cache') || "[]"),
+            routines: JSON.parse(localStorage.getItem('routines') || "[]")
+        };
 
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullExport, null, 2));
         const anchor = document.createElement('a');
@@ -581,12 +494,14 @@
         reader.onload = function(evt) {
             try {
                 const parsed = JSON.parse(evt.target.result);
-                if (parsed.workoutData) {
-                    Object.keys(parsed.workoutData).forEach(p => {
-                        localStorage.setItem(`workout_cache_${p}`, JSON.stringify(parsed.workoutData[p]));
-                    });
+                if (Array.isArray(parsed)) {
+                    localStorage.setItem('workout_cache', JSON.stringify(parsed));
+                } else if (parsed.workoutData) {
+                    localStorage.setItem('workout_cache', JSON.stringify(parsed.workoutData));
+                    if (parsed.routines) localStorage.setItem('routines', JSON.stringify(parsed.routines));
                 }
                 alert("Import successful!");
+                loadRoutines();
                 loadHistory();
             } catch(err) { alert("Invalid backup JSON."); }
         };
