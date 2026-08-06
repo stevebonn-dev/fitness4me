@@ -1,197 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeavyDutySteve Workout Tracker</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 650px; margin: auto; background-color: #f2f2f7; color: #1c1c1e; }
-        
-        .card { 
-            background: #ffffff; 
-            padding: 18px; 
-            border-radius: 14px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
-            margin-bottom: 15px; 
-            border: 1px solid #e5e5ea;
-        }
-        
-        .dashboard-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            border-bottom: 1px solid #efeff4;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-
-        .status-banner {
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .status-connected { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
-        .status-disconnected { background-color: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
-
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; background: #e5e5ea; border: none; border-radius: 8px; font-weight: 600; color: #007aff; cursor: pointer; }
-        .tab-btn.active { background: #007aff; color: #fff; }
-        
-        .set-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
-        .input-group { display: flex; align-items: center; gap: 6px; }
-        select, input { padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1px solid #c7c7cc; background-color: #fff; width: 100%; }
-        
-        .btn { background: #007aff; color: white; border: none; padding: 10px 14px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; text-align: center; }
-        .btn:hover { background: #0056b3; }
-        .btn-success { background: #34c759; }
-        .btn-warning { background: #ff9500; }
-        .btn-danger { background: #ff3b30; }
-        
-        .timer-display { font-size: 26px; font-weight: 700; margin: 15px 0; text-align: center; color: #007aff; }
-        .history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item { padding: 10px; border-bottom: 1px solid #e5e5ea; display: flex; justify-content: space-between; font-size: 14px; }
-        
-        .hidden { display: none; }
-        .toggle-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #e5e5ea; margin-top: 10px; }
-
-        /* Setup Modal */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-body { background: white; padding: 24px; border-radius: 14px; max-width: 500px; width: 90%; }
-    </style>
-    <!-- Google OAuth Client API Script -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-
-<!-- INITIAL SETUP MODAL (Shown if Client ID missing) -->
-<div id="setup-modal" class="modal-overlay hidden">
-    <div class="modal-body">
-        <h3 style="margin-top:0;">Connect Google Drive Sync</h3>
-        <p style="font-size: 14px; color: #48484a;">Enter your Google OAuth Client ID to enable background cloud backups for logged workouts.</p>
-        <input type="text" id="modal-client-id" placeholder="123456...apps.googleusercontent.com" style="margin-bottom: 12px;">
-        <div style="display: flex; gap: 8px;">
-            <button class="btn btn-success" style="flex: 2;" onclick="saveModalClientId(true)">Save & Login Now</button>
-            <button class="btn" style="flex: 1; background: #8e8e93;" onclick="closeModal()">Skip</button>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <!-- DASHBOARD HEADER -->
-    <div class="dashboard-header">
-        <div>
-            <h2 style="margin: 0; font-size: 20px;">Dashboard</h2>
-            <span style="font-size: 12px; color: #8e8e93;">HeavyDutySteve Tracker</span>
-        </div>
-        <div style="text-align: right;">
-            <label for="profile-select" style="font-size: 12px; display: block; font-weight: 600;">Active Profile</label>
-            <select id="profile-select" onchange="switchProfile()" style="width: auto; padding: 4px 8px;">
-                <option value="Default">Default</option>
-            </select>
-            <button type="button" class="btn" style="padding: 2px 6px; font-size: 11px; margin-top: 4px;" onclick="addNewProfile()">+ New Profile</button>
-        </div>
-    </div>
-
-    <!-- CLOUD STATUS BANNER -->
-    <div id="status-banner" class="status-banner status-disconnected">
-        <span id="banner-text">Google Drive: Disconnected</span>
-        <button id="banner-btn" class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="promptOrAuthorizeDrive()">Connect</button>
-    </div>
-
-    <!-- MAIN NAVIGATION TABS -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" id="tab-workout" onclick="showTab('workout')">Workout</button>
-        <button class="tab-btn" id="tab-builder" onclick="showTab('builder')">Builder</button>
-        <button class="tab-btn" id="tab-history" onclick="showTab('history')">History</button>
-        <button class="tab-btn" id="tab-settings" onclick="showTab('settings')">Sync & Migration</button>
-    </div>
-
-    <!-- TAB 1: WORKOUT EXECUTION -->
-    <div id="view-workout">
-        <label for="workout-picker"><strong>Select Routine:</strong></label>
-        <select id="workout-picker" onchange="loadSelectedRoutine()" style="margin-bottom: 15px;">
-            <option value="">-- Choose a Workout --</option>
-        </select>
-
-        <div id="exercise-runner">
-            <h3 id="current-exercise-title" style="margin-bottom: 5px;">Select a routine above</h3>
-            <p id="current-exercise-target" style="font-size: 13px; color: #8e8e93; margin-top: 0;"></p>
-
-            <div class="set-row">
-                <div class="input-group">
-                    <label for="reps-input">Reps:</label>
-                    <select id="reps-input"></select>
-                </div>
-                <div class="input-group">
-                    <label for="weight-input">Weight (kg):</label>
-                    <select id="weight-input"></select>
-                </div>
-                <button type="button" class="btn btn-success" onclick="logSet()">Log Set</button>
-            </div>
-        </div>
-
-        <div class="timer-display" id="timer">Rest Timer: 00:00</div>
-    </div>
-
-    <!-- TAB 2: ROUTINE BUILDER -->
-    <div id="view-builder" class="hidden">
-        <h3>Create New Routine</h3>
-        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Chest & Back)" style="margin-bottom: 10px;">
-        <input type="text" id="exercise-name" placeholder="Exercise Name (e.g., Cable Crossover)" style="margin-bottom: 10px;">
-        <input type="text" id="exercise-target" placeholder="Target Muscle (e.g., Pectorals)" style="margin-bottom: 10px;">
-        
-        <button type="button" class="btn btn-warning" onclick="saveNewRoutine()" style="width: 100%;">Save Routine to Active Profile</button>
-    </div>
-
-    <!-- TAB 3: WORKOUT HISTORY -->
-    <div id="view-history" class="hidden">
-        <h3>Workout History (<span id="history-profile-tag">Default</span>)</h3>
-        <ul id="history-container" class="history-list">
-            <li style="color: #8e8e93; font-size: 13px;">No workouts logged yet.</li>
-        </ul>
-    </div>
-
-    <!-- TAB 4: AUTOMATED DRIVE RESTORE & BACKUP -->
-    <div id="view-settings" class="hidden">
-        <h3>Google OAuth Settings</h3>
-        <div style="margin-bottom: 15px;">
-            <label for="client-id-input" style="font-size: 12px; font-weight: 600;">Google Client ID:</label>
-            <input type="text" id="client-id-input" placeholder="e.g. 123456...apps.googleusercontent.com" style="margin-top: 4px; margin-bottom: 8px;">
-            <div style="display: flex; gap: 8px;">
-                <button type="button" class="btn" onclick="saveClientId()" style="flex: 1;">Save Client ID</button>
-                <button type="button" class="btn btn-danger" onclick="clearClientId()" style="padding: 10px;">Reset</button>
-            </div>
-        </div>
-
-        <div class="toggle-box">
-            <span style="font-size: 14px; font-weight: 600;">Enable Automatic Background Syncing</span>
-            <input type="checkbox" id="autosync-toggle" style="width: 20px; height: 20px;" onchange="toggleAutoSync(this.checked)">
-        </div>
-
-        <button type="button" class="btn" id="btn-auth-cloud" onclick="authorizeCloudSync()" style="width: 100%; margin-top: 8px; margin-bottom: 15px; background: #5856d6;">
-            🔑 Authorize Google Drive Session
-        </button>
-
-        <hr style="border: 0; border-top: 1px solid #e5e5ea; margin: 15px 0;">
-
-        <h3>Cloud Restore & Local File Operations</h3>
-        <button type="button" class="btn btn-success" onclick="restoreFromGoogleDrive()" style="width: 100%; margin-bottom: 10px; padding: 12px;">
-            🔍 Scan Cloud Restore from Google Drive
-        </button>
-
-        <button type="button" class="btn" onclick="exportLocalBackup()" style="width: 100%; margin-bottom: 8px; background: #8e8e93;">💾 Export Local JSON Backup</button>
-        <button type="button" class="btn" onclick="triggerImport()" style="width: 100%; background: #5856d6;">📂 Manual Pick JSON File (Local)</button>
-        <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleFileImport(event)">
-    </div>
-</div>
-
 <script>
     let activeProfile = "Default";
     let audioCtx = null;
@@ -209,9 +15,9 @@
 
         document.getElementById('autosync-toggle').checked = autoSyncEnabled;
         
-        // Initial setup check: prompt for Client ID on startup if missing
+        // Explicitly force open the modal if no Client ID is stored
         const savedClientId = localStorage.getItem('GOOGLE_CLIENT_ID');
-        if (!savedClientId) {
+        if (!savedClientId || !savedClientId.trim()) {
             document.getElementById('setup-modal').classList.remove('hidden');
         } else if (accessToken) {
             updateStatusBanner(true, "Google Drive Connected");
@@ -254,7 +60,7 @@
 
     function promptOrAuthorizeDrive() {
         const clientId = localStorage.getItem('GOOGLE_CLIENT_ID');
-        if (!clientId) {
+        if (!clientId || !clientId.trim()) {
             document.getElementById('setup-modal').classList.remove('hidden');
         } else {
             authorizeCloudSync();
@@ -282,13 +88,15 @@
         sessionStorage.removeItem('gdrive_access_token');
         accessToken = null;
         document.getElementById('client-id-input').value = '';
+        document.getElementById('modal-client-id').value = '';
         updateStatusBanner(false, "Google Drive Disconnected");
+        document.getElementById('setup-modal').classList.remove('hidden');
         alert("Saved Client ID cleared.");
     }
 
     function authorizeCloudSync() {
         const clientId = localStorage.getItem('GOOGLE_CLIENT_ID');
-        if (!clientId) {
+        if (!clientId || !clientId.trim()) {
             document.getElementById('setup-modal').classList.remove('hidden');
             return;
         }
@@ -686,6 +494,3 @@
         reader.readAsText(file);
     }
 </script>
-
-</body>
-</html>
