@@ -93,8 +93,49 @@
     let audioCtx = null;
     let timerInterval = null;
 
+    // LEGACY MIGRATION: Recovers workout history from single-user legacy format
+    function migrateLegacyData() {
+        const LEGACY_STORAGE_KEY = 'workout_data_cache';
+        const DEFAULT_PROFILE_KEY = 'workout_cache_Default';
+
+        try {
+            const legacyDataRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+            if (legacyDataRaw) {
+                const legacyData = JSON.parse(legacyDataRaw);
+                if (Array.isArray(legacyData) && legacyData.length > 0) {
+                    let defaultProfileData = JSON.parse(localStorage.getItem(DEFAULT_PROFILE_KEY) || "[]");
+
+                    // Tag legacy items with profile property if missing
+                    const formattedLegacyData = legacyData.map(item => ({
+                        ...item,
+                        profile: item.profile || 'Default'
+                    }));
+
+                    // Deduplicate items based on timestamp
+                    const existingTimestamps = new Set(defaultProfileData.map(item => item.timestamp));
+                    formattedLegacyData.forEach(item => {
+                        if (!item.timestamp || !existingTimestamps.has(item.timestamp)) {
+                            defaultProfileData.push(item);
+                        }
+                    });
+
+                    // Save into new profile-aware storage
+                    localStorage.setItem(DEFAULT_PROFILE_KEY, JSON.stringify(defaultProfileData));
+                    localStorage.setItem('pending_sync_Default', 'true');
+
+                    console.log(`Successfully migrated ${legacyData.length} legacy workout records into 'Default' profile.`);
+                }
+            }
+        } catch (e) {
+            console.error("Legacy migration error:", e);
+        }
+    }
+
     // 1. Profile Management Setup
     function initProfiles() {
+        // Run migration check before populating profiles
+        migrateLegacyData();
+
         try {
             let profiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
             activeProfile = localStorage.getItem('heavyduty_active_profile') || profiles[0];
@@ -224,7 +265,6 @@
         let remaining = durationInSeconds;
         const timerDisplay = document.getElementById('timer');
 
-        // Prime AudioContext during the user gesture (tick button click)
         getAudioContext();
 
         function updateDisplay() {
@@ -304,7 +344,10 @@
             const storageKey = `workout_cache_${activeProfile}`;
             const fullData = localStorage.getItem(storageKey);
             
-            const fileName = `heavydutysteve_v3_${activeProfile.toLowerCase().replace(/\s+/g, '_')}.json`;
+            // Cloud file target: uses heavydutysteve_v3.json for Default profile, or profile-specific names for others
+            const fileName = activeProfile === 'Default' 
+                ? 'heavydutysteve_v3.json' 
+                : `heavydutysteve_v3_${activeProfile.toLowerCase().replace(/\s+/g, '_')}.json`;
 
             // Google Drive API upload bridge target:
             // await uploadToGoogleDrive(fileName, fullData);
@@ -352,7 +395,7 @@
         document.getElementById('sync-status').textContent = 'Status: Backup exported to device/iCloud';
     }
 
-    // 6. Import & Restore
+    // 6. Import & Restore (Handles both legacy single-array and multi-profile JSON backups)
     function triggerImport() {
         const input = document.getElementById('import-file-input');
         if (input) input.click();
@@ -367,34 +410,44 @@
             try {
                 const importedData = JSON.parse(e.target.result);
 
-                if (!importedData.profiles || !importedData.workoutData) {
-                    alert("Invalid backup file format.");
+                // Case A: Multi-Profile Backup Format
+                if (importedData.profiles && importedData.workoutData) {
+                    let currentProfiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
+                    importedData.profiles.forEach(p => {
+                        if (!currentProfiles.includes(p)) {
+                            currentProfiles.push(p);
+                        }
+                    });
+                    localStorage.setItem('heavyduty_profiles', JSON.stringify(currentProfiles));
+
+                    Object.keys(importedData.workoutData).forEach(p => {
+                        const storageKey = `workout_cache_${p}`;
+                        const pendingKey = `pending_sync_${p}`;
+                        const dataToSave = JSON.stringify(importedData.workoutData[p] || []);
+                        
+                        localStorage.setItem(storageKey, dataToSave);
+                        localStorage.setItem(pendingKey, 'true');
+                    });
+
+                    activeProfile = currentProfiles[0];
+                    localStorage.setItem('heavyduty_active_profile', activeProfile);
+                    renderProfileDropdown(currentProfiles);
+                } 
+                // Case B: Legacy Single-Array JSON Backup Format
+                else if (Array.isArray(importedData)) {
+                    const storageKey = `workout_cache_Default`;
+                    localStorage.setItem(storageKey, JSON.stringify(importedData));
+                    localStorage.setItem('pending_sync_Default', 'true');
+                    activeProfile = 'Default';
+                    localStorage.setItem('heavyduty_active_profile', 'Default');
+                    renderProfileDropdown(JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]'));
+                } else {
+                    alert("Unrecognized JSON backup format.");
                     return;
                 }
 
-                let currentProfiles = JSON.parse(localStorage.getItem('heavyduty_profiles') || '["Default"]');
-                importedData.profiles.forEach(p => {
-                    if (!currentProfiles.includes(p)) {
-                        currentProfiles.push(p);
-                    }
-                });
-                localStorage.setItem('heavyduty_profiles', JSON.stringify(currentProfiles));
-
-                Object.keys(importedData.workoutData).forEach(p => {
-                    const storageKey = `workout_cache_${p}`;
-                    const pendingKey = `pending_sync_${p}`;
-                    const dataToSave = JSON.stringify(importedData.workoutData[p] || []);
-                    
-                    localStorage.setItem(storageKey, dataToSave);
-                    localStorage.setItem(pendingKey, 'true');
-                });
-
-                activeProfile = currentProfiles[0];
-                localStorage.setItem('heavyduty_active_profile', activeProfile);
-                renderProfileDropdown(currentProfiles);
-
                 document.getElementById('sync-status').textContent = 'Status: Backup restored successfully!';
-                alert("Workout data and profiles restored successfully!");
+                alert("Workout data restored successfully!");
 
                 syncToCloud();
 
@@ -408,7 +461,7 @@
         event.target.value = '';
     }
 
-    // Online/Offline Listeners
+    // Network Listeners
     window.addEventListener('online', () => {
         document.getElementById('sync-status').textContent = 'Status: Network restored. Syncing...';
         syncToCloud();
@@ -422,9 +475,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         initProfiles();
         populateDropdowns();
+        syncToCloud();
     });
 </script>
 
 </body>
 </html>
-
