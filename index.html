@@ -40,22 +40,24 @@
         .tab-btn { flex: 1; padding: 10px; background: #e5e5ea; border: none; border-radius: 8px; font-weight: 600; color: #007aff; cursor: pointer; }
         .tab-btn.active { background: #007aff; color: #fff; }
         
-        .set-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
-        .input-group { display: flex; align-items: center; gap: 6px; }
-        select, input { padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1px solid #c7c7cc; background-color: #fff; width: 100%; }
+        .set-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; background: #f9f9fb; padding: 8px; border-radius: 8px; }
+        .input-group { display: flex; align-items: center; gap: 6px; flex: 1; }
+        select, input { padding: 8px 12px; font-size: 15px; border-radius: 8px; border: 1px solid #c7c7cc; background-color: #fff; width: 100%; }
         
         .btn { background: #007aff; color: white; border: none; padding: 10px 14px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; text-align: center; }
         .btn:hover { background: #0056b3; }
+        .btn-sm { padding: 4px 8px; font-size: 12px; }
         .btn-success { background: #34c759; }
         .btn-warning { background: #ff9500; }
         .btn-danger { background: #ff3b30; }
         
         .timer-display { font-size: 26px; font-weight: 700; margin: 15px 0; text-align: center; color: #007aff; }
         .history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item { padding: 10px; border-bottom: 1px solid #e5e5ea; display: flex; justify-content: space-between; font-size: 14px; }
+        .history-item { padding: 12px; border-bottom: 1px solid #e5e5ea; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
         
+        .badge-superset { background: #ff9500; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px; }
         .hidden { display: none !important; }
-        .toggle-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #e5e5ea; margin-top: 10px; }
+        .toggle-box { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
 
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-body { background: white; padding: 24px; border-radius: 14px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -66,7 +68,7 @@
 </head>
 <body>
 
-<!-- MANDATORY STORAGE MODE SELECTION -->
+<!-- STORAGE MODE SELECTION -->
 <div id="storage-modal" class="modal-overlay hidden">
     <div class="modal-body">
         <h3 style="margin-top:0;">Storage Setup</h3>
@@ -108,7 +110,7 @@
         <h3>Create Workout Day</h3>
         <p style="font-size: 13px; color: #8e8e93;">Initialize a workout session before logging exercises.</p>
         
-        <input type="text" id="workout-day-name" placeholder="Workout Day Name (e.g., Chest & Back Routine)" style="margin-bottom: 10px;">
+        <input type="text" id="workout-day-name" placeholder="Workout Day Name (e.g., Heavy Duty Chest & Back)" style="margin-bottom: 10px;">
         <button class="btn btn-success" style="width: 100%; padding: 12px;" onclick="createWorkoutDay()">➕ Initialize Workout Session</button>
 
         <div id="active-day-container" class="hidden">
@@ -127,25 +129,32 @@
         </div>
 
         <label for="workout-picker"><strong>Select Exercise / Routine:</strong></label>
-        <select id="workout-picker" onchange="loadSelectedRoutine()" style="margin-bottom: 15px;">
+        <select id="workout-picker" onchange="loadSelectedRoutine()" style="margin-bottom: 12px;">
             <option value="">-- Choose an Exercise --</option>
         </select>
 
         <div id="exercise-runner">
-            <h3 id="current-exercise-title" style="margin-bottom: 5px;">Select an exercise above</h3>
-            <p id="current-exercise-target" style="font-size: 13px; color: #8e8e93; margin-top: 0;"></p>
+            <h3 id="current-exercise-title" style="margin-bottom: 2px;">Select an exercise above</h3>
+            <p id="current-exercise-target" style="font-size: 13px; color: #8e8e93; margin-top: 0; margin-bottom: 10px;"></p>
 
-            <div class="set-row">
-                <div class="input-group">
-                    <label for="reps-input">Reps:</label>
-                    <select id="reps-input"></select>
-                </div>
-                <div class="input-group">
-                    <label for="weight-input">Weight (kg):</label>
-                    <select id="weight-input"></select>
-                </div>
-                <button type="button" class="btn btn-success" onclick="logSet()">Log Set</button>
+            <div class="toggle-box" style="margin-bottom: 10px; border-bottom: 1px solid #e5e5ea; padding-bottom: 10px;">
+                <label for="superset-checkbox" style="font-size: 14px; font-weight: 600;">⚡ Mark as Superset</label>
+                <input type="checkbox" id="superset-checkbox" style="width: 18px; height: 18px;">
             </div>
+
+            <!-- MULTIPLE SETS CONTAINER -->
+            <div id="sets-container">
+                <!-- Set rows will be dynamically added here -->
+            </div>
+
+            <button type="button" class="btn btn-sm" onclick="addSetRow()" style="margin-bottom: 12px; background: #8e8e93;">➕ Add Another Set</button>
+
+            <div style="margin-bottom: 15px;">
+                <label for="exercise-comments" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Notes / Comments:</label>
+                <input type="text" id="exercise-comments" placeholder="e.g. Failure reached on final set, drop set used">
+            </div>
+
+            <button type="button" class="btn btn-success" onclick="logAllSets()" style="width: 100%; padding: 12px;">Log Exercise & Sets</button>
         </div>
 
         <div class="timer-display" id="timer">Rest Timer: 00:00</div>
@@ -154,9 +163,15 @@
     <!-- BUILDER TAB -->
     <div id="view-builder" class="hidden">
         <h3>Create New Exercise Routine</h3>
-        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Heavy Duty Routine)" style="margin-bottom: 10px;">
-        <input type="text" id="exercise-name" placeholder="Exercise Name (e.g., Cable Crossover)" style="margin-bottom: 10px;">
+        <input type="text" id="routine-name" placeholder="Routine Name (e.g., Heavy Duty Chest)" style="margin-bottom: 10px;">
+        <input type="text" id="exercise-name" placeholder="Exercise Name (e.g., Pec Deck Fly)" style="margin-bottom: 10px;">
         <input type="text" id="exercise-target" placeholder="Target Muscle (e.g., Pectorals)" style="margin-bottom: 10px;">
+        
+        <div class="toggle-box" style="margin-bottom: 10px;">
+            <span style="font-size: 14px; font-weight: 600;">Default Superset</span>
+            <input type="checkbox" id="builder-superset-toggle" style="width: 18px; height: 18px;">
+        </div>
+
         <button type="button" class="btn btn-warning" onclick="saveNewRoutine()" style="width: 100%;">Save Routine</button>
     </div>
 
@@ -178,11 +193,6 @@
                 <button type="button" class="btn" onclick="saveClientId()" style="flex: 1;">Save Client ID</button>
                 <button type="button" class="btn btn-danger" onclick="clearClientId()" style="padding: 10px;">Reset</button>
             </div>
-        </div>
-
-        <div class="toggle-box">
-            <span style="font-size: 14px; font-weight: 600;">Enable Automatic Background Syncing</span>
-            <input type="checkbox" id="autosync-toggle" style="width: 20px; height: 20px;" onchange="toggleAutoSync(this.checked)">
         </div>
 
         <button type="button" class="btn" id="btn-auth-cloud" onclick="authorizeCloudSync()" style="width: 100%; margin-top: 8px; margin-bottom: 15px; background: #5856d6;">
@@ -207,11 +217,10 @@
     let timerInterval = null;
     let tokenClient = null;
     let accessToken = sessionStorage.getItem('gdrive_access_token') || null;
-    let autoSyncEnabled = localStorage.getItem('heavyduty_autosync') !== 'false';
 
     document.addEventListener('DOMContentLoaded', () => {
-        populateDropdowns();
         checkStorageModeStep();
+        addSetRow(); // Add default single set row
     });
 
     function checkStorageModeStep() {
@@ -236,8 +245,6 @@
                 localStorage.setItem('GOOGLE_CLIENT_ID', clientVal);
                 document.getElementById('client-id-input').value = clientVal;
                 authorizeCloudSync();
-            } else if (!localStorage.getItem('GOOGLE_CLIENT_ID')) {
-                alert("Please add a Client ID in the Sync tab when ready.");
             }
         }
         
@@ -251,7 +258,45 @@
         document.getElementById('storage-modal').classList.remove('hidden');
     }
 
-    // HOME TAB WORKOUT CREATION FLOW
+    // MULTIPLE SET ROW MANAGEMENT & 1KG INCREMENTS
+    function addSetRow() {
+        const container = document.getElementById('sets-container');
+        const setIndex = container.children.length + 1;
+
+        const row = document.createElement('div');
+        row.className = 'set-row';
+
+        let repsOptions = '';
+        for (let i = 1; i <= 35; i++) {
+            repsOptions += `<option value="${i}">${i} reps</option>`;
+        }
+
+        // 1 KG INCREMENTS (1 kg to 300 kg)
+        let weightOptions = '';
+        for (let i = 1; i <= 300; i++) {
+            weightOptions += `<option value="${i}" ${i === 20 ? 'selected' : ''}>${i} kg</option>`;
+        }
+
+        row.innerHTML = `
+            <span style="font-weight: bold; font-size: 13px; width: 45px;">Set ${setIndex}:</span>
+            <div class="input-group">
+                <select class="set-reps">${repsOptions}</select>
+            </div>
+            <div class="input-group">
+                <select class="set-weight">${weightOptions}</select>
+            </div>
+            ${setIndex > 1 ? `<button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>` : '<div style="width:24px;"></div>'}
+        `;
+
+        container.appendChild(row);
+    }
+
+    function resetSetRows() {
+        document.getElementById('sets-container').innerHTML = '';
+        addSetRow();
+    }
+
+    // WORKOUT SESSION CREATION
     function createWorkoutDay() {
         const input = document.getElementById('workout-day-name');
         const dayName = input.value.trim();
@@ -306,34 +351,23 @@
         }
     }
 
-    function populateDropdowns() {
-        const repsSelect = document.getElementById('reps-input');
-        const weightSelect = document.getElementById('weight-input');
-        repsSelect.innerHTML = ''; weightSelect.innerHTML = '';
-        for (let i = 1; i <= 35; i++) {
-            const opt = document.createElement('option');
-            opt.value = i; opt.textContent = i; repsSelect.appendChild(opt);
-        }
-        for (let i = 0; i <= 300; i += 2.5) {
-            const opt = document.createElement('option');
-            opt.value = i; opt.textContent = `${i} kg`; weightSelect.appendChild(opt);
-        }
-    }
-
     function saveNewRoutine() {
         const name = document.getElementById('routine-name').value.trim();
         const exName = document.getElementById('exercise-name').value.trim();
         const exTarget = document.getElementById('exercise-target').value.trim();
+        const isSuperset = document.getElementById('builder-superset-toggle').checked;
+
         if (!name || !exName) { alert("Please enter routine and exercise names."); return; }
 
         let routines = JSON.parse(localStorage.getItem('routines') || "[]");
-        routines.push({ name, exercise: exName, target: exTarget });
+        routines.push({ name, exercise: exName, target: exTarget, isSuperset });
         localStorage.setItem('routines', JSON.stringify(routines));
 
         alert("Routine saved!");
         document.getElementById('routine-name').value = '';
         document.getElementById('exercise-name').value = '';
         document.getElementById('exercise-target').value = '';
+        document.getElementById('builder-superset-toggle').checked = false;
         loadRoutines();
         showTab('workout');
     }
@@ -344,7 +378,7 @@
         const routines = JSON.parse(localStorage.getItem('routines') || "[]");
         routines.forEach((r, idx) => {
             const opt = document.createElement('option');
-            opt.value = idx; opt.textContent = `${r.name} - ${r.exercise}`;
+            opt.value = idx; opt.textContent = `${r.name} - ${r.exercise} ${r.isSuperset ? '(Superset)' : ''}`;
             picker.appendChild(opt);
         });
     }
@@ -356,18 +390,29 @@
         if (routines[idx]) {
             document.getElementById('current-exercise-title').textContent = routines[idx].exercise;
             document.getElementById('current-exercise-target').textContent = `Target: ${routines[idx].target || 'General'}`;
+            document.getElementById('superset-checkbox').checked = !!routines[idx].isSuperset;
         }
     }
 
-    function logSet() {
+    function logAllSets() {
         const title = document.getElementById('current-exercise-title').textContent;
         if (title === "Select an exercise above") { alert("Select an exercise first."); return; }
+
+        const setElements = document.querySelectorAll('#sets-container .set-row');
+        const setsData = [];
+
+        setElements.forEach(row => {
+            const reps = parseInt(row.querySelector('.set-reps').value, 10);
+            const weight = parseFloat(row.querySelector('.set-weight').value);
+            setsData.push({ reps, weight });
+        });
 
         const entry = {
             workoutDay: activeWorkoutDay || "General Session",
             exercise: title,
-            reps: parseInt(document.getElementById('reps-input').value, 10),
-            weight: parseFloat(document.getElementById('weight-input').value),
+            isSuperset: document.getElementById('superset-checkbox').checked,
+            comments: document.getElementById('exercise-comments').value.trim(),
+            sets: setsData,
             timestamp: new Date().toISOString()
         };
 
@@ -375,6 +420,8 @@
         history.push(entry);
         localStorage.setItem('workout_cache', JSON.stringify(history));
 
+        document.getElementById('exercise-comments').value = '';
+        resetSetRows();
         loadHistory();
         startTimer(90);
     }
@@ -388,12 +435,20 @@
             return;
         }
 
-        container.innerHTML = history.slice(-15).reverse().map(item => `
-            <li class="history-item">
-                <span><strong>${item.workoutDay || 'Session'}</strong> - ${item.exercise}: ${item.reps} reps @ ${item.weight} kg</span>
-                <span style="color:#8e8e93; font-size:12px;">${new Date(item.timestamp).toLocaleDateString()}</span>
-            </li>
-        `).join('');
+        container.innerHTML = history.slice(-15).reverse().map(item => {
+            const setsSummary = item.sets ? item.sets.map((s, idx) => `S${idx+1}: ${s.reps}r @ ${s.weight}kg`).join(' | ') : `${item.reps || 0} reps @ ${item.weight || 0} kg`;
+            return `
+                <li class="history-item">
+                    <div>
+                        <strong>${item.workoutDay || 'Session'}</strong> - ${item.exercise}
+                        ${item.isSuperset ? '<span class="badge-superset">SUPERSET</span>' : ''}
+                    </div>
+                    <div style="font-size: 13px; color: #007aff;">${setsSummary}</div>
+                    ${item.comments ? `<div style="font-size: 12px; color: #48484a; italic;">💬 ${item.comments}</div>` : ''}
+                    <span style="color:#8e8e93; font-size:11px;">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </li>
+            `;
+        }).join('');
     }
 
     function getAudioContext() {
