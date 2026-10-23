@@ -278,7 +278,59 @@
 
     function getWorkoutDays() {
       const stored = localStorage.getItem('workout_days');
-      return stored ? JSON.parse(stored) : initialDays;
+      if (!stored) return initialDays;
+      try {
+        const parsed = JSON.parse(stored);
+        return normalizeWorkoutDays(parsed);
+      } catch(e) {
+        return initialDays;
+      }
+    }
+
+    // BACKWARDS COMPATIBILITY SCHEMA MIGRATIONS
+    function normalizeWorkoutDays(daysArray) {
+      if (!Array.isArray(daysArray)) return initialDays;
+      return daysArray.map(day => ({
+        id: day.id || 'day_' + Date.now(),
+        title: day.title || 'Workout Day',
+        restSeconds: day.restSeconds || 90,
+        exercises: (day.exercises || []).map(ex => ({
+          id: ex.id || 'ex_' + Date.now(),
+          name: ex.name || 'Exercise',
+          notes: ex.notes || '',
+          superset: !!ex.superset,
+          benchPosition: ex.benchPosition || 'None',
+          cableSides: ex.cableSides || 'None',
+          cableHeight: ex.cableHeight !== undefined ? ex.cableHeight : 0,
+          sets: (ex.sets || []).map(s => {
+            if (typeof s === 'number') return { reps: s, weight: 10, completed: false, lastReps: s, lastWeight: 10 };
+            return {
+              reps: parseInt(s.reps) || 10,
+              weight: parseFloat(s.weight) || 10,
+              completed: !!s.completed,
+              lastReps: parseInt(s.lastReps) || parseInt(s.reps) || 10,
+              lastWeight: parseFloat(s.lastWeight) || parseFloat(s.weight) || 10
+            };
+          })
+        }))
+      }));
+    }
+
+    function normalizeHistory(historyArray) {
+      if (!Array.isArray(historyArray)) return [];
+      return historyArray.map(h => ({
+        title: h.title || 'Logged Session',
+        date: h.date || new Date().toISOString(),
+        exercises: (h.exercises || []).map(e => ({
+          name: e.name || 'Exercise',
+          benchPosition: e.benchPosition || 'None',
+          cableHeight: e.cableHeight,
+          sets: (e.sets || []).map(s => ({
+            reps: parseInt(s.reps) || 0,
+            weight: parseFloat(s.weight) || 0
+          }))
+        }))
+      }));
     }
 
     function saveWorkoutDays(days) {
@@ -305,7 +357,6 @@
         const ctx = getAudioContext();
         const now = ctx.currentTime;
         
-        // Play 3 distinct beeps
         [0, 0.25, 0.5].forEach(delay => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -324,7 +375,7 @@
     }
 
     function startTimer() {
-      getAudioContext(); // Ensure Audio Context initialized on user tap
+      getAudioContext();
       clearInterval(timerInterval);
       const inputVal = parseInt(document.getElementById('timer-input-seconds').value) || 90;
       if (timerTimeLeft <= 0 || timerTimeLeft === inputVal) timerTimeLeft = inputVal;
@@ -367,7 +418,6 @@
       resetTimer();
     }
 
-    // Days Ago / Recovery Calculations
     function getDaysAgo(dateString) {
       if (!dateString) return null;
       const date = new Date(dateString);
@@ -377,7 +427,8 @@
     }
 
     function updateGlobalRecoveryUI() {
-      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
+      const rawHistory = localStorage.getItem('workout_history');
+      const history = rawHistory ? normalizeHistory(JSON.parse(rawHistory)) : [];
       const tag = document.getElementById('global-recovery-tag');
       if (!history || history.length === 0) {
         tag.innerText = "Recovery: No Workouts Yet";
@@ -390,7 +441,8 @@
 
     function renderDashboard() {
       const days = getWorkoutDays();
-      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
+      const rawHistory = localStorage.getItem('workout_history');
+      const history = rawHistory ? normalizeHistory(JSON.parse(rawHistory)) : [];
       const container = document.getElementById('workout-days-container');
       
       container.innerHTML = days.map(d => {
@@ -484,7 +536,6 @@
             </div>
           </div>
 
-          <!-- Options Grid including Bench Position -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div class="flex items-center space-x-2">
               <label class="text-slate-500 dark:text-slate-400">Bench Pos:</label>
@@ -701,7 +752,7 @@
       });
       saveWorkoutDays(days);
 
-      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
+      const history = normalizeHistory(JSON.parse(localStorage.getItem('workout_history') || '[]'));
       history.unshift({
         title: day.title,
         date: new Date().toISOString(),
@@ -753,7 +804,8 @@
     }
 
     function renderHistory() {
-      const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
+      const rawHistory = localStorage.getItem('workout_history');
+      const history = rawHistory ? normalizeHistory(JSON.parse(rawHistory)) : [];
       const container = document.getElementById('history-list');
 
       if (history.length === 0) {
@@ -887,15 +939,15 @@
     function getPayload() {
       return {
         workoutDays: getWorkoutDays(),
-        history: JSON.parse(localStorage.getItem('workout_history') || '[]'),
+        history: normalizeHistory(JSON.parse(localStorage.getItem('workout_history') || '[]')),
         creatineIntake: localStorage.getItem('creatineIntake') || '0g',
         lastUpdated: new Date().toISOString()
       };
     }
 
     function applyPayload(payload) {
-      if (payload.workoutDays) saveWorkoutDays(payload.workoutDays);
-      if (payload.history) localStorage.setItem('workout_history', JSON.stringify(payload.history));
+      if (payload.workoutDays) saveWorkoutDays(normalizeWorkoutDays(payload.workoutDays));
+      if (payload.history) localStorage.setItem('workout_history', JSON.stringify(normalizeHistory(payload.history)));
       if (payload.creatineIntake) {
         localStorage.setItem('creatineIntake', payload.creatineIntake);
         creatineIntake = payload.creatineIntake;
