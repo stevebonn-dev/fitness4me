@@ -3,1234 +3,650 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Fitness4Me - Heavy Duty Workout Tracker</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#121318',
-              card: '#1A1C23',
-              border: '#2A2D3A',
-              accent: '#00F0FF', // Neon Cyan
-              warning: '#FFB800', // Amber
-              danger: '#FF3B3B',
-              success: '#00E676',
-              purple: '#9D4EDD'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
+  <title>Fitness4Me - High-Intensity Heavy Duty Tracker</title>
   <style>
-    body {
-      background-color: #121318;
-      color: #E2E8F0;
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    
-    /* Smooth Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #121318;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #2A2D3A;
-      border-radius: 3px;
-    }
-    
-    .glow-cyan {
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
-    }
-    
-    .glow-cyan-border {
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
-      border-color: #00F0FF !important;
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-scale: 1;
     }
 
-    /* Custom Number Input Spinner Hide */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+    body.font-large { --font-scale: 1.15; }
+    body.font-xlarge { --font-scale: 1.3; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-size: calc(15px * var(--font-scale));
+      line-height: 1.5;
+      padding-bottom: 80px;
     }
-    input[type=number] {
-      -moz-appearance: textfield;
+
+    /* Header & Navigation */
+    header {
+      background-color: #090d16;
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 16px;
     }
+    .header-title { font-size: calc(18px * var(--font-scale)); font-weight: 700; color: #fff; text-align: center; margin-bottom: 8px; }
+    
+    nav { display: flex; justify-content: space-around; gap: 8px; }
+    .nav-btn {
+      flex: 1;
+      padding: 8px 12px;
+      background: #1e293b;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: calc(13px * var(--font-scale));
+      cursor: pointer;
+      text-align: center;
+    }
+    .nav-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    /* Container */
+    .container { padding: 16px; max-width: 768px; margin: 0 auto; }
+    
+    /* Metrics Banner */
+    .rest-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rest-banner-title { font-size: calc(13px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .rest-banner-value { font-size: calc(22px * var(--font-scale)); font-weight: 800; color: var(--accent); }
+
+    /* Card Styling */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .card-title { font-size: calc(16px * var(--font-scale)); font-weight: 700; color: #ffffff; }
+
+    /* Controls & Dropdowns */
+    label { display: block; font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    select, input[type="text"], input[type="number"], input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: calc(14px * var(--font-scale));
+      margin-bottom: 10px;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--accent); }
+
+    /* Exercise Items */
+    .exercise-item {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .exercise-title { font-weight: 700; color: #ffffff; font-size: calc(15px * var(--font-scale)); }
+    
+    .reorder-btns { display: flex; gap: 4px; }
+    .btn-mini {
+      padding: 4px 8px;
+      background: #334155;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .exercise-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* Sets Table */
+    .sets-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .sets-table th { font-size: calc(11px * var(--font-scale)); color: var(--text-muted); text-align: center; padding: 4px; }
+    .sets-table td { padding: 4px; text-align: center; }
+    
+    .last-target-badge {
+      display: inline-block;
+      background: #334155;
+      color: #f8fafc;
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Checkbox styling */
+    .checkbox-custom {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--success);
+      cursor: pointer;
+    }
+
+    /* Primary Action Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: calc(14px * var(--font-scale));
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-primary { background: var(--accent); color: #0f172a; }
+    .btn-success { background: var(--success); color: #0f172a; }
+    .btn-warning { background: var(--warning); color: #0f172a; }
+    .btn-secondary { background: #334155; color: #fff; }
+
+    /* Hidden File Picker */
+    #jsonFileInput { display: none; }
+
+    /* Tab Displays */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* History Items */
+    .history-item {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .history-date { font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .history-meta { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 8px; }
+    .history-exercise { font-size: calc(13px * var(--font-scale)); border-top: 1px solid #1e293b; padding-top: 4px; margin-top: 4px; }
   </style>
 </head>
-<body class="flex flex-col min-h-screen pb-20 md:pb-0 md:pt-16 max-w-lg mx-auto bg-brand-dark border-x border-brand-border/40">
+<body>
 
-  <!-- Top Fixed Header -->
-  <header class="fixed top-0 left-0 right-0 z-40 bg-brand-dark/95 backdrop-blur border-b border-brand-border px-4 py-3 max-w-lg mx-auto flex items-center justify-between">
-    <div class="flex items-center space-x-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-        <i class="fa-solid font-black fa-bolt text-xs"></i>
-      </div>
+  <header>
+    <div class="header-title">Fitness4Me Heavy Duty</div>
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('workout')">Workouts</button>
+      <button class="nav-btn" onclick="switchTab('history')">History</button>
+      <button class="nav-btn" onclick="switchTab('settings')">Settings</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- REST DAYS BANNER -->
+    <div class="rest-banner">
       <div>
-        <h1 class="font-extrabold text-base tracking-wider text-white flex items-center gap-1.5">
-          FITNESS<span class="text-brand-accent">4ME</span>
-          <span class="text-[10px] bg-brand-accent/10 text-brand-accent px-1.5 py-0.5 rounded font-mono font-bold">HIT</span>
-        </h1>
+        <div class="rest-banner-title">Rest Days Since Last Workout</div>
+        <div style="font-size: 12px; color: var(--text-muted);" id="lastWorkoutDateText">Last session: Never</div>
+      </div>
+      <div class="rest-banner-value" id="restDaysCount">0 Days</div>
+    </div>
+
+    <!-- WORKOUT TAB -->
+    <div id="tab-workout" class="tab-content active">
+      <div class="card">
+        <label for="workoutDaySelect">Select Workout Routine</label>
+        <select id="workoutDaySelect" onchange="renderActiveWorkout()"></select>
+      </div>
+
+      <div id="activeWorkoutContainer"></div>
+
+      <button class="btn btn-success" onclick="completeWorkout()">
+        ✓ Complete Workout & Sync to Cloud
+      </button>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Completed Workout Logs</div>
+        </div>
+        <div id="historyLogsContainer"></div>
       </div>
     </div>
 
-    <!-- Quick Rest Timer Mini Preview -->
-    <button onclick="switchTab('timer')" class="flex items-center gap-2 bg-brand-card hover:bg-brand-border/60 border border-brand-border px-3 py-1.5 rounded-full text-xs font-mono font-semibold transition-all">
-      <i class="fa-solid fa-stopwatch text-brand-warning animate-pulse"></i>
-      <span id="headerTimerText" class="text-brand-warning">00:00</span>
-    </button>
-  </header>
-
-  <!-- Main Content Body -->
-  <main class="flex-1 px-4 pt-16 pb-6 overflow-y-auto">
-
-    <!-- TAB 1: WORKOUT TRACKER -->
-    <section id="tab-tracker" class="tab-content space-y-4">
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-content">
       
-      <!-- Routine Selector Dropdown / Pills -->
-      <div class="bg-brand-card p-3 rounded-xl border border-brand-border space-y-2">
-        <label class="text-xs uppercase font-bold tracking-wider text-gray-400 flex items-center justify-between">
-          <span>Active Workout Routine</span>
-          <span id="workoutDateStamp" class="text-[10px] text-gray-500 font-normal">Today</span>
-        </label>
-        <select id="daySelect" onchange="handleDayChange()" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2.5 text-sm font-semibold text-white focus:outline-none focus:border-brand-accent transition">
-          <!-- Populated dynamically -->
+      <!-- Display & Accessibility -->
+      <div class="card">
+        <div class="card-title">Display Settings</div>
+        <label for="fontSizeSelect">Font Scaling</label>
+        <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
+          <option value="normal">Normal Text</option>
+          <option value="large">Large Text</option>
+          <option value="xlarge">Extra Large Text</option>
         </select>
       </div>
 
-      <!-- Days Summary Header Card -->
-      <div id="dayInfoCard" class="bg-gradient-to-r from-brand-card to-gray-900/80 p-4 rounded-xl border border-brand-border/80 flex justify-between items-center">
-        <div>
-          <h2 id="currentDayTitle" class="text-lg font-bold text-white">Loading...</h2>
-          <p id="currentDaySubtitle" class="text-xs text-gray-400 mt-0.5">Heavy Duty High Intensity Protocol</p>
-        </div>
-        <button onclick="openAddExerciseModal()" class="bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/30 p-2.5 rounded-lg flex items-center gap-1.5 text-xs font-bold transition">
-          <i class="fa-solid fa-plus"></i> Exercise
-        </button>
-      </div>
-
-      <!-- Exercises List Container -->
-      <div id="exercisesContainer" class="space-y-4">
-        <!-- Rendered dynamically -->
-      </div>
-
-    </section>
-
-    <!-- TAB 2: MANAGE ROUTINES -->
-    <section id="tab-manage" class="tab-content hidden space-y-4">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-brand-accent"></i> Custom Routines
-        </h2>
-        <button onclick="openAddDayModal()" class="bg-brand-accent text-gray-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 hover:bg-cyan-300 transition">
-          <i class="fa-solid fa-plus"></i> New Day
-        </button>
-      </div>
-
-      <p class="text-xs text-gray-400">Configure your Heavy Duty split structure. Customize names, targets, and default order.</p>
-
-      <div id="manageDaysList" class="space-y-3">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- TAB 3: BACKUP & RESTORE -->
-    <section id="tab-backup" class="tab-content hidden space-y-5">
-      
-      <!-- Import Card -->
-      <div class="bg-brand-card p-4 rounded-xl border border-brand-border space-y-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center text-brand-accent">
-            <i class="fa-solid fa-file-arrow-up text-lg"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Import JSON Backup</h3>
-            <p class="text-xs text-gray-400">Restore workouts from Google Drive or local storage</p>
-          </div>
-        </div>
-
-        <p class="text-xs text-gray-300 leading-relaxed bg-brand-dark/50 p-2.5 rounded border border-brand-border/50">
-          <i class="fa-solid fa-shield-halved text-brand-success mr-1"></i>
-          Safe import engine active. Faulty items are skipped individually without hanging or crashing state.
+      <!-- Manual Backup & File Picker -->
+      <div class="card">
+        <div class="card-title">Local JSON Backup & Restore</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Import backup JSON files copied from local storage or Google Drive.
         </p>
-
-        <div class="space-y-2">
-          <input type="file" id="importFileInput" accept=".json,application/json" class="hidden" onchange="handleFileSelect(event)" />
-          
-          <button onclick="document.getElementById('importFileInput').click()" class="w-full bg-brand-dark hover:bg-brand-border/40 border-2 border-dashed border-brand-border hover:border-brand-accent/60 p-4 rounded-xl text-center cursor-pointer transition group">
-            <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 group-hover:text-brand-accent mb-1 block"></i>
-            <span id="selectedFileName" class="text-xs font-semibold text-gray-300 group-hover:text-white">Click to Select JSON File</span>
-          </button>
-
-          <button id="btnExecuteImport" onclick="executeImport()" disabled class="w-full py-2.5 bg-brand-accent opacity-50 cursor-not-allowed text-gray-950 font-bold rounded-lg text-xs transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-file-import"></i> Restore Data
-          </button>
-        </div>
-      </div>
-
-      <!-- Export Card -->
-      <div class="bg-brand-card p-4 rounded-xl border border-brand-border space-y-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-brand-success/10 border border-brand-success/30 flex items-center justify-center text-brand-success">
-            <i class="fa-solid fa-file-arrow-down text-lg"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Export Local Backup</h3>
-            <p class="text-xs text-gray-400">Save current progress to a downloadable file</p>
-          </div>
-        </div>
-
-        <button onclick="exportBackupJSON()" class="w-full py-2.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-white font-bold rounded-lg text-xs transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-download text-brand-success"></i> Download heavyduty_backup.json
+        
+        <input type="file" id="jsonFileInput" accept=".json,application/json" onchange="handleFileSelect(event)" />
+        
+        <button class="btn btn-primary" onclick="triggerFilePicker()">
+          📁 Select JSON Backup File
+        </button>
+        <button class="btn btn-secondary" onclick="exportBackupJSON()">
+          ⬇️ Download Backup JSON
         </button>
       </div>
 
-      <!-- Import Logs / Status Console -->
-      <div class="bg-brand-card p-4 rounded-xl border border-brand-border space-y-2">
-        <div class="flex justify-between items-center">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">System Log</h4>
-          <button onclick="clearLogs()" class="text-[10px] text-gray-500 hover:text-gray-300">Clear Log</button>
-        </div>
-        <div id="importConsoleLog" class="bg-brand-dark p-3 rounded-lg font-mono text-[11px] text-gray-400 h-28 overflow-y-auto space-y-1 border border-brand-border/50">
-          <div>[System] App ready. Awaiting import operations...</div>
-        </div>
+      <!-- Google Drive Cloud Setup -->
+      <div class="card">
+        <div class="card-title">Google Drive Integration</div>
+        <label for="gdriveClientId">OAuth Client ID</label>
+        <input type="text" id="gdriveClientId" placeholder="Enter Google OAuth Client ID" />
+
+        <label for="gdriveToken">Access Token / API Key</label>
+        <input type="password" id="gdriveToken" placeholder="Enter OAuth Access Token" />
+
+        <button class="btn btn-secondary" onclick="saveDriveSettings()">Save Drive Credentials</button>
+        <button class="btn btn-warning" onclick="syncToGoogleDrive()">☁️ Manual Cloud Backup Now</button>
       </div>
 
-      <!-- Reset / Danger Zone -->
-      <div class="bg-brand-card/60 p-4 rounded-xl border border-brand-danger/30 space-y-3">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-brand-danger flex items-center gap-1.5">
-          <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
-        </h4>
-        <p class="text-xs text-gray-400">Wipe all saved exercises, sets, and custom routines to reset back to factory Heavy Duty default split.</p>
-        <button onclick="openResetModal()" class="w-full py-2 bg-brand-danger/10 hover:bg-brand-danger/20 border border-brand-danger/40 text-brand-danger font-bold rounded-lg text-xs transition">
-          Reset All Data to Default
-        </button>
-      </div>
-
-    </section>
-
-    <!-- TAB 4: REST TIMER -->
-    <section id="tab-timer" class="tab-content hidden space-y-6">
-      <div class="text-center py-4 space-y-2">
-        <h2 class="text-sm uppercase font-extrabold tracking-widest text-brand-accent">HIT Rest Interval</h2>
-        <p class="text-xs text-gray-400 max-w-xs mx-auto">Heavy Duty protocol requires 2 to 3 minutes of recovery between sets for absolute intensity capability.</p>
-      </div>
-
-      <!-- Large Circular Timer Readout -->
-      <div class="relative w-56 h-56 mx-auto flex flex-col items-center justify-center bg-brand-card rounded-full border-4 border-brand-border shadow-2xl">
-        <div id="timerDisplay" class="text-5xl font-black font-mono tracking-tight text-white">02:00</div>
-        <div id="timerStatusLabel" class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-2">Ready</div>
-      </div>
-
-      <!-- Quick Preset Increment Buttons -->
-      <div class="grid grid-cols-4 gap-2">
-        <button onclick="adjustTimer(30)" class="py-2.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-brand-accent font-bold rounded-xl text-xs transition">+30s</button>
-        <button onclick="adjustTimer(60)" class="py-2.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-brand-accent font-bold rounded-xl text-xs transition">+60s</button>
-        <button onclick="adjustTimer(90)" class="py-2.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-brand-accent font-bold rounded-xl text-xs transition">+90s</button>
-        <button onclick="adjustTimer(180)" class="py-2.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-brand-accent font-bold rounded-xl text-xs transition">+3m</button>
-      </div>
-
-      <!-- Primary Timer Controls -->
-      <div class="flex items-center gap-3">
-        <button id="btnStartPauseTimer" onclick="toggleTimer()" class="flex-1 py-3.5 bg-brand-accent hover:bg-cyan-300 text-gray-950 font-black rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
-          <i class="fa-solid fa-play"></i> START TIMER
-        </button>
-        <button onclick="resetTimer()" class="px-5 py-3.5 bg-brand-card hover:bg-brand-border/60 border border-brand-border text-gray-300 font-bold rounded-xl text-sm transition">
-          <i class="fa-solid fa-rotate-left"></i>
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Bottom Navigation Bar (Mobile Native Style) -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-brand-dark/95 backdrop-blur border-t border-brand-border max-w-lg mx-auto">
-    <div class="grid grid-cols-4 h-16">
-      <button onclick="switchTab('tracker')" id="nav-tracker" class="nav-btn active flex flex-col items-center justify-center text-brand-accent transition">
-        <i class="fa-solid fa-dumbbell text-lg mb-1"></i>
-        <span class="text-[10px] font-bold">Track</span>
-      </button>
-
-      <button onclick="switchTab('manage')" id="nav-manage" class="nav-btn flex flex-col items-center justify-center text-gray-500 hover:text-gray-300 transition">
-        <i class="fa-solid fa-list-check text-lg mb-1"></i>
-        <span class="text-[10px] font-bold">Routines</span>
-      </button>
-
-      <button onclick="switchTab('timer')" id="nav-timer" class="nav-btn flex flex-col items-center justify-center text-gray-500 hover:text-gray-300 transition">
-        <i class="fa-solid fa-stopwatch text-lg mb-1"></i>
-        <span class="text-[10px] font-bold">Timer</span>
-      </button>
-
-      <button onclick="switchTab('backup')" id="nav-backup" class="nav-btn flex flex-col items-center justify-center text-gray-500 hover:text-gray-300 transition">
-        <i class="fa-solid fa-cloud-arrow-down text-lg mb-1"></i>
-        <span class="text-[10px] font-bold">Backup</span>
-      </button>
     </div>
-  </nav>
 
-  <!-- MODALS -->
-
-  <!-- Modal: Add / Edit Exercise -->
-  <div id="exerciseModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-brand-card border border-brand-border rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-brand-border pb-3">
-        <h3 id="exerciseModalTitle" class="font-bold text-base text-white">Add Exercise</h3>
-        <button onclick="closeModal('exerciseModal')" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs font-semibold text-gray-400 block mb-1">Exercise Name</label>
-          <input type="text" id="modalExName" placeholder="e.g. Incline Cable Press" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-brand-accent" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-semibold text-gray-400 block mb-1">Cable Mode</label>
-            <select id="modalExCableMode" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-              <option value="Single">Single Arm / Pulley</option>
-              <option value="Dual">Dual Cables</option>
-              <option value="Barbell/Dumbbell">Barbell / Free Weight</option>
-              <option value="Machine">Machine / Lever</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-xs font-semibold text-gray-400 block mb-1">Height (0 - 31)</label>
-            <input type="number" id="modalExCableHeight" min="0" max="31" value="15" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-accent" />
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between bg-brand-dark p-3 rounded-lg border border-brand-border">
-          <div>
-            <span class="text-xs font-semibold text-white block">Superset Protocol</span>
-            <span class="text-[10px] text-gray-400 block">Link to next exercise without rest</span>
-          </div>
-          <input type="checkbox" id="modalExSuperset" class="w-4 h-4 accent-brand-accent rounded cursor-pointer" />
-        </div>
-
-        <div>
-          <label class="text-xs font-semibold text-gray-400 block mb-1">Notes / Cue Setup</label>
-          <textarea id="modalExNotes" rows="2" placeholder="e.g. Bench angled at 30 deg, handle at notch 12" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2 text-xs text-white focus:outline-none focus:border-brand-accent"></textarea>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 pt-2">
-        <button onclick="saveExerciseModal()" class="flex-1 py-2.5 bg-brand-accent text-gray-950 font-bold rounded-lg text-xs">Save Exercise</button>
-        <button onclick="closeModal('exerciseModal')" class="px-4 py-2.5 bg-brand-dark border border-brand-border text-gray-300 font-bold rounded-lg text-xs">Cancel</button>
-      </div>
-    </div>
   </div>
 
-  <!-- Modal: Add New Workout Day -->
-  <div id="addDayModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-brand-card border border-brand-border rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-brand-border pb-3">
-        <h3 class="font-bold text-base text-white">Create New Routine Day</h3>
-        <button onclick="closeModal('addDayModal')" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs font-semibold text-gray-400 block mb-1">Day Title</label>
-          <input type="text" id="modalDayTitle" placeholder="e.g. Day 4: Shoulders & Traps" class="w-full bg-brand-dark border border-brand-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-brand-accent" />
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 pt-2">
-        <button onclick="saveNewDay()" class="flex-1 py-2.5 bg-brand-accent text-gray-950 font-bold rounded-lg text-xs">Create Day</button>
-        <button onclick="closeModal('addDayModal')" class="px-4 py-2.5 bg-brand-dark border border-brand-border text-gray-300 font-bold rounded-lg text-xs">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Reset Confirmation -->
-  <div id="resetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-brand-card border border-brand-danger/40 rounded-2xl w-full max-w-sm p-5 space-y-4 text-center shadow-2xl">
-      <div class="w-12 h-12 rounded-full bg-brand-danger/20 text-brand-danger flex items-center justify-center mx-auto text-xl">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <div>
-        <h3 class="font-bold text-base text-white">Confirm Reset</h3>
-        <p class="text-xs text-gray-400 mt-1">This will permanently clear all logs and restore default workouts.</p>
-      </div>
-      <div class="flex items-center gap-2 pt-2">
-        <button onclick="confirmResetAllData()" class="flex-1 py-2.5 bg-brand-danger text-white font-bold rounded-lg text-xs">Yes, Reset All</button>
-        <button onclick="closeModal('resetModal')" class="flex-1 py-2.5 bg-brand-dark border border-brand-border text-gray-300 font-bold rounded-lg text-xs">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT APPLICATION CORE -->
   <script>
-    // ==========================================
-    // 1. DEFAULT HEAVY DUTY DATASET STRUCTURE
-    // ==========================================
-    const DEFAULT_WORKOUT_DATA = {
-      version: 1,
-      activeDayId: "day_1",
+    // Initial State Structure
+    let appState = {
       workoutDays: [
         {
           id: "day_1",
-          title: "Day 1: Chest & Arms (HIT)",
+          title: "Workout Day 1 (Chest & Arms)",
           exercises: [
             {
-              id: "ex_101",
-              name: "Incline Cable Fly / Press",
-              notes: "Set bench at 30 degrees. Peak contraction pause for 2s.",
+              id: "ex_1",
+              name: "Cable Incline Press",
+              notes: "Bench on 2nd highest setting",
               cableSides: "Dual",
-              cableHeight: 8,
-              superset: true,
-              sets: [
-                { reps: 8, weight: 35, lastReps: 7, lastWeight: 32.5, completed: false }
-              ]
-            },
-            {
-              id: "ex_102",
-              name: "Incline Dumbbell Press",
-              notes: "Superset immediately following cable flies.",
-              cableSides: "Barbell/Dumbbell",
-              cableHeight: 0,
-              superset: false,
-              sets: [
-                { reps: 6, weight: 40, lastReps: 6, lastWeight: 38, completed: false }
-              ]
-            },
-            {
-              id: "ex_103",
-              name: "Standing Cable Bicep Curls",
-              notes: "Strict form, pin elbows to ribs.",
-              cableSides: "Single",
-              cableHeight: 1,
-              superset: false,
-              sets: [
-                { reps: 10, weight: 27.5, lastReps: 10, lastWeight: 25, completed: false }
-              ]
-            },
-            {
-              id: "ex_104",
-              name: "Tricep Cable Pushdowns",
-              notes: "Dual rope attachment. Splay rope at bottom.",
-              cableSides: "Dual",
-              cableHeight: 28,
-              superset: false,
-              sets: [
-                { reps: 9, weight: 45, lastReps: 8, lastWeight: 42.5, completed: false }
-              ]
-            }
-          ]
-        },
-        {
-          id: "day_2",
-          title: "Day 2: Back & Rear Delts",
-          exercises: [
-            {
-              id: "ex_201",
-              name: "High Cable Pulldowns",
-              notes: "Thumbs-free neutral grip.",
-              cableSides: "Dual",
-              cableHeight: 31,
-              superset: false,
-              sets: [
-                { reps: 8, weight: 70, lastReps: 8, lastWeight: 65, completed: false }
-              ]
-            },
-            {
-              id: "ex_202",
-              name: "Seated Cable Row",
-              notes: "Pull into lower abdomen. Squeeze lats.",
-              cableSides: "Single",
-              cableHeight: 5,
-              superset: false,
-              sets: [
-                { reps: 10, weight: 62.5, lastReps: 9, lastWeight: 60, completed: false }
-              ]
-            },
-            {
-              id: "ex_203",
-              name: "Cable Rear Delt Flyes",
-              notes: "Cross cables at chest height.",
-              cableSides: "Dual",
-              cableHeight: 18,
-              superset: false,
-              sets: [
-                { reps: 12, weight: 15, lastReps: 11, lastWeight: 12.5, completed: false }
-              ]
-            }
-          ]
-        },
-        {
-          id: "day_3",
-          title: "Day 3: Legs & Abs",
-          exercises: [
-            {
-              id: "ex_301",
-              name: "Sissy Squats / Hack Squat",
-              notes: "Maximum quad stretch at bottom position.",
-              cableSides: "Machine",
-              cableHeight: 0,
-              superset: true,
-              sets: [
-                { reps: 12, weight: 20, lastReps: 12, lastWeight: 15, completed: false }
-              ]
-            },
-            {
-              id: "ex_302",
-              name: "Romanian Deadlifts",
-              notes: "Focus on hamstring tension and flat back.",
-              cableSides: "Barbell/Dumbbell",
-              cableHeight: 0,
-              superset: false,
-              sets: [
-                { reps: 8, weight: 100, lastReps: 8, lastWeight: 95, completed: false }
-              ]
-            },
-            {
-              id: "ex_303",
-              name: "Kneeling Cable Crunches",
-              notes: "Flex spine, do not pull with arms.",
-              cableSides: "Single",
               cableHeight: 26,
-              superset: false,
               sets: [
-                { reps: 15, weight: 50, lastReps: 15, lastWeight: 45, completed: false }
+                { reps: 6, weight: 10, completed: false, lastReps: 6, lastWeight: 10 },
+                { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
               ]
             }
           ]
         }
-      ]
+      ],
+      history: [],
+      driveClientId: "",
+      driveToken: "",
+      fontSize: "normal"
     };
 
-    // App State Variable
-    let appState = null;
-    let selectedFileForImport = null;
-    let editingExerciseId = null;
-
-    // Timer Variables
-    let timerInterval = null;
-    let timerTotalSeconds = 120;
-    let timerRemainingSeconds = 120;
-    let isTimerRunning = false;
-
-    // ==========================================
-    // 2. INITIALIZATION & LOCAL STORAGE
-    // ==========================================
+    // Initialize App
     window.onload = function() {
-      loadStateFromStorage();
-      renderApp();
-      setupDateDisplay();
+      loadLocalStorage();
+      renderWorkoutSelect();
+      renderActiveWorkout();
+      renderHistory();
+      calculateRestDays();
+      applyFontSize(appState.fontSize);
     };
 
-    function loadStateFromStorage() {
-      try {
-        const stored = localStorage.getItem('fitness4me_workouts');
-        if (stored) {
-          appState = JSON.parse(stored);
-        } else {
-          appState = JSON.parse(JSON.stringify(DEFAULT_WORKOUT_DATA));
-          saveStateToStorage();
+    // Navigation Switch
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Load Local Storage
+    function loadLocalStorage() {
+      const saved = localStorage.getItem('fitness4me_workouts');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.workoutDays) appState.workoutDays = parsed.workoutDays;
+          if (parsed.history) appState.history = parsed.history;
+          if (parsed.driveClientId) appState.driveClientId = parsed.driveClientId;
+          if (parsed.driveToken) appState.driveToken = parsed.driveToken;
+          if (parsed.fontSize) appState.fontSize = parsed.fontSize;
+
+          document.getElementById('gdriveClientId').value = appState.driveClientId || '';
+          document.getElementById('gdriveToken').value = appState.driveToken || '';
+          document.getElementById('fontSizeSelect').value = appState.fontSize || 'normal';
+        } catch (e) {
+          console.error("Error loading localStorage:", e);
         }
-      } catch (err) {
-        console.error('Error loading storage, using default:', err);
-        appState = JSON.parse(JSON.stringify(DEFAULT_WORKOUT_DATA));
       }
     }
 
-    function saveStateToStorage() {
-      try {
-        localStorage.setItem('fitness4me_workouts', JSON.stringify(appState));
-      } catch (e) {
-        console.error('Failed to save to localStorage:', e);
-      }
+    // Save Local Storage
+    function saveLocalStorage() {
+      localStorage.setItem('fitness4me_workouts', JSON.stringify(appState));
     }
 
-    function setupDateDisplay() {
-      const now = new Date();
-      const options = { weekday: 'short', month: 'short', day: 'numeric' };
-      document.getElementById('workoutDateStamp').innerText = now.toLocaleDateString('en-US', options);
+    // Render Workout Selector
+    function renderWorkoutSelect() {
+      const select = document.getElementById('workoutDaySelect');
+      select.innerHTML = appState.workoutDays.map((d, i) => `<option value="${i}">${d.title}</option>`).join('');
     }
 
-    // ==========================================
-    // 3. UI TAB NAVIGATION
-    // ==========================================
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(el => {
-        el.classList.remove('text-brand-accent');
-        el.classList.add('text-gray-500');
-      });
+    // Render Active Workout
+    function renderActiveWorkout() {
+      const index = document.getElementById('workoutDaySelect').value || 0;
+      const day = appState.workoutDays[index];
+      const container = document.getElementById('activeWorkoutContainer');
 
-      const targetTab = document.getElementById(`tab-${tabName}`);
-      const targetNav = document.getElementById(`nav-${tabName}`);
-
-      if (targetTab) targetTab.classList.remove('hidden');
-      if (targetNav) {
-        targetNav.classList.remove('text-gray-500');
-        targetNav.classList.add('text-brand-accent');
-      }
-
-      if (tabName === 'manage') {
-        renderManageRoutines();
-      }
-    }
-
-    // ==========================================
-    // 4. WORKOUT TRACKER RENDERING & INTERACTION
-    // ==========================================
-    function renderApp() {
-      renderDayDropdown();
-      renderCurrentDayExercises();
-    }
-
-    function renderDayDropdown() {
-      const daySelect = document.getElementById('daySelect');
-      daySelect.innerHTML = '';
-
-      appState.workoutDays.forEach(day => {
-        const option = document.createElement('option');
-        option.value = day.id;
-        option.textContent = day.title;
-        if (day.id === appState.activeDayId) {
-          option.selected = true;
-        }
-        daySelect.appendChild(option);
-      });
-    }
-
-    function handleDayChange() {
-      const select = document.getElementById('daySelect');
-      appState.activeDayId = select.value;
-      saveStateToStorage();
-      renderCurrentDayExercises();
-    }
-
-    function getActiveDay() {
-      return appState.workoutDays.find(d => d.id === appState.activeDayId) || appState.workoutDays[0];
-    }
-
-    function renderCurrentDayExercises() {
-      const activeDay = getActiveDay();
-      if (!activeDay) return;
-
-      document.getElementById('currentDayTitle').innerText = activeDay.title;
-
-      const container = document.getElementById('exercisesContainer');
-      container.innerHTML = '';
-
-      if (!activeDay.exercises || activeDay.exercises.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 border-2 border-dashed border-brand-border rounded-xl p-4">
-            <i class="fa-solid fa-dumbbell text-3xl text-gray-600 mb-2"></i>
-            <p class="text-sm font-semibold text-gray-400">No exercises added to this day yet.</p>
-            <button onclick="openAddExerciseModal()" class="mt-3 px-4 py-2 bg-brand-accent text-gray-950 rounded-lg text-xs font-bold">
-              + Add First Exercise
-            </button>
-          </div>
-        `;
+      if (!day) {
+        container.innerHTML = `<div class="card">No workouts found.</div>`;
         return;
       }
 
-      activeDay.exercises.forEach((ex, exIndex) => {
-        const exCard = document.createElement('div');
-        exCard.className = 'bg-brand-card rounded-xl border border-brand-border p-4 space-y-3';
-
-        // Cable setup badge string
-        let setupBadgeHtml = '';
-        if (ex.cableSides === 'Dual' || ex.cableSides === 'Single') {
-          setupBadgeHtml = `<span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded text-[10px] font-mono">
-            <i class="fa-solid fa-arrows-split-up-and-left mr-1"></i>${ex.cableSides} Cable (Pos #${ex.cableHeight})
-          </span>`;
-        } else {
-          setupBadgeHtml = `<span class="bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded text-[10px] font-mono">
-            ${ex.cableSides || 'Free Weight'}
-          </span>`;
-        }
-
-        const supersetBadge = ex.superset ? `<span class="bg-brand-warning/10 text-brand-warning border border-brand-warning/30 px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-          <i class="fa-solid fa-bolt mr-1"></i>SUPERSET
-        </span>` : '';
-
-        // Exercise Header
-        exCard.innerHTML = `
-          <div class="flex justify-between items-start gap-2">
-            <div>
-              <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                <h3 class="font-extrabold text-white text-sm tracking-wide">${ex.name}</h3>
-                ${supersetBadge}
-              </div>
-              <div class="flex items-center gap-2">
-                ${setupBadgeHtml}
+      let html = '';
+      day.exercises.forEach((ex, exIdx) => {
+        html += `
+          <div class="exercise-item">
+            <div class="exercise-header">
+              <span class="exercise-title">${ex.name}</span>
+              <div class="reorder-btns">
+                <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
+                <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
               </div>
             </div>
-            <div class="flex items-center gap-1">
-              <button onclick="editExercise('${ex.id}')" class="p-1.5 text-gray-400 hover:text-white transition"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
-              <button onclick="deleteExercise('${ex.id}')" class="p-1.5 text-gray-400 hover:text-brand-danger transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+
+            <div class="exercise-settings-grid">
+              <div>
+                <label>Sides</label>
+                <select onchange="updateExSetting(${index}, ${exIdx}, 'cableSides', this.value)">
+                  <option value="Single" ${ex.cableSides === 'Single' ? 'selected' : ''}>Single Side</option>
+                  <option value="Dual" ${ex.cableSides === 'Dual' ? 'selected' : ''}>Both Sides (Dual)</option>
+                </select>
+              </div>
+              <div>
+                <label>Cable Height</label>
+                <select onchange="updateExSetting(${index}, ${exIdx}, 'cableHeight', parseInt(this.value))">
+                  ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>Notch ${h}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label>Plates Load</label>
+                <select onchange="updateSetPlates(${index}, ${exIdx}, parseInt(this.value))">
+                  ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}">${p} Plates</option>`).join('')}
+                </select>
+              </div>
             </div>
+
+            <table class="sets-table">
+              <thead>
+                <tr>
+                  <th>Set</th>
+                  <th>Target (Last)</th>
+                  <th>Reps</th>
+                  <th>Done</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ex.sets.map((s, sIdx) => `
+                  <tr>
+                    <td>#${sIdx + 1}</td>
+                    <td><span class="last-target-badge">${s.lastWeight || s.weight} Plates × ${s.lastReps || s.reps}</span></td>
+                    <td>
+                      <input type="number" value="${s.reps}" style="width: 60px; margin: 0; text-align: center;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, this.value)" />
+                    </td>
+                    <td>
+                      <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
+        `;
+      });
 
-          ${ex.notes ? `<p class="text-[11px] text-gray-400 italic bg-brand-dark/40 p-2 rounded border border-brand-border/40"><i class="fa-regular fa-sticky-note mr-1 text-brand-accent"></i>${ex.notes}</p>` : ''}
+      container.innerHTML = html;
+    }
 
-          <!-- Sets Table Header -->
-          <div class="grid grid-cols-12 gap-1 text-[10px] uppercase font-bold text-gray-500 pt-1 px-1">
-            <span class="col-span-1 text-center">Set</span>
-            <span class="col-span-3 text-center">Last Rec</span>
-            <span class="col-span-3 text-center">Kg</span>
-            <span class="col-span-3 text-center">Reps</span>
-            <span class="col-span-2 text-center">Done</span>
-          </div>
+    // Exercise Controls
+    function moveExercise(dayIdx, exIdx, dir) {
+      const ex = appState.workoutDays[dayIdx].exercises;
+      const target = exIdx + dir;
+      if (target < 0 || target >= ex.length) return;
+      const temp = ex[exIdx];
+      ex[exIdx] = ex[target];
+      ex[target] = temp;
+      saveLocalStorage();
+      renderActiveWorkout();
+    }
 
-          <!-- Sets Container -->
-          <div class="space-y-2">
-            ${ex.sets.map((set, sIdx) => `
-              <div class="grid grid-cols-12 gap-1.5 items-center bg-brand-dark p-2 rounded-lg border border-brand-border/60 ${set.completed ? 'border-brand-success/50 bg-brand-success/5' : ''}">
-                <span class="col-span-1 text-center font-bold text-xs text-gray-400">${sIdx + 1}</span>
-                
-                <span class="col-span-3 text-center text-[10px] font-mono text-gray-400 bg-brand-card py-1 rounded border border-brand-border/30">
-                  ${set.lastWeight || 0}kg x ${set.lastReps || 0}
-                </span>
+    function updateExSetting(dayIdx, exIdx, key, value) {
+      appState.workoutDays[dayIdx].exercises[exIdx][key] = value;
+      saveLocalStorage();
+    }
 
-                <div class="col-span-3">
-                  <input type="number" step="0.5" value="${set.weight}" onchange="updateSetVal('${ex.id}', ${sIdx}, 'weight', this.value)" 
-                    class="w-full bg-brand-card text-center text-xs font-mono font-bold text-white border border-brand-border rounded py-1 focus:outline-none focus:border-brand-accent" />
-                </div>
+    function updateSetPlates(dayIdx, exIdx, value) {
+      appState.workoutDays[dayIdx].exercises[exIdx].sets.forEach(s => s.weight = value);
+      saveLocalStorage();
+      renderActiveWorkout();
+    }
 
-                <div class="col-span-3">
-                  <input type="number" value="${set.reps}" onchange="updateSetVal('${ex.id}', ${sIdx}, 'reps', this.value)" 
-                    class="w-full bg-brand-card text-center text-xs font-mono font-bold text-white border border-brand-border rounded py-1 focus:outline-none focus:border-brand-accent" />
-                </div>
+    function updateSetReps(dayIdx, exIdx, sIdx, value) {
+      appState.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].reps = parseInt(value) || 0;
+      saveLocalStorage();
+    }
 
-                <div class="col-span-2 flex justify-center">
-                  <button onclick="toggleSetComplete('${ex.id}', ${sIdx})" class="w-8 h-8 rounded-lg flex items-center justify-center transition ${set.completed ? 'bg-brand-success text-gray-950 shadow-md' : 'bg-brand-card text-gray-500 border border-brand-border hover:border-gray-400'}">
-                    <i class="fa-solid ${set.completed ? 'fa-check' : 'fa-minus'} text-xs"></i>
-                  </button>
-                </div>
+    function toggleSetComplete(dayIdx, exIdx, sIdx, completed) {
+      appState.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].completed = completed;
+      saveLocalStorage();
+    }
+
+    // Complete Workout Session
+    function completeWorkout() {
+      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
+      const day = appState.workoutDays[dayIdx];
+
+      const log = {
+        date: new Date().toISOString(),
+        title: day.title,
+        exercises: day.exercises.map(ex => ({
+          name: ex.name,
+          cableSides: ex.cableSides,
+          cableHeight: ex.cableHeight,
+          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight }))
+        }))
+      };
+
+      // Update Target Historical Values
+      day.exercises.forEach(ex => {
+        ex.sets.forEach(s => {
+          s.lastWeight = s.weight;
+          s.lastReps = s.reps;
+          s.completed = false;
+        });
+      });
+
+      appState.history.unshift(log);
+      saveLocalStorage();
+      calculateRestDays();
+      renderActiveWorkout();
+      renderHistory();
+
+      alert("Workout Completed & Logged!");
+      syncToGoogleDrive();
+    }
+
+    // Rest Days Calculation
+    function calculateRestDays() {
+      if (!appState.history || appState.history.length === 0) {
+        document.getElementById('restDaysCount').innerText = "0 Days";
+        document.getElementById('lastWorkoutDateText').innerText = "Last session: None";
+        return;
+      }
+
+      const lastDate = new Date(appState.history[0].date);
+      const now = new Date();
+      const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+
+      document.getElementById('restDaysCount').innerText = `${diffDays} Days`;
+      document.getElementById('lastWorkoutDateText').innerText = `Last: ${lastDate.toLocaleDateString()}`;
+    }
+
+    // Render History Logs
+    function renderHistory() {
+      const container = document.getElementById('historyLogsContainer');
+      if (!appState.history || appState.history.length === 0) {
+        container.innerHTML = `<p style="font-size:13px; color:var(--text-muted);">No history recorded yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = appState.history.map(h => {
+        const d = new Date(h.date);
+        const elapsed = Math.floor((new Date() - d) / (1000 * 60 * 60 * 24));
+        return `
+          <div class="history-item">
+            <div class="history-date">${h.title} - ${d.toLocaleDateString()}</div>
+            <div class="history-meta">${elapsed} days ago</div>
+            ${h.exercises.map(e => `
+              <div class="history-exercise">
+                <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight})<br/>
+                ${e.sets.map(s => `${s.weight} Plates × ${s.reps} reps`).join(' | ')}
               </div>
             `).join('')}
           </div>
-
-          <!-- Add Set & Action Row -->
-          <div class="flex justify-between items-center pt-1">
-            <button onclick="addSetToExercise('${ex.id}')" class="text-xs text-brand-accent hover:underline font-bold flex items-center gap-1">
-              <i class="fa-solid fa-plus text-[10px]"></i> Add Set
-            </button>
-            ${ex.sets.length > 1 ? `
-              <button onclick="removeLastSet('${ex.id}')" class="text-[10px] text-gray-500 hover:text-brand-danger">
-                Remove Set
-              </button>
-            ` : ''}
-          </div>
         `;
-
-        container.appendChild(exCard);
-      });
+      }).join('');
     }
 
-    function updateSetVal(exId, setIdx, field, value) {
-      const activeDay = getActiveDay();
-      const ex = activeDay.exercises.find(e => e.id === exId);
-      if (ex && ex.sets[setIdx]) {
-        ex.sets[setIdx][field] = parseFloat(value) || 0;
-        saveStateToStorage();
-      }
-    }
-
-    function toggleSetComplete(exId, setIdx) {
-      const activeDay = getActiveDay();
-      const ex = activeDay.exercises.find(e => e.id === exId);
-      if (ex && ex.sets[setIdx]) {
-        ex.sets[setIdx].completed = !ex.sets[setIdx].completed;
-        
-        // Auto trigger timer start if set completed
-        if (ex.sets[setIdx].completed) {
-          triggerHaptic();
-          startTimerWithDuration(120);
-        }
-
-        saveStateToStorage();
-        renderCurrentDayExercises();
-      }
-    }
-
-    function addSetToExercise(exId) {
-      const activeDay = getActiveDay();
-      const ex = activeDay.exercises.find(e => e.id === exId);
-      if (ex) {
-        const lastSet = ex.sets[ex.sets.length - 1] || { weight: 20, reps: 8, lastWeight: 20, lastReps: 8 };
-        ex.sets.push({
-          weight: lastSet.weight,
-          reps: lastSet.reps,
-          lastWeight: lastSet.weight,
-          lastReps: lastSet.reps,
-          completed: false
-        });
-        saveStateToStorage();
-        renderCurrentDayExercises();
-      }
-    }
-
-    function removeLastSet(exId) {
-      const activeDay = getActiveDay();
-      const ex = activeDay.exercises.find(e => e.id === exId);
-      if (ex && ex.sets.length > 1) {
-        ex.sets.pop();
-        saveStateToStorage();
-        renderCurrentDayExercises();
-      }
-    }
-
-    // ==========================================
-    // 5. EXERCISE & DAY MODALS
-    // ==========================================
-    function openAddExerciseModal() {
-      editingExerciseId = null;
-      document.getElementById('exerciseModalTitle').innerText = 'Add Exercise';
-      document.getElementById('modalExName').value = '';
-      document.getElementById('modalExCableMode').value = 'Dual';
-      document.getElementById('modalExCableHeight').value = 15;
-      document.getElementById('modalExSuperset').checked = false;
-      document.getElementById('modalExNotes').value = '';
-      openModal('exerciseModal');
-    }
-
-    function editExercise(exId) {
-      const activeDay = getActiveDay();
-      const ex = activeDay.exercises.find(e => e.id === exId);
-      if (!ex) return;
-
-      editingExerciseId = exId;
-      document.getElementById('exerciseModalTitle').innerText = 'Edit Exercise';
-      document.getElementById('modalExName').value = ex.name;
-      document.getElementById('modalExCableMode').value = ex.cableSides || 'Dual';
-      document.getElementById('modalExCableHeight').value = ex.cableHeight !== undefined ? ex.cableHeight : 15;
-      document.getElementById('modalExSuperset').checked = !!ex.superset;
-      document.getElementById('modalExNotes').value = ex.notes || '';
-      openModal('exerciseModal');
-    }
-
-    function saveExerciseModal() {
-      const name = document.getElementById('modalExName').value.trim();
-      if (!name) {
-        alert('Please enter an exercise name');
-        return;
-      }
-
-      const activeDay = getActiveDay();
-
-      if (editingExerciseId) {
-        const ex = activeDay.exercises.find(e => e.id === editingExerciseId);
-        if (ex) {
-          ex.name = name;
-          ex.cableSides = document.getElementById('modalExCableMode').value;
-          ex.cableHeight = parseInt(document.getElementById('modalExCableHeight').value) || 0;
-          ex.superset = document.getElementById('modalExSuperset').checked;
-          ex.notes = document.getElementById('modalExNotes').value.trim();
-        }
-      } else {
-        const newEx = {
-          id: 'ex_' + Date.now(),
-          name: name,
-          cableSides: document.getElementById('modalExCableMode').value,
-          cableHeight: parseInt(document.getElementById('modalExCableHeight').value) || 0,
-          superset: document.getElementById('modalExSuperset').checked,
-          notes: document.getElementById('modalExNotes').value.trim(),
-          sets: [
-            { reps: 8, weight: 20, lastReps: 8, lastWeight: 20, completed: false }
-          ]
-        };
-        activeDay.exercises.push(newEx);
-      }
-
-      saveStateToStorage();
-      renderCurrentDayExercises();
-      closeModal('exerciseModal');
-    }
-
-    function deleteExercise(exId) {
-      if (confirm('Delete this exercise?')) {
-        const activeDay = getActiveDay();
-        activeDay.exercises = activeDay.exercises.filter(e => e.id !== exId);
-        saveStateToStorage();
-        renderCurrentDayExercises();
-      }
-    }
-
-    function openAddDayModal() {
-      document.getElementById('modalDayTitle').value = '';
-      openModal('addDayModal');
-    }
-
-    function saveNewDay() {
-      const title = document.getElementById('modalDayTitle').value.trim();
-      if (!title) return;
-
-      const newDay = {
-        id: 'day_' + Date.now(),
-        title: title,
-        exercises: []
-      };
-
-      appState.workoutDays.push(newDay);
-      appState.activeDayId = newDay.id;
-      saveStateToStorage();
-      renderApp();
-      closeModal('addDayModal');
-      switchTab('tracker');
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // ==========================================
-    // 6. MANAGE ROUTINES TAB
-    // ==========================================
-    function renderManageRoutines() {
-      const container = document.getElementById('manageDaysList');
-      container.innerHTML = '';
-
-      appState.workoutDays.forEach((day, index) => {
-        const card = document.createElement('div');
-        card.className = 'bg-brand-card p-4 rounded-xl border border-brand-border flex items-center justify-between gap-2';
-
-        card.innerHTML = `
-          <div>
-            <h4 class="font-bold text-white text-sm">${day.title}</h4>
-            <span class="text-xs text-gray-400 font-mono">${day.exercises.length} Exercises configured</span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            ${appState.workoutDays.length > 1 ? `
-              <button onclick="deleteRoutineDay('${day.id}')" class="p-2 text-brand-danger hover:bg-brand-danger/10 rounded-lg transition">
-                <i class="fa-solid fa-trash-can text-sm"></i>
-              </button>
-            ` : ''}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function deleteRoutineDay(dayId) {
-      if (confirm('Are you sure you want to delete this full day routine?')) {
-        appState.workoutDays = appState.workoutDays.filter(d => d.id !== dayId);
-        if (appState.activeDayId === dayId) {
-          appState.activeDayId = appState.workoutDays[0].id;
-        }
-        saveStateToStorage();
-        renderApp();
-        renderManageRoutines();
-      }
-    }
-
-    // ==========================================
-    // 7. FILE IMPORT & SAFE RECOVERY ENGINE
-    // ==========================================
-    function logToConsole(msg, isError = false) {
-      const consoleBox = document.getElementById('importConsoleLog');
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.className = isError ? 'text-brand-danger font-semibold' : 'text-gray-300';
-      div.innerText = `[${time}] ${msg}`;
-      consoleBox.appendChild(div);
-      consoleBox.scrollTop = consoleBox.scrollHeight;
-    }
-
-    function clearLogs() {
-      document.getElementById('importConsoleLog').innerHTML = '<div>[System] Log cleared. Ready.</div>';
+    // Reliable File Picker Handler
+    function triggerFilePicker() {
+      const fileInput = document.getElementById('jsonFileInput');
+      fileInput.value = ''; // Reset value to enable re-selecting same file
+      fileInput.click();
     }
 
     function handleFileSelect(event) {
-      const files = event.target.files;
-      if (files && files.length > 0) {
-        selectedFileForImport = files[0];
-        document.getElementById('selectedFileName').innerText = `Selected: ${selectedFileForImport.name} (${(selectedFileForImport.size / 1024).toFixed(1)} KB)`;
-        document.getElementById('btnExecuteImport').disabled = false;
-        document.getElementById('btnExecuteImport').classList.remove('opacity-50', 'cursor-not-allowed');
-        logToConsole(`File selected: ${selectedFileForImport.name}`);
-      }
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.workoutDays && Array.isArray(parsed.workoutDays)) {
+            appState.workoutDays = parsed.workoutDays;
+            if (parsed.history) appState.history = parsed.history;
+            saveLocalStorage();
+            renderWorkoutSelect();
+            renderActiveWorkout();
+            renderHistory();
+            calculateRestDays();
+            alert("Backup JSON successfully restored!");
+          } else {
+            alert("Invalid JSON schema: Missing workoutDays array.");
+          }
+        } catch (err) {
+          alert("Error reading backup JSON file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
-    function executeImport() {
-      if (!selectedFileForImport) {
-        logToConsole('No file selected for import.', true);
+    // Export Backup JSON
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `heavyduty_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Drive Credential Handlers
+    function saveDriveSettings() {
+      appState.driveClientId = document.getElementById('gdriveClientId').value;
+      appState.driveToken = document.getElementById('gdriveToken').value;
+      saveLocalStorage();
+      alert("Google Drive credentials saved!");
+    }
+
+    function syncToGoogleDrive() {
+      if (!appState.driveToken) {
+        console.log("No Drive Token provided, skipping cloud sync.");
         return;
       }
 
-      logToConsole('Starting JSON parsing and schema sanitization...');
-      const reader = new FileReader();
-
-      reader.onload = function(e) {
-        try {
-          const rawText = e.target.result;
-          const parsedData = JSON.parse(rawText);
-
-          // Support standard JSON backup envelope or direct array
-          let sourceDays = [];
-          if (Array.isArray(parsedData)) {
-            sourceDays = parsedData;
-          } else if (parsedData.workoutDays && Array.isArray(parsedData.workoutDays)) {
-            sourceDays = parsedData.workoutDays;
-          } else if (parsedData.days && Array.isArray(parsedData.days)) {
-            sourceDays = parsedData.days;
-          } else {
-            throw new Error('Unrecognized JSON structure: Missing "workoutDays" root array.');
-          }
-
-          logToConsole(`Found ${sourceDays.length} potential day structure(s). Validating...`);
-
-          // Safe item-by-item sanitization loop with error boundary per day
-          const sanitizedDays = [];
-          let recoveredCount = 0;
-          let skippedCount = 0;
-
-          sourceDays.forEach((day, dIdx) => {
-            try {
-              if (!day || typeof day !== 'object') throw new Error('Invalid day payload');
-
-              const safeDay = {
-                id: day.id || 'day_' + (Date.now() + dIdx),
-                title: day.title || day.name || `Restored Day ${dIdx + 1}`,
-                exercises: []
-              };
-
-              const exercisesList = Array.isArray(day.exercises) ? day.exercises : [];
-
-              exercisesList.forEach((ex, eIdx) => {
-                try {
-                  if (!ex || typeof ex !== 'object') return;
-
-                  const safeEx = {
-                    id: ex.id || 'ex_' + (Date.now() + eIdx + Math.random()),
-                    name: ex.name || ex.title || 'Restored Exercise',
-                    notes: ex.notes || '',
-                    cableSides: ex.cableSides || ex.cableMode || 'Dual',
-                    cableHeight: typeof ex.cableHeight === 'number' ? ex.cableHeight : (parseInt(ex.cableHeight) || 0),
-                    superset: !!ex.superset,
-                    sets: []
-                  };
-
-                  const setsList = Array.isArray(ex.sets) ? ex.sets : [];
-                  if (setsList.length === 0) {
-                    safeEx.sets.push({ reps: 8, weight: 20, lastReps: 8, lastWeight: 20, completed: false });
-                  } else {
-                    setsList.forEach(s => {
-                      safeEx.sets.push({
-                        reps: Number(s.reps) || 0,
-                        weight: Number(s.weight) || 0,
-                        lastReps: Number(s.lastReps || s.reps) || 0,
-                        lastWeight: Number(s.lastWeight || s.weight) || 0,
-                        completed: !!s.completed
-                      });
-                    });
-                  }
-
-                  safeDay.exercises.push(safeEx);
-                } catch (exErr) {
-                  logToConsole(`Warning: Skipped corrupted exercise in day ${dIdx + 1}: ${exErr.message}`, true);
-                }
-              });
-
-              sanitizedDays.push(safeDay);
-              recoveredCount++;
-            } catch (dayErr) {
-              skippedCount++;
-              logToConsole(`Error processing day index ${dIdx}: ${dayErr.message}`, true);
-            }
-          });
-
-          if (sanitizedDays.length === 0) {
-            throw new Error('Zero valid workout days could be recovered from this file.');
-          }
-
-          // Apply recovered state to app
-          appState.workoutDays = sanitizedDays;
-          appState.activeDayId = sanitizedDays[0].id;
-          saveStateToStorage();
-          renderApp();
-
-          logToConsole(`SUCCESS: Restored ${recoveredCount} days cleanly. (${skippedCount} skipped).`);
-          alert(`Successfully restored ${recoveredCount} workout routines!`);
-          switchTab('tracker');
-
-        } catch (err) {
-          logToConsole(`CRITICAL IMPORT ERROR: ${err.message}`, true);
-          alert(`Import failed: ${err.message}`);
-        }
-      };
-
-      reader.onerror = function() {
-        logToConsole('FileReader error while attempting to read JSON.', true);
-      };
-
-      reader.readAsText(selectedFileForImport);
+      fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${appState.driveToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(appState)
+      })
+      .then(res => res.json())
+      .then(data => console.log("Google Drive Sync Success:", data))
+      .catch(err => console.error("Google Drive Sync Failed:", err));
     }
 
-    // ==========================================
-    // 8. EXPORT BACKUP
-    // ==========================================
-    function exportBackupJSON() {
-      try {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `heavyduty_backup_${new Date().toISOString().slice(0,10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-        logToConsole('Exported backup successfully.');
-      } catch (err) {
-        alert('Export failed: ' + err.message);
-      }
+    // Font Size Handlers
+    function changeFontSize(size) {
+      appState.fontSize = size;
+      applyFontSize(size);
+      saveLocalStorage();
     }
 
-    // ==========================================
-    // 9. DANGER ZONE RESET
-    // ==========================================
-    function openResetModal() {
-      openModal('resetModal');
-    }
-
-    function confirmResetAllData() {
-      localStorage.removeItem('fitness4me_workouts');
-      appState = JSON.parse(JSON.stringify(DEFAULT_WORKOUT_DATA));
-      saveStateToStorage();
-      renderApp();
-      closeModal('resetModal');
-      logToConsole('State reset to Heavy Duty default values.');
-      alert('App data reset to default successfully.');
-    }
-
-    // ==========================================
-    // 10. REST TIMER CORE LOGIC
-    // ==========================================
-    function formatTime(totalSeconds) {
-      const mins = Math.floor(totalSeconds / 60);
-      const secs = totalSeconds % 60;
-      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function updateTimerUI() {
-      const formatted = formatTime(timerRemainingSeconds);
-      document.getElementById('timerDisplay').innerText = formatted;
-      document.getElementById('headerTimerText').innerText = formatted;
-
-      const label = document.getElementById('timerStatusLabel');
-      if (isTimerRunning) {
-        label.innerText = 'RESTING...';
-        label.className = 'text-xs font-bold text-brand-accent uppercase tracking-wider mt-2 animate-pulse';
-      } else {
-        label.innerText = 'PAUSED / READY';
-        label.className = 'text-xs font-bold text-gray-500 uppercase tracking-wider mt-2';
-      }
-    }
-
-    function startTimerWithDuration(secs) {
-      timerTotalSeconds = secs;
-      timerRemainingSeconds = secs;
-      if (!isTimerRunning) {
-        toggleTimer();
-      } else {
-        updateTimerUI();
-      }
-    }
-
-    function toggleTimer() {
-      const btn = document.getElementById('btnStartPauseTimer');
-      if (isTimerRunning) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        btn.innerHTML = '<i class="fa-solid fa-play"></i> RESUME TIMER';
-        btn.classList.remove('bg-brand-warning');
-        btn.classList.add('bg-brand-accent');
-      } else {
-        if (timerRemainingSeconds <= 0) timerRemainingSeconds = 120;
-        isTimerRunning = true;
-        btn.innerHTML = '<i class="fa-solid fa-pause"></i> PAUSE TIMER';
-        btn.classList.remove('bg-brand-accent');
-        btn.classList.add('bg-brand-warning');
-
-        timerInterval = setInterval(() => {
-          if (timerRemainingSeconds > 0) {
-            timerRemainingSeconds--;
-            updateTimerUI();
-          } else {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            triggerTimerCompleteSignal();
-            btn.innerHTML = '<i class="fa-solid fa-play"></i> START TIMER';
-            btn.classList.remove('bg-brand-warning');
-            btn.classList.add('bg-brand-accent');
-            updateTimerUI();
-          }
-        }, 1000);
-      }
-      updateTimerUI();
-    }
-
-    function resetTimer() {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      timerRemainingSeconds = 120;
-      document.getElementById('btnStartPauseTimer').innerHTML = '<i class="fa-solid fa-play"></i> START TIMER';
-      document.getElementById('btnStartPauseTimer').classList.remove('bg-brand-warning');
-      document.getElementById('btnStartPauseTimer').classList.add('bg-brand-accent');
-      updateTimerUI();
-    }
-
-    function adjustTimer(addSecs) {
-      timerRemainingSeconds += addSecs;
-      updateTimerUI();
-    }
-
-    function triggerHaptic() {
-      if ('vibrate' in navigator) {
-        navigator.vibrate([100, 50, 100]);
-      }
-    }
-
-    function triggerTimerCompleteSignal() {
-      triggerHaptic();
-      // Audio beep fallback using Web Audio API
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.8);
-      } catch (e) {
-        console.log('Audio context not permitted or supported yet.');
-      }
+    function applyFontSize(size) {
+      document.body.classList.remove('font-large', 'font-xlarge');
+      if (size === 'large') document.body.classList.add('font-large');
+      if (size === 'xlarge') document.body.classList.add('font-xlarge');
     }
   </script>
 </body>
