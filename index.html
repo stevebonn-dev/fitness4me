@@ -141,9 +141,9 @@
 
     .exercise-settings-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     /* Sets Table */
@@ -155,9 +155,9 @@
       display: inline-block;
       background: #334155;
       color: #f8fafc;
-      font-size: calc(11px * var(--font-scale));
+      font-size: calc(14px * var(--font-scale));
       font-weight: 700;
-      padding: 2px 4px;
+      padding: 4px 6px;
       border-radius: 4px;
     }
 
@@ -330,6 +330,7 @@
               notes: "Bench on 2nd highest setting",
               cableSides: "both",
               cableHeight: 26,
+              benchPosition: "incline",
               sets: [
                 { reps: 6, weight: 10, completed: false, lastReps: 6, lastWeight: 10 },
                 { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
@@ -402,6 +403,9 @@
 
       let html = '';
       day.exercises.forEach((ex, exIdx) => {
+        const benchPos = ex.benchPosition || 'none';
+        const notes = ex.notes || '';
+
         html += `
           <div class="exercise-item">
             <div class="exercise-header">
@@ -427,6 +431,20 @@
                   ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>${h}</option>`).join('')}
                 </select>
               </div>
+              <div>
+                <label>Bench</label>
+                <select onchange="updateExSetting(${index}, ${exIdx}, 'benchPosition', this.value)">
+                  <option value="none" ${benchPos === 'none' ? 'selected' : ''}>none</option>
+                  <option value="flat" ${benchPos === 'flat' ? 'selected' : ''}>flat</option>
+                  <option value="incline" ${benchPos === 'incline' ? 'selected' : ''}>incline</option>
+                  <option value="decline" ${benchPos === 'decline' ? 'selected' : ''}>decline</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 8px;">
+              <label>Comments / Notes</label>
+              <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. 2nd notch on bench" style="margin-bottom: 4px;" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
             </div>
 
             <table class="sets-table">
@@ -547,6 +565,7 @@
         notes: "",
         cableSides: "both",
         cableHeight: 1,
+        benchPosition: "none",
         sets: [
           { reps: 8, weight: 10, completed: false, lastReps: 8, lastWeight: 10 }
         ]
@@ -604,6 +623,8 @@
           name: ex.name,
           cableSides: ex.cableSides,
           cableHeight: ex.cableHeight,
+          benchPosition: ex.benchPosition || 'none',
+          notes: ex.notes || '',
           sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight }))
         }))
       };
@@ -657,7 +678,8 @@
             <div class="history-meta">${elapsed} days ago</div>
             ${h.exercises.map(e => `
               <div class="history-exercise">
-                <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight})<br/>
+                <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
+                ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
                 ${e.sets.map(s => `${s.weight}p × ${s.reps}r`).join(' | ')}
               </div>
             `).join('')}
