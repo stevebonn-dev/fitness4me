@@ -303,7 +303,7 @@
       <div id="activeWorkoutContainer"></div>
 
       <button class="btn btn-success" onclick="completeWorkout()">
-        ✓ Complete Workout & Sync to Cloud
+        ✓ Complete Workout & Save Local File
       </button>
     </div>
 
@@ -794,6 +794,7 @@
       }
     }
 
+    // Complete Workout Session + Automated Local File Download Trigger
     function completeWorkout() {
       const profile = getCurrentProfile();
       const dayIdx = document.getElementById('workoutDaySelect').value || 0;
@@ -826,8 +827,15 @@
       renderActiveWorkout();
       renderHistory();
 
-      alert("Workout Completed & Logged!");
-      syncToGoogleDrive();
+      // Trigger automatic local backup file download to device's Files/Downloads app
+      exportBackupJSON();
+
+      // Trigger Google Drive cloud upload if configured
+      if (appState.driveToken) {
+        syncToGoogleDrive();
+      }
+
+      alert("Workout Completed! Backup file automatically saved to your device's Files/Downloads.");
     }
 
     function calculateRestDays() {
