@@ -446,12 +446,14 @@
                     <td>#${sIdx + 1}</td>
                     <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
                     <td>
-                      <select style="width: 65px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                      <select style="width: 60px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
                         ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
                       </select>
                     </td>
                     <td>
-                      <input type="number" value="${s.reps}" style="width: 55px; margin: 0; text-align: center;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, this.value)" />
+                      <select style="width: 65px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                        ${Array.from({length: 100}, (_, i) => i + 1).map(r => `<option value="${r}" ${s.reps === r ? 'selected' : ''}>${r}</option>`).join('')}
+                      </select>
                     </td>
                     <td>
                       <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
@@ -494,7 +496,7 @@
     }
 
     function updateSetReps(dayIdx, exIdx, sIdx, value) {
-      appState.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].reps = parseInt(value) || 0;
+      appState.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].reps = value;
       saveLocalStorage();
     }
 
