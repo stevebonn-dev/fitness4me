@@ -134,10 +134,14 @@
       font-size: 12px;
       cursor: pointer;
     }
+    .btn-danger-mini {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
 
     .exercise-settings-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
       margin-bottom: 10px;
     }
@@ -145,22 +149,22 @@
     /* Sets Table */
     .sets-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     .sets-table th { font-size: calc(11px * var(--font-scale)); color: var(--text-muted); text-align: center; padding: 4px; }
-    .sets-table td { padding: 4px; text-align: center; }
+    .sets-table td { padding: 4px; text-align: center; vertical-align: middle; }
     
     .last-target-badge {
       display: inline-block;
       background: #334155;
       color: #f8fafc;
-      font-size: calc(12px * var(--font-scale));
+      font-size: calc(11px * var(--font-scale));
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 4px;
       border-radius: 4px;
     }
 
     /* Checkbox styling */
     .checkbox-custom {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       accent-color: var(--success);
       cursor: pointer;
     }
@@ -184,6 +188,7 @@
     .btn-success { background: var(--success); color: #0f172a; }
     .btn-warning { background: var(--warning); color: #0f172a; }
     .btn-secondary { background: #334155; color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
 
     /* Hidden File Picker */
     #jsonFileInput { display: none; }
@@ -232,6 +237,11 @@
       <div class="card">
         <label for="workoutDaySelect">Select Workout Routine</label>
         <select id="workoutDaySelect" onchange="renderActiveWorkout()"></select>
+        
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptAddExercise()">+ Add Exercise</button>
+          <button class="btn btn-danger-mini" style="flex:1; margin-bottom:0; border-radius:8px; font-weight:700;" onclick="promptDeleteWorkout()">🗑️ Delete Routine</button>
+        </div>
       </div>
 
       <div id="activeWorkoutContainer"></div>
@@ -254,6 +264,14 @@
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tab-content">
       
+      <!-- Create New Routine -->
+      <div class="card">
+        <div class="card-title">Create New Workout Routine</div>
+        <label for="newWorkoutTitle">Routine Name</label>
+        <input type="text" id="newWorkoutTitle" placeholder="e.g., Workout Day 4 (Core & Legs)" />
+        <button class="btn btn-primary" onclick="createNewWorkoutRoutine()">Create Routine</button>
+      </div>
+
       <!-- Display & Accessibility -->
       <div class="card">
         <div class="card-title">Display Settings</div>
@@ -300,7 +318,6 @@
   </div>
 
   <script>
-    // Initial State Structure
     let appState = {
       workoutDays: [
         {
@@ -311,7 +328,7 @@
               id: "ex_1",
               name: "Cable Incline Press",
               notes: "Bench on 2nd highest setting",
-              cableSides: "Dual",
+              cableSides: "both",
               cableHeight: 26,
               sets: [
                 { reps: 6, weight: 10, completed: false, lastReps: 6, lastWeight: 10 },
@@ -327,7 +344,6 @@
       fontSize: "normal"
     };
 
-    // Initialize App
     window.onload = function() {
       loadLocalStorage();
       renderWorkoutSelect();
@@ -337,7 +353,6 @@
       applyFontSize(appState.fontSize);
     };
 
-    // Navigation Switch
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -346,7 +361,6 @@
       event.target.classList.add('active');
     }
 
-    // Load Local Storage
     function loadLocalStorage() {
       const saved = localStorage.getItem('fitness4me_workouts');
       if (saved) {
@@ -367,25 +381,22 @@
       }
     }
 
-    // Save Local Storage
     function saveLocalStorage() {
       localStorage.setItem('fitness4me_workouts', JSON.stringify(appState));
     }
 
-    // Render Workout Selector
     function renderWorkoutSelect() {
       const select = document.getElementById('workoutDaySelect');
       select.innerHTML = appState.workoutDays.map((d, i) => `<option value="${i}">${d.title}</option>`).join('');
     }
 
-    // Render Active Workout
     function renderActiveWorkout() {
       const index = document.getElementById('workoutDaySelect').value || 0;
       const day = appState.workoutDays[index];
       const container = document.getElementById('activeWorkoutContainer');
 
       if (!day) {
-        container.innerHTML = `<div class="card">No workouts found.</div>`;
+        container.innerHTML = `<div class="card">No workouts found. Please create one in Settings.</div>`;
         return;
       }
 
@@ -398,27 +409,22 @@
               <div class="reorder-btns">
                 <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
                 <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
+                <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
               </div>
             </div>
 
             <div class="exercise-settings-grid">
               <div>
-                <label>Sides</label>
+                <label>Cable Sides</label>
                 <select onchange="updateExSetting(${index}, ${exIdx}, 'cableSides', this.value)">
-                  <option value="Single" ${ex.cableSides === 'Single' ? 'selected' : ''}>Single Side</option>
-                  <option value="Dual" ${ex.cableSides === 'Dual' ? 'selected' : ''}>Both Sides (Dual)</option>
+                  <option value="single" ${ex.cableSides === 'single' ? 'selected' : ''}>single</option>
+                  <option value="both" ${ex.cableSides === 'both' ? 'selected' : ''}>both</option>
                 </select>
               </div>
               <div>
                 <label>Cable Height</label>
                 <select onchange="updateExSetting(${index}, ${exIdx}, 'cableHeight', parseInt(this.value))">
-                  ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>Notch ${h}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <label>Plates Load</label>
-                <select onchange="updateSetPlates(${index}, ${exIdx}, parseInt(this.value))">
-                  ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}">${p} Plates</option>`).join('')}
+                  ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>${h}</option>`).join('')}
                 </select>
               </div>
             </div>
@@ -428,25 +434,37 @@
                 <tr>
                   <th>Set</th>
                   <th>Target (Last)</th>
+                  <th>Plates</th>
                   <th>Reps</th>
                   <th>Done</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 ${ex.sets.map((s, sIdx) => `
                   <tr>
                     <td>#${sIdx + 1}</td>
-                    <td><span class="last-target-badge">${s.lastWeight || s.weight} Plates × ${s.lastReps || s.reps}</span></td>
+                    <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
                     <td>
-                      <input type="number" value="${s.reps}" style="width: 60px; margin: 0; text-align: center;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, this.value)" />
+                      <select style="width: 65px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                        ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
+                      </select>
+                    </td>
+                    <td>
+                      <input type="number" value="${s.reps}" style="width: 55px; margin: 0; text-align: center;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, this.value)" />
                     </td>
                     <td>
                       <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
+                    </td>
+                    <td>
+                      <button class="btn-mini btn-danger-mini" onclick="promptDeleteSet(${index}, ${exIdx}, ${sIdx})">✕</button>
                     </td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
+
+            <button class="btn btn-secondary" style="margin-top: 10px; padding: 6px; font-size: 13px;" onclick="addSet(${index}, ${exIdx})">+ Add Set</button>
           </div>
         `;
       });
@@ -454,7 +472,6 @@
       container.innerHTML = html;
     }
 
-    // Exercise Controls
     function moveExercise(dayIdx, exIdx, dir) {
       const ex = appState.workoutDays[dayIdx].exercises;
       const target = exIdx + dir;
@@ -471,10 +488,9 @@
       saveLocalStorage();
     }
 
-    function updateSetPlates(dayIdx, exIdx, value) {
-      appState.workoutDays[dayIdx].exercises[exIdx].sets.forEach(s => s.weight = value);
+    function updateSetPlates(dayIdx, exIdx, sIdx, value) {
+      appState.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].weight = value;
       saveLocalStorage();
-      renderActiveWorkout();
     }
 
     function updateSetReps(dayIdx, exIdx, sIdx, value) {
@@ -487,7 +503,94 @@
       saveLocalStorage();
     }
 
-    // Complete Workout Session
+    function addSet(dayIdx, exIdx) {
+      const sets = appState.workoutDays[dayIdx].exercises[exIdx].sets;
+      const last = sets[sets.length - 1] || { reps: 5, weight: 10, lastReps: 5, lastWeight: 10 };
+      sets.push({
+        reps: last.reps,
+        weight: last.weight,
+        completed: false,
+        lastReps: last.lastReps || last.reps,
+        lastWeight: last.lastWeight || last.weight
+      });
+      saveLocalStorage();
+      renderActiveWorkout();
+    }
+
+    function promptDeleteSet(dayIdx, exIdx, sIdx) {
+      if (confirm("Are you sure you want to delete this set?")) {
+        appState.workoutDays[dayIdx].exercises[exIdx].sets.splice(sIdx, 1);
+        saveLocalStorage();
+        renderActiveWorkout();
+      }
+    }
+
+    function promptDeleteExercise(dayIdx, exIdx) {
+      const exName = appState.workoutDays[dayIdx].exercises[exIdx].name;
+      if (confirm(`Are you sure you want to delete exercise "${exName}"?`)) {
+        appState.workoutDays[dayIdx].exercises.splice(exIdx, 1);
+        saveLocalStorage();
+        renderActiveWorkout();
+      }
+    }
+
+    function promptAddExercise() {
+      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
+      const name = prompt("Enter exercise name:");
+      if (!name) return;
+
+      appState.workoutDays[dayIdx].exercises.push({
+        id: "ex_" + Date.now(),
+        name: name,
+        notes: "",
+        cableSides: "both",
+        cableHeight: 1,
+        sets: [
+          { reps: 8, weight: 10, completed: false, lastReps: 8, lastWeight: 10 }
+        ]
+      });
+      saveLocalStorage();
+      renderActiveWorkout();
+    }
+
+    function createNewWorkoutRoutine() {
+      const titleInput = document.getElementById('newWorkoutTitle');
+      const title = titleInput.value.trim();
+      if (!title) {
+        alert("Please enter a routine name.");
+        return;
+      }
+
+      appState.workoutDays.push({
+        id: "day_" + Date.now(),
+        title: title,
+        exercises: []
+      });
+      titleInput.value = "";
+      saveLocalStorage();
+      renderWorkoutSelect();
+      document.getElementById('workoutDaySelect').value = appState.workoutDays.length - 1;
+      renderActiveWorkout();
+      switchTab('workout');
+      alert("New routine created successfully!");
+    }
+
+    function promptDeleteWorkout() {
+      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
+      const day = appState.workoutDays[dayIdx];
+      if (appState.workoutDays.length <= 1) {
+        alert("You must keep at least one workout routine.");
+        return;
+      }
+
+      if (confirm(`Are you sure you want to delete routine "${day.title}"?`)) {
+        appState.workoutDays.splice(dayIdx, 1);
+        saveLocalStorage();
+        renderWorkoutSelect();
+        renderActiveWorkout();
+      }
+    }
+
     function completeWorkout() {
       const dayIdx = document.getElementById('workoutDaySelect').value || 0;
       const day = appState.workoutDays[dayIdx];
@@ -503,7 +606,6 @@
         }))
       };
 
-      // Update Target Historical Values
       day.exercises.forEach(ex => {
         ex.sets.forEach(s => {
           s.lastWeight = s.weight;
@@ -522,7 +624,6 @@
       syncToGoogleDrive();
     }
 
-    // Rest Days Calculation
     function calculateRestDays() {
       if (!appState.history || appState.history.length === 0) {
         document.getElementById('restDaysCount').innerText = "0 Days";
@@ -538,7 +639,6 @@
       document.getElementById('lastWorkoutDateText').innerText = `Last: ${lastDate.toLocaleDateString()}`;
     }
 
-    // Render History Logs
     function renderHistory() {
       const container = document.getElementById('historyLogsContainer');
       if (!appState.history || appState.history.length === 0) {
@@ -556,7 +656,7 @@
             ${h.exercises.map(e => `
               <div class="history-exercise">
                 <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight})<br/>
-                ${e.sets.map(s => `${s.weight} Plates × ${s.reps} reps`).join(' | ')}
+                ${e.sets.map(s => `${s.weight}p × ${s.reps}r`).join(' | ')}
               </div>
             `).join('')}
           </div>
@@ -564,10 +664,9 @@
       }).join('');
     }
 
-    // Reliable File Picker Handler
     function triggerFilePicker() {
       const fileInput = document.getElementById('jsonFileInput');
-      fileInput.value = ''; // Reset value to enable re-selecting same file
+      fileInput.value = '';
       fileInput.click();
     }
 
@@ -598,7 +697,6 @@
       reader.readAsText(file);
     }
 
-    // Export Backup JSON
     function exportBackupJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -609,7 +707,6 @@
       downloadAnchor.remove();
     }
 
-    // Drive Credential Handlers
     function saveDriveSettings() {
       appState.driveClientId = document.getElementById('gdriveClientId').value;
       appState.driveToken = document.getElementById('gdriveToken').value;
@@ -618,10 +715,7 @@
     }
 
     function syncToGoogleDrive() {
-      if (!appState.driveToken) {
-        console.log("No Drive Token provided, skipping cloud sync.");
-        return;
-      }
+      if (!appState.driveToken) return;
 
       fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
         method: 'POST',
@@ -636,7 +730,6 @@
       .catch(err => console.error("Google Drive Sync Failed:", err));
     }
 
-    // Font Size Handlers
     function changeFontSize(size) {
       appState.fontSize = size;
       applyFontSize(size);
