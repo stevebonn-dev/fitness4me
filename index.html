@@ -323,9 +323,17 @@
       <!-- Profile Management -->
       <div class="card">
         <div class="card-title">Manage User Profiles</div>
-        <label for="newProfileName">New Profile Name</label>
+        <label for="newProfileName">Create New Profile</label>
         <input type="text" id="newProfileName" placeholder="e.g., Steve, Partner, Deload" />
         <button class="btn btn-primary" onclick="createNewProfile()">Create Profile</button>
+        
+        <hr style="border:0; border-top:1px solid var(--card-border); margin: 12px 0;" />
+        
+        <label>Active Profile Controls</label>
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptRenameProfile()">✏️ Rename</button>
+          <button class="btn btn-danger" style="flex:1; margin-bottom:0;" onclick="promptDeleteProfile()">🗑️ Remove</button>
+        </div>
       </div>
 
       <!-- Create New Routine -->
@@ -416,7 +424,6 @@
       fontSize: "normal"
     };
 
-    // Restore wizard state queue
     let pendingRestoreProfiles = [];
     let currentRestoreIndex = 0;
 
@@ -519,6 +526,37 @@
       calculateRestDays();
       switchTab('workout');
       alert(`Profile "${name}" created and selected!`);
+    }
+
+    function promptRenameProfile() {
+      const current = getCurrentProfile();
+      const newName = prompt("Enter new profile name:", current.name);
+      if (newName && newName.trim() !== '') {
+        current.name = newName.trim();
+        saveLocalStorage();
+        renderProfileSelect();
+        alert("Profile renamed successfully!");
+      }
+    }
+
+    function promptDeleteProfile() {
+      if (appState.profiles.length <= 1) {
+        alert("You must keep at least one profile.");
+        return;
+      }
+
+      const current = getCurrentProfile();
+      if (confirm(`Are you sure you want to delete profile "${current.name}"? All associated workout days and history will be lost.`)) {
+        appState.profiles = appState.profiles.filter(p => p.id !== current.id);
+        appState.activeProfileId = appState.profiles[0].id;
+        saveLocalStorage();
+        renderProfileSelect();
+        renderWorkoutSelect();
+        renderActiveWorkout();
+        renderHistory();
+        calculateRestDays();
+        alert("Profile removed.");
+      }
     }
 
     function renderWorkoutSelect() {
@@ -841,7 +879,6 @@
       fileInput.click();
     }
 
-    // Interactive File Import & Wizard Flow
     function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -866,7 +903,6 @@
             return;
           }
 
-          // Trigger Profile Restore Wizard
           pendingRestoreProfiles = incomingProfiles;
           currentRestoreIndex = 0;
           showRestoreModal();
@@ -894,7 +930,6 @@
       const prof = pendingRestoreProfiles[currentRestoreIndex];
       document.getElementById('modalProfileName').innerText = prof.name;
       
-      // Populate existing profile selector
       const existingSelect = document.getElementById('modalExistingSelect');
       existingSelect.innerHTML = appState.profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
@@ -914,7 +949,6 @@
       const action = document.getElementById('restoreActionSelect').value;
 
       if (action === 'original') {
-        // Ensure unique ID
         prof.id = "profile_" + Date.now() + "_" + Math.floor(Math.random()*1000);
         appState.profiles.push(prof);
         appState.activeProfileId = prof.id;
@@ -922,7 +956,6 @@
         const targetId = document.getElementById('modalExistingSelect').value;
         const targetProf = appState.profiles.find(p => p.id === targetId);
         if (targetProf) {
-          // Merge workout routines and history
           targetProf.workoutDays = targetProf.workoutDays.concat(prof.workoutDays);
           targetProf.history = targetProf.history.concat(prof.history);
           appState.activeProfileId = targetProf.id;
