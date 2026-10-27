@@ -65,19 +65,31 @@
     /* Container */
     .container { padding: 16px; max-width: 768px; margin: 0 auto; }
     
-    /* Metrics Banner */
-    .rest-banner {
+    /* Metrics Banner & Rest Timer Banner */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media(min-width: 500px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .rest-banner, .timer-banner {
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border: 1px solid var(--accent);
       border-radius: 12px;
       padding: 14px;
-      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .rest-banner-title { font-size: calc(13px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-    .rest-banner-value { font-size: calc(22px * var(--font-scale)); font-weight: 800; color: var(--accent); }
+    .timer-banner { border-color: var(--warning); background: linear-gradient(135deg, #27200a, #0f172a); }
+    
+    .rest-banner-title, .timer-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .rest-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--accent); }
+    .timer-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--warning); }
 
     /* Card Styling */
     .card {
@@ -276,13 +288,23 @@
 
   <div class="container">
 
-    <!-- REST DAYS BANNER -->
-    <div class="rest-banner">
-      <div>
-        <div class="rest-banner-title">Rest Days Since Last Workout</div>
-        <div style="font-size: 12px; color: var(--text-muted);" id="lastWorkoutDateText">Last session: Never</div>
+    <!-- METRICS & REST TIMER BANNERS -->
+    <div class="metrics-grid">
+      <div class="rest-banner">
+        <div>
+          <div class="rest-banner-title">Rest Days Since Last</div>
+          <div style="font-size: 11px; color: var(--text-muted);" id="lastWorkoutDateText">Never</div>
+        </div>
+        <div class="rest-banner-value" id="restDaysCount">0 Days</div>
       </div>
-      <div class="rest-banner-value" id="restDaysCount">0 Days</div>
+
+      <div class="timer-banner">
+        <div>
+          <div class="timer-banner-title">Rest Timer</div>
+          <div style="font-size: 11px; color: var(--text-muted);" id="timerSubtext">Ready</div>
+        </div>
+        <div class="timer-banner-value" id="timerDisplay">00:45</div>
+      </div>
     </div>
 
     <!-- WORKOUT TAB -->
@@ -320,6 +342,15 @@
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tab-content">
       
+      <!-- Rest Timer Settings -->
+      <div class="card">
+        <div class="card-title">Rest Timer Settings</div>
+        <label for="defaultRestSecSelect">Default Rest Duration (5s increments)</label>
+        <select id="defaultRestSecSelect" onchange="updateDefaultRestTime(parseInt(this.value))">
+          <!-- Populated dynamically via JS in 5-sec increments up to 300s -->
+        </select>
+      </div>
+
       <!-- Profile Management -->
       <div class="card">
         <div class="card-title">Manage User Profiles</div>
@@ -392,6 +423,7 @@
   <script>
     let appState = {
       activeProfileId: "profile_1",
+      defaultRestSeconds: 45,
       profiles: [
         {
           id: "profile_1",
@@ -426,9 +458,12 @@
 
     let pendingRestoreProfiles = [];
     let currentRestoreIndex = 0;
+    let restTimerInterval = null;
+    let remainingRestSeconds = 0;
 
     window.onload = function() {
       loadLocalStorage();
+      populateRestTimerDropdowns();
       renderProfileSelect();
       renderWorkoutSelect();
       renderActiveWorkout();
@@ -436,6 +471,66 @@
       calculateRestDays();
       applyFontSize(appState.fontSize);
     };
+
+    function populateRestTimerDropdowns() {
+      const select = document.getElementById('defaultRestSecSelect');
+      let options = '';
+      for (let sec = 5; sec <= 300; sec += 5) {
+        const mins = Math.floor(sec / 60);
+        const s = sec % 60;
+        const label = mins > f = `${mins}m ${s > 0 ? s + 's' : ''}` : `${sec} seconds`;
+        options += `<option value="${sec}" ${appState.defaultRestSeconds === sec ? 'selected' : ''}>${sec} seconds (${Math.floor(sec/60)}m ${sec%60}s)</option>`;
+      }
+      select.innerHTML = options;
+      select.value = appState.defaultRestSeconds;
+    }
+
+    function updateDefaultRestTime(sec) {
+      appState.defaultRestSeconds = sec;
+      saveLocalStorage();
+    }
+
+    // Sound alert generator via Web Audio API
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880; // A5 note
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.6);
+      } catch (e) {
+        console.log("Audio Context not supported or blocked", e);
+      }
+    }
+
+    function startRestTimer(seconds) {
+      if (restTimerInterval) clearInterval(restTimerInterval);
+      remainingRestSeconds = seconds;
+      updateTimerDisplay();
+
+      restTimerInterval = setInterval(() => {
+        remainingRestSeconds--;
+        updateTimerDisplay();
+        if (remainingRestSeconds <= 0) {
+          clearInterval(restTimerInterval);
+          restTimerInterval = null;
+          document.getElementById('timerSubtext').innerText = "Time's up!";
+          playBeepSound();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(remainingRestSeconds / 60).toString().padStart(2, '0');
+      const secs = (remainingRestSeconds % 60).toString().padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+      document.getElementById('timerSubtext').innerText = remainingRestSeconds > 0 ? "Resting..." : "Ready";
+    }
 
     function getCurrentProfile() {
       return appState.profiles.find(p => p.id === appState.activeProfileId) || appState.profiles[0];
@@ -467,6 +562,7 @@
             appState.activeProfileId = parsed.activeProfileId || parsed.profiles[0].id;
           }
 
+          if (parsed.defaultRestSeconds) appState.defaultRestSeconds = parsed.defaultRestSeconds;
           if (parsed.driveClientId) appState.driveClientId = parsed.driveClientId;
           if (parsed.driveToken) appState.driveToken = parsed.driveToken;
           if (parsed.fontSize) appState.fontSize = parsed.fontSize;
@@ -701,6 +797,11 @@
       const profile = getCurrentProfile();
       profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].completed = completed;
       saveLocalStorage();
+
+      // Trigger automatic rest timer if checked
+      if (completed) {
+        startRestTimer(appState.defaultRestSeconds || 45);
+      }
     }
 
     function addSet(dayIdx, exIdx) {
@@ -794,7 +895,6 @@
       }
     }
 
-    // Complete Workout Session + Automated Local File Download Trigger
     function completeWorkout() {
       const profile = getCurrentProfile();
       const dayIdx = document.getElementById('workoutDaySelect').value || 0;
@@ -827,10 +927,8 @@
       renderActiveWorkout();
       renderHistory();
 
-      // Trigger automatic local backup file download to device's Files/Downloads app
       exportBackupJSON();
 
-      // Trigger Google Drive cloud upload if configured
       if (appState.driveToken) {
         syncToGoogleDrive();
       }
