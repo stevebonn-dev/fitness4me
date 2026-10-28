@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Fitness4Me - High-Intensity Heavy Duty Tracker</title>
+  <!-- Google Identity Services Script -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -65,7 +67,7 @@
     /* Container */
     .container { padding: 16px; max-width: 768px; margin: 0 auto; }
     
-    /* Metrics Banner & Rest Timer Banner */
+    /* Metrics & Mentzer Notification Banner */
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -76,7 +78,7 @@
       .metrics-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    .rest-banner, .timer-banner {
+    .rest-banner, .timer-banner, .mentzer-banner {
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border: 1px solid var(--accent);
       border-radius: 12px;
@@ -86,10 +88,12 @@
       align-items: center;
     }
     .timer-banner { border-color: var(--warning); background: linear-gradient(135deg, #27200a, #0f172a); }
+    .mentzer-banner { border-color: var(--success); background: linear-gradient(135deg, #062414, #0f172a); grid-column: 1 / -1; }
     
-    .rest-banner-title, .timer-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .rest-banner-title, .timer-banner-title, .mentzer-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
     .rest-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--accent); }
     .timer-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--warning); }
+    .mentzer-banner-desc { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: var(--success); margin-top: 2px; }
 
     /* Card Styling */
     .card {
@@ -288,7 +292,7 @@
 
   <div class="container">
 
-    <!-- METRICS & REST TIMER BANNERS -->
+    <!-- METRICS, REST TIMER & MENTZER RECOVERY BANNERS -->
     <div class="metrics-grid">
       <div class="rest-banner">
         <div>
@@ -304,6 +308,14 @@
           <div style="font-size: 11px; color: var(--text-muted);" id="timerSubtext">Ready</div>
         </div>
         <div class="timer-banner-value" id="timerDisplay">00:45</div>
+      </div>
+
+      <div class="mentzer-banner">
+        <div>
+          <div class="mentzer-banner-title">Mike Mentzer Recovery Advisor</div>
+          <div class="mentzer-banner-desc" id="mentzerStatusText">Status: Ready to train</div>
+        </div>
+        <div style="font-size: 24px;">🧠</div>
       </div>
     </div>
 
@@ -405,13 +417,12 @@
       <!-- Google Drive Cloud Setup -->
       <div class="card">
         <div class="card-title">Google Drive Integration</div>
-        <label for="gdriveClientId">OAuth Client ID</label>
+        <label for="gdriveClientId">Google OAuth Client ID</label>
         <input type="text" id="gdriveClientId" placeholder="Enter Google OAuth Client ID" onchange="saveDriveSettings()" />
 
-        <label for="gdriveToken">Access Token / API Key</label>
-        <input type="password" id="gdriveToken" placeholder="Enter OAuth Access Token" onchange="saveDriveSettings()" />
+        <div id="driveAuthStatus" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Status: Not signed in</div>
 
-        <button class="btn btn-secondary" onclick="saveDriveSettings()">Save Drive Credentials</button>
+        <button class="btn btn-primary" onclick="handleGoogleSignIn()">🔑 Sign in with Google</button>
         <button class="btn btn-warning" onclick="syncToGoogleDrive()">☁️ Manual Cloud Backup Now</button>
       </div>
 
@@ -430,7 +441,7 @@
           workoutDays: [
             {
               id: "day_1",
-              title: "Workout Day 1 (Chest & Arms)",
+              title: "Workout Day 1 (Chest & Back)",
               exercises: [
                 {
                   id: "ex_1",
@@ -441,6 +452,40 @@
                   benchPosition: "incline",
                   sets: [
                     { reps: 6, weight: 10, completed: false, lastReps: 6, lastWeight: 10 },
+                    { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
+                  ]
+                }
+              ]
+            },
+            {
+              id: "day_2",
+              title: "Workout Day 2 (Legs)",
+              exercises: [
+                {
+                  id: "ex_2",
+                  name: "Leg Press / Squat",
+                  notes: "Heavy HIT set to failure",
+                  cableSides: "both",
+                  cableHeight: 1,
+                  benchPosition: "none",
+                  sets: [
+                    { reps: 8, weight: 15, completed: false, lastReps: 8, lastWeight: 15 }
+                  ]
+                }
+              ]
+            },
+            {
+              id: "day_3",
+              title: "Workout Day 3 (Arms & Shoulders)",
+              exercises: [
+                {
+                  id: "ex_3",
+                  name: "Barbell / Cable Curl",
+                  notes: "Strict form",
+                  cableSides: "both",
+                  cableHeight: 1,
+                  benchPosition: "none",
+                  sets: [
                     { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
                   ]
                 }
@@ -459,6 +504,7 @@
     let currentRestoreIndex = 0;
     let restTimerInterval = null;
     let remainingRestSeconds = 0;
+    let tokenClient = null;
 
     window.onload = function() {
       const isFirstLaunch = !localStorage.getItem('fitness4me_workouts');
@@ -470,8 +516,9 @@
       renderHistory();
       calculateRestDays();
       applyFontSize(appState.fontSize);
+      updateDriveAuthStatus();
+      initGoogleDriveAuthClient();
 
-      // If no local database existed on start, prompt file picker restore wizard
       if (isFirstLaunch) {
         setTimeout(() => {
           if (confirm("Welcome to Fitness4Me! Would you like to restore an existing backup JSON file now?")) {
@@ -480,6 +527,54 @@
         }, 200);
       }
     };
+
+    function initGoogleDriveAuthClient() {
+      if (!appState.driveClientId) return;
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: appState.driveClientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (response) => {
+          if (response.error !== undefined) {
+            alert('Google Sign-In Error: ' + response.error);
+            return;
+          }
+          appState.driveToken = response.access_token;
+          saveLocalStorage();
+          updateDriveAuthStatus();
+          alert('Google account authenticated successfully!');
+          syncToGoogleDrive();
+        },
+      });
+    }
+
+    function handleGoogleSignIn() {
+      appState.driveClientId = document.getElementById('gdriveClientId').value.trim();
+      saveLocalStorage();
+      if (!appState.driveClientId) {
+        alert("Please enter a Google OAuth Client ID first.");
+        return;
+      }
+      if (!tokenClient) {
+        initGoogleDriveAuthClient();
+      }
+      if (tokenClient) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+      } else {
+        alert("Google Identity Services library is still loading or unavailable. Please check your internet connection.");
+      }
+    }
+
+    function updateDriveAuthStatus() {
+      const statusEl = document.getElementById('driveAuthStatus');
+      if (statusEl) {
+        if (appState.driveToken) {
+          statusEl.innerHTML = 'Status: <span style="color: var(--success);">Signed In (Token Active)</span>';
+        } else {
+          statusEl.innerHTML = 'Status: <span style="color: var(--text-muted);">Not signed in</span>';
+        }
+      }
+    }
 
     function populateRestTimerDropdowns() {
       const select = document.getElementById('defaultRestSecSelect');
@@ -578,7 +673,6 @@
           if (parsed.fontSize) appState.fontSize = parsed.fontSize;
 
           document.getElementById('gdriveClientId').value = appState.driveClientId || '';
-          document.getElementById('gdriveToken').value = appState.driveToken || '';
           document.getElementById('fontSizeSelect').value = appState.fontSize || 'normal';
         } catch (e) {
           console.error("Error loading localStorage:", e);
@@ -950,6 +1044,7 @@
       if (!profile.history || profile.history.length === 0) {
         document.getElementById('restDaysCount').innerText = "0 Days";
         document.getElementById('lastWorkoutDateText').innerText = "Last session: None";
+        document.getElementById('mentzerStatusText').innerText = "Mentzer Advice: Fresh! Ideal time to train.";
         return;
       }
 
@@ -959,6 +1054,15 @@
 
       document.getElementById('restDaysCount').innerText = `${diffDays} Days`;
       document.getElementById('lastWorkoutDateText').innerText = `Last: ${lastDate.toLocaleDateString()}`;
+
+      const mentzerStatusEl = document.getElementById('mentzerStatusText');
+      if (diffDays < 4) {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises 4–7+ days rest for full recovery.</span>`;
+      } else if (diffDays >= 4 && diffDays <= 7) {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window (4-7 days). Ready to grow!</span>`;
+      } else {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>7 days). Ensure strength hasn't plateaued.</span>`;
+      }
     }
 
     function renderHistory() {
@@ -1104,15 +1208,16 @@
     }
 
     function saveDriveSettings() {
-      appState.driveClientId = document.getElementById('gdriveClientId').value;
-      appState.driveToken = document.getElementById('gdriveToken').value;
+      appState.driveClientId = document.getElementById('gdriveClientId').value.trim();
       saveLocalStorage();
-      alert("Google Drive credentials saved!");
+      initGoogleDriveAuthClient();
+      alert("Google Drive Client ID saved!");
     }
 
     function syncToGoogleDrive() {
       if (!appState.driveToken) {
-        alert("Please enter a Google Drive Access Token in Settings first.");
+        alert("Please sign in with Google first.");
+        handleGoogleSignIn();
         return;
       }
 
@@ -1134,7 +1239,10 @@
       })
       .catch(err => {
         console.error("Google Drive Sync Failed:", err);
-        alert("Google Drive sync failed: " + err.message);
+        alert("Google Drive sync failed (token may have expired): " + err.message);
+        appState.driveToken = "";
+        saveLocalStorage();
+        updateDriveAuthStatus();
       });
     }
 
@@ -1152,4 +1260,3 @@
   </script>
 </body>
 </html>
-
