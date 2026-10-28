@@ -45,16 +45,16 @@
     }
     .header-title { font-size: calc(18px * var(--font-scale)); font-weight: 700; color: #fff; text-align: center; margin-bottom: 8px; }
     
-    nav { display: flex; justify-content: space-around; gap: 8px; }
+    nav { display: flex; justify-content: space-around; gap: 4px; }
     .nav-btn {
       flex: 1;
-      padding: 8px 12px;
+      padding: 8px 6px;
       background: #1e293b;
       color: var(--text-muted);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       font-weight: 600;
-      font-size: calc(13px * var(--font-scale));
+      font-size: calc(12px * var(--font-scale));
       cursor: pointer;
       text-align: center;
     }
@@ -67,7 +67,7 @@
     /* Container */
     .container { padding: 16px; max-width: 768px; margin: 0 auto; }
     
-    /* Metrics, Rest Timer & Mentzer Recovery Banners */
+    /* Metrics, Rest Timer & Banners */
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -246,7 +246,7 @@
     }
     .history-date { font-weight: 700; color: var(--accent); margin-bottom: 4px; }
     .history-meta { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 8px; }
-    .history-exercise { font-size: calc(13px * var(--font-scale)); border-top: 1px solid #1e293b; padding-top: 4px; margin-top: 4px; }
+    .history-exercise { font-size: calc(13px * var(--font-scale)); border-top: 1px solid #1e293b; padding-top: 6px; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -286,57 +286,72 @@
   <header>
     <div class="header-title">Fitness4Me Heavy Duty</div>
     <nav>
-      <button class="nav-btn active" onclick="switchTab('workout', event)">Workouts</button>
-      <button class="nav-btn" onclick="switchTab('history', event)">History & Stats</button>
+      <button class="nav-btn active" onclick="switchTab('home', event)">Home</button>
+      <button class="nav-btn" onclick="switchTab('workout', event)">Workout</button>
+      <button class="nav-btn" onclick="switchTab('history', event)">History</button>
       <button class="nav-btn" onclick="switchTab('settings', event)">Settings</button>
     </nav>
   </header>
 
   <div class="container">
 
-    <!-- METRICS, REST TIMER, MENTZER & APPLE HEALTH RECOVERY BANNERS -->
-    <div class="metrics-grid">
-      <div class="rest-banner">
-        <div>
-          <div class="rest-banner-title">Rest Days Since Last</div>
-          <div style="font-size: 11px; color: var(--text-muted);" id="lastWorkoutDateText">Never</div>
+    <!-- HOME / DASHBOARD TAB -->
+    <div id="tab-home" class="tab-content active">
+      <div class="metrics-grid">
+        <div class="rest-banner">
+          <div>
+            <div class="rest-banner-title">Rest Days Since Last</div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="homeLastWorkoutDateText">Never</div>
+          </div>
+          <div class="rest-banner-value" id="homeRestDaysCount">0 Days</div>
         </div>
-        <div class="rest-banner-value" id="restDaysCount">0 Days</div>
+
+        <div class="mentzer-banner">
+          <div>
+            <div class="mentzer-banner-title">Mike Mentzer Recovery Advisor</div>
+            <div class="mentzer-banner-desc" id="homeMentzerStatusText">Status: Ready to train</div>
+          </div>
+          <div style="font-size: 24px;">🧠</div>
+        </div>
+
+        <div class="health-banner">
+          <div>
+            <div class="health-banner-title">Apple Health Shortcut Status</div>
+            <div class="health-banner-desc" id="homeHealthStatusText">Not synced yet</div>
+          </div>
+          <div style="font-size: 24px;">🍏</div>
+        </div>
       </div>
 
-      <div class="timer-banner">
-        <div>
-          <div class="timer-banner-title">Rest Timer</div>
-          <div style="font-size: 11px; color: var(--text-muted);" id="timerSubtext">Ready</div>
-        </div>
-        <div class="timer-banner-value" id="timerDisplay">00:45</div>
-      </div>
-
-      <div class="mentzer-banner">
-        <div>
-          <div class="mentzer-banner-title">Mike Mentzer Recovery Advisor</div>
-          <div class="mentzer-banner-desc" id="mentzerStatusText">Status: Ready to train</div>
-        </div>
-        <div style="font-size: 24px;">🧠</div>
-      </div>
-
-      <div class="health-banner">
-        <div>
-          <div class="health-banner-title">Apple Health / Shortcut Integration</div>
-          <div class="health-banner-desc" id="healthStatusText">HRV & Sleep status: Not synced yet</div>
-        </div>
-        <div style="font-size: 24px;">🍏</div>
+      <div class="card">
+        <div class="card-title">Select Today's Workout Routine</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+          Choose which routine to perform today based on your recovery window:
+        </p>
+        <label for="homeWorkoutDaySelect">Workout Routine</label>
+        <select id="homeWorkoutDaySelect" onchange="syncRoutineSelection(this.value)"></select>
+        <button class="btn btn-primary" style="margin-top: 8px;" onclick="switchTabToWorkout()">🚀 Start Selected Workout</button>
       </div>
     </div>
 
     <!-- WORKOUT TAB -->
-    <div id="tab-workout" class="tab-content active">
+    <div id="tab-workout" class="tab-content">
+      <div class="metrics-grid" style="margin-bottom: 12px;">
+        <div class="timer-banner" style="grid-column: 1 / -1;">
+          <div>
+            <div class="timer-banner-title">Rest Timer</div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="timerSubtext">Ready</div>
+          </div>
+          <div class="timer-banner-value" id="timerDisplay">00:45</div>
+        </div>
+      </div>
+
       <div class="card">
         <label for="profileSelect">Active Profile</label>
         <select id="profileSelect" onchange="switchProfile(this.value)"></select>
 
         <label for="workoutDaySelect">Select Workout Routine</label>
-        <select id="workoutDaySelect" onchange="renderActiveWorkout()"></select>
+        <select id="workoutDaySelect" onchange="syncHomeRoutineSelection(this.value); renderActiveWorkout()"></select>
         
         <div style="display: flex; gap: 8px; margin-top: 8px;">
           <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptAddExercise()">+ Add Exercise</button>
@@ -365,7 +380,7 @@
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Completed Workout Logs</div>
+          <div class="card-title">Completed Workout Logs & Set Details</div>
         </div>
         <div id="historyLogsContainer"></div>
       </div>
@@ -447,8 +462,8 @@
       <!-- Google Drive Cloud Setup -->
       <div class="card">
         <div class="card-title">Google Drive Integration</div>
-        <label for="gdriveClientId">Google OAuth Client ID</label>
-        <input type="text" id="gdriveClientId" placeholder="Enter Google OAuth Client ID" onchange="saveDriveSettings()" />
+        <label for="gdriveClientId">Google OAuth Client ID (from Google Cloud Console)</label>
+        <input type="text" id="gdriveClientId" placeholder="e.g. 123456789-abc.apps.googleusercontent.com" onchange="saveDriveSettings()" />
 
         <div id="driveAuthStatus" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Status: Not signed in</div>
 
@@ -542,14 +557,14 @@
       loadLocalStorage();
       populateRestTimerDropdowns();
       renderProfileSelect();
-      renderWorkoutSelect();
+      renderWorkoutSelects();
       renderActiveWorkout();
       renderHistory();
       renderStrengthAnalytics();
       calculateRestDays();
       applyFontSize(appState.fontSize);
       updateDriveAuthStatus();
-      updateHealthStatusBanner();
+      updateHealthStatusBanners();
       initGoogleDriveAuthClient();
 
       if (isFirstLaunch) {
@@ -585,7 +600,7 @@
       appState.driveClientId = document.getElementById('gdriveClientId').value.trim();
       saveLocalStorage();
       if (!appState.driveClientId) {
-        alert("Please enter a Google OAuth Client ID first.");
+        alert("Please enter a valid Google OAuth Client ID first.");
         return;
       }
       if (!tokenClient) {
@@ -625,7 +640,7 @@
           date: new Date().toISOString()
         };
         saveLocalStorage();
-        updateHealthStatusBanner();
+        updateHealthStatusBanners();
         calculateRestDays();
         alert("Apple Health recovery metrics successfully imported!");
       } catch (e) {
@@ -633,11 +648,11 @@
       }
     }
 
-    function updateHealthStatusBanner() {
+    function updateHealthStatusBanners() {
       const profile = getCurrentProfile();
-      const statusEl = document.getElementById('healthStatusText');
+      const statusEl = document.getElementById('homeHealthStatusText');
       if (!profile.healthData) {
-        statusEl.innerHTML = '<span style="color: var(--text-muted);">No Apple Health payload imported yet</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color: var(--text-muted);">Not synced yet</span>';
         return;
       }
       const hd = profile.healthData;
@@ -647,7 +662,9 @@
         statusColor = "var(--danger)";
         recText = "Low HRV / Poor Sleep — Extend Rest!";
       }
-      statusEl.innerHTML = `<span style="color: ${statusColor};">HRV: ${hd.hrv}ms | Sleep: ${hd.sleepScore}% (${recText})</span>`;
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color: ${statusColor};">HRV: ${hd.hrv}ms | Sleep: ${hd.sleepScore}% (${recText})</span>`;
+      }
     }
 
     function populateRestTimerDropdowns() {
@@ -720,7 +737,17 @@
       document.getElementById(`tab-${tabId}`).classList.add('active');
       if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
+      } else {
+        // Fallback if triggered programmatically
+        const btnMap = { 'home': 0, 'workout': 1, 'history': 2, 'settings': 3 };
+        const idx = btnMap[tabId];
+        const buttons = document.querySelectorAll('.nav-btn');
+        if (buttons[idx]) buttons[idx].classList.add('active');
       }
+    }
+
+    function switchTabToWorkout() {
+      switchTab('workout');
     }
 
     function loadLocalStorage() {
@@ -768,12 +795,12 @@
     function switchProfile(profileId) {
       appState.activeProfileId = profileId;
       saveLocalStorage();
-      renderWorkoutSelect();
+      renderWorkoutSelects();
       renderActiveWorkout();
       renderHistory();
       renderStrengthAnalytics();
       calculateRestDays();
-      updateHealthStatusBanner();
+      updateHealthStatusBanners();
     }
 
     function createNewProfile() {
@@ -797,12 +824,12 @@
       nameInput.value = "";
       saveLocalStorage();
       renderProfileSelect();
-      renderWorkoutSelect();
+      renderWorkoutSelects();
       renderActiveWorkout();
       renderHistory();
       renderStrengthAnalytics();
       calculateRestDays();
-      updateHealthStatusBanner();
+      updateHealthStatusBanners();
       switchTab('workout');
       alert(`Profile "${name}" created and selected!`);
     }
@@ -830,20 +857,40 @@
         appState.activeProfileId = appState.profiles[0].id;
         saveLocalStorage();
         renderProfileSelect();
-        renderWorkoutSelect();
+        renderWorkoutSelects();
         renderActiveWorkout();
         renderHistory();
         renderStrengthAnalytics();
         calculateRestDays();
-        updateHealthStatusBanner();
+        updateHealthStatusBanners();
         alert("Profile removed.");
       }
     }
 
-    function renderWorkoutSelect() {
+    function renderWorkoutSelects() {
       const profile = getCurrentProfile();
-      const select = document.getElementById('workoutDaySelect');
-      select.innerHTML = profile.workoutDays.map((d, i) => `<option value="${i}">${d.title}</option>`).join('');
+      const optionsHtml = profile.workoutDays.map((d, i) => `<option value="${i}">${d.title}</option>`).join('');
+      
+      const workoutSel = document.getElementById('workoutDaySelect');
+      const homeSel = document.getElementById('homeWorkoutDaySelect');
+      
+      if (workoutSel) workoutSel.innerHTML = optionsHtml;
+      if (homeSel) homeSel.innerHTML = optionsHtml;
+    }
+
+    function syncRoutineSelection(val) {
+      const workoutSel = document.getElementById('workoutDaySelect');
+      if (workoutSel) {
+        workoutSel.value = val;
+        renderActiveWorkout();
+      }
+    }
+
+    function syncHomeRoutineSelection(val) {
+      const homeSel = document.getElementById('homeWorkoutDaySelect');
+      if (homeSel) {
+        homeSel.value = val;
+      }
     }
 
     function renderActiveWorkout() {
@@ -1075,7 +1122,7 @@
       });
       titleInput.value = "";
       saveLocalStorage();
-      renderWorkoutSelect();
+      renderWorkoutSelects();
       document.getElementById('workoutDaySelect').value = profile.workoutDays.length - 1;
       renderActiveWorkout();
       switchTab('workout');
@@ -1090,7 +1137,7 @@
       if (confirm(`Are you sure you want to delete routine "${day.title}"?`)) {
         profile.workoutDays.splice(dayIdx, 1);
         saveLocalStorage();
-        renderWorkoutSelect();
+        renderWorkoutSelects();
         renderActiveWorkout();
       }
     }
@@ -1139,10 +1186,14 @@
 
     function calculateRestDays() {
       const profile = getCurrentProfile();
+      const restDaysEl = document.getElementById('homeRestDaysCount');
+      const lastDateEl = document.getElementById('homeLastWorkoutDateText');
+      const mentzerStatusEl = document.getElementById('homeMentzerStatusText');
+
       if (!profile.history || profile.history.length === 0) {
-        document.getElementById('restDaysCount').innerText = "0 Days";
-        document.getElementById('lastWorkoutDateText').innerText = "Last session: None";
-        document.getElementById('mentzerStatusText').innerText = "Mentzer Advice: Fresh! Ideal time to train.";
+        if (restDaysEl) restDaysEl.innerText = "0 Days";
+        if (lastDateEl) lastDateEl.innerText = "Last session: None";
+        if (mentzerStatusEl) mentzerStatusEl.innerText = "Mentzer Advice: Fresh! Ideal time to train.";
         return;
       }
 
@@ -1150,30 +1201,27 @@
       const now = new Date();
       const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
 
-      document.getElementById('restDaysCount').innerText = `${diffDays} Days`;
-      document.getElementById('lastWorkoutDateText').innerText = `Last: ${lastDate.toLocaleDateString()}`;
+      if (restDaysEl) restDaysEl.innerText = `${diffDays} Days`;
+      if (lastDateEl) lastDateEl.innerText = `Last: ${lastDate.toLocaleDateString()}`;
 
-      const mentzerStatusEl = document.getElementById('mentzerStatusText');
       let minRestDays = 4;
-
       if (profile.healthData && (profile.healthData.hrv < 40 || profile.healthData.sleepScore < 60)) {
-        minRestDays = 6; // Extend required recovery window if Apple Health HRV/Sleep is low
+        minRestDays = 6;
       }
 
-      // Check Stagnation (Stagnation Detector)
       let stagnantWarning = "";
       if (profile.history.length >= 3) {
-        const lastThree = profile.history.slice(0, 3);
-        // Basic heuristic: check if weights haven't budged across sessions
-        stagnantWarning = `<br/><span style="color: var(--warning); font-size:11px;">💡 Stagnation Check: Ensure progressive overload or take an extended 10-day deload if strength plateaued.</span>`;
+        stagnantWarning = `<br/><span style="color: var(--warning); font-size:11px;">💡 Stagnation Check: Ensure progressive overload or take a deload if plateaued.</span>`;
       }
 
-      if (diffDays < minRestDays) {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest based on recovery metrics.</span>${stagnantWarning}`;
-      } else if (diffDays >= minRestDays && diffDays <= 8) {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${stagnantWarning}`;
-      } else {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>8 days). Check for strength plateaus.</span>${stagnantWarning}`;
+      if (mentzerStatusEl) {
+        if (diffDays < minRestDays) {
+          mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest.</span>${stagnantWarning}`;
+        } else if (diffDays >= minRestDays && diffDays <= 8) {
+          mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${stagnantWarning}`;
+        } else {
+          mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>8 days). Check for strength plateaus.</span>${stagnantWarning}`;
+        }
       }
     }
 
@@ -1185,7 +1233,6 @@
         return;
       }
 
-      // Aggregate exercise weight/reps across history logs
       let exerciseMap = {};
       profile.history.slice().reverse().forEach(h => {
         h.exercises.forEach(e => {
@@ -1235,7 +1282,14 @@
               <div class="history-exercise">
                 <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
                 ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
-                ${e.sets.map(s => `${s.weight}p × ${s.reps}r [${s.intensity || 'normal'}]`).join(' | ')}
+                <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                  ${e.sets.map((s, idx) => `
+                    <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between;">
+                      <span>Set #${idx + 1}: <strong>${s.weight} plates</strong> × <strong>${s.reps} reps</strong></span>
+                      <span style="color: var(--accent); text-transform: uppercase; font-size: 10px;">[${s.intensity || 'normal'}]</span>
+                    </div>
+                  `).join('')}
+                </div>
               </div>
             `).join('')}
           </div>
@@ -1290,12 +1344,12 @@
         document.getElementById('restoreModal').style.display = 'none';
         saveLocalStorage();
         renderProfileSelect();
-        renderWorkoutSelect();
+        renderWorkoutSelects();
         renderActiveWorkout();
         renderHistory();
         renderStrengthAnalytics();
         calculateRestDays();
-        updateHealthStatusBanner();
+        updateHealthStatusBanners();
         alert("All backup profiles successfully processed and restored!");
         return;
       }
