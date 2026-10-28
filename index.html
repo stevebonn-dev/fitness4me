@@ -738,7 +738,6 @@
       if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
       } else {
-        // Fallback if triggered programmatically
         const btnMap = { 'home': 0, 'workout': 1, 'history': 2, 'settings': 3 };
         const idx = btnMap[tabId];
         const buttons = document.querySelectorAll('.nav-btn');
@@ -1422,36 +1421,68 @@
       alert("Google Drive Client ID saved!");
     }
 
-    function syncToGoogleDrive() {
+    async function syncToGoogleDrive() {
       if (!appState.driveToken) {
         alert("Please sign in with Google first.");
         handleGoogleSignIn();
         return;
       }
 
-      fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${appState.driveToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(appState)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Cloud sync upload failed with status " + res.status);
-        return res.json();
-      })
-      .then(data => {
+      try {
+        const metadata = {
+          name: 'heavyduty_backup.json',
+          mimeType: 'application/json'
+        };
+
+        // First, check if file already exists in user's drive to update it instead of cluttering duplicates
+        const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27heavyduty_backup.json%27%20and%20trashed%3Dfalse', {
+          headers: { 'Authorization': `Bearer ${appState.driveToken}` }
+        });
+        const searchData = await searchRes.json();
+        let fileId = (searchData.files && searchData.files.length > 0) ? searchData.files[0].id : null;
+
+        const boundary = 'foo_bar_baz';
+        const delimiter = `\r\n--${boundary}\r\n`;
+        const closeDelimiter = `\r\n--${boundary}--`;
+
+        const multipartRequestBody =
+          delimiter +
+          'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+          JSON.stringify(metadata) +
+          delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(appState, null, 2) +
+          closeDelimiter;
+
+        const method = fileId ? 'PATCH' : 'POST';
+        const url = fileId 
+          ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+          : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+
+        const uploadRes = await fetch(url, {
+          method: method,
+          headers: {
+            'Authorization': `Bearer ${appState.driveToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`
+          },
+          body: multipartRequestBody
+        });
+
+        if (!uploadRes.ok) {
+          const errText = await uploadRes.text();
+          throw new Error(`Drive sync failed (${uploadRes.status}): ${errText}`);
+        }
+
+        const data = await uploadRes.json();
         console.log("Google Drive Sync Success:", data);
-        alert("Google Drive sync successful!");
-      })
-      .catch(err => {
+        alert("Google Drive cloud sync successful!");
+      } catch (err) {
         console.error("Google Drive Sync Failed:", err);
         alert("Google Drive sync failed (token may have expired): " + err.message);
         appState.driveToken = "";
         saveLocalStorage();
         updateDriveAuthStatus();
-      });
+      }
     }
 
     function changeFontSize(size) {
