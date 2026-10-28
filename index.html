@@ -1196,9 +1196,12 @@
         return;
       }
 
-      const lastDate = new Date(profile.history[0].date);
+      // Ensure proper parsing of history dates (supporting ISO strings or timestamps)
+      const lastLog = profile.history[0];
+      const lastDate = new Date(lastLog.date || lastLog.timestamp || Date.now());
       const now = new Date();
-      const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+      const diffTime = now - lastDate;
+      const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
       if (restDaysEl) restDaysEl.innerText = `${diffDays} Days`;
       if (lastDateEl) lastDateEl.innerText = `Last: ${lastDate.toLocaleDateString()}`;
@@ -1234,11 +1237,14 @@
 
       let exerciseMap = {};
       profile.history.slice().reverse().forEach(h => {
+        if (!h.exercises) return;
         h.exercises.forEach(e => {
           if (!exerciseMap[e.name]) exerciseMap[e.name] = [];
-          const maxWeight = Math.max(...e.sets.map(s => s.weight));
-          const totalReps = e.sets.reduce((sum, s) => sum + s.reps, 0);
-          exerciseMap[e.name].push({ date: new Date(h.date).toLocaleDateString(), weight: maxWeight, reps: totalReps });
+          const setsArr = e.sets || [];
+          const maxWeight = setsArr.length > 0 ? Math.max(...setsArr.map(s => s.weight || s.lastWeight || 0)) : 0;
+          const totalReps = setsArr.reduce((sum, s) => sum + (s.reps || s.lastReps || 0), 0);
+          const logDate = new Date(h.date || h.timestamp || Date.now()).toLocaleDateString();
+          exerciseMap[e.name].push({ date: logDate, weight: maxWeight, reps: totalReps });
         });
       });
 
@@ -1271,20 +1277,22 @@
       }
 
       container.innerHTML = profile.history.map(h => {
-        const d = new Date(h.date);
-        const elapsed = Math.floor((new Date() - d) / (1000 * 60 * 60 * 24));
+        const d = new Date(h.date || h.timestamp || Date.now());
+        const elapsed = Math.max(0, Math.floor((new Date() - d) / (1000 * 60 * 60 * 24)));
+        const exercisesList = h.exercises || [];
+
         return `
           <div class="history-item">
-            <div class="history-date">${h.title} - ${d.toLocaleDateString()}</div>
+            <div class="history-date">${h.title || 'Workout Routine'} - ${d.toLocaleDateString()}</div>
             <div class="history-meta">${elapsed} days ago</div>
-            ${h.exercises.map(e => `
+            ${exercisesList.map(e => `
               <div class="history-exercise">
-                <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
+                <strong>${e.name || 'Exercise'}</strong> (${e.cableSides || 'both'}, Notch ${e.cableHeight || 1}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
                 ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
                 <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
-                  ${e.sets.map((s, idx) => `
+                  ${(e.sets || []).map((s, idx) => `
                     <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between;">
-                      <span>Set #${idx + 1}: <strong>${s.weight} plates</strong> × <strong>${s.reps} reps</strong></span>
+                      <span>Set #${idx + 1}: <strong>${s.weight || s.lastWeight || 0} plates</strong> × <strong>${s.reps || s.lastReps || 0} reps</strong></span>
                       <span style="color: var(--accent); text-transform: uppercase; font-size: 10px;">[${s.intensity || 'normal'}]</span>
                     </div>
                   `).join('')}
@@ -1382,8 +1390,8 @@
         const targetId = document.getElementById('modalExistingSelect').value;
         const targetProf = appState.profiles.find(p => p.id === targetId);
         if (targetProf) {
-          targetProf.workoutDays = targetProf.workoutDays.concat(prof.workoutDays);
-          targetProf.history = targetProf.history.concat(prof.history);
+          targetProf.workoutDays = targetProf.workoutDays.concat(prof.workoutDays || []);
+          targetProf.history = (targetProf.history || []).concat(prof.history || []);
           appState.activeProfileId = targetProf.id;
         }
       } else if (action === 'new') {
@@ -1434,7 +1442,6 @@
           mimeType: 'application/json'
         };
 
-        // First, check if file already exists in user's drive to update it instead of cluttering duplicates
         const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27heavyduty_backup.json%27%20and%20trashed%3Dfalse', {
           headers: { 'Authorization': `Bearer ${appState.driveToken}` }
         });
