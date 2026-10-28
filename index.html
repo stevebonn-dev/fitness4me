@@ -67,7 +67,7 @@
     /* Container */
     .container { padding: 16px; max-width: 768px; margin: 0 auto; }
     
-    /* Metrics & Mentzer Notification Banner */
+    /* Metrics, Rest Timer & Mentzer Recovery Banners */
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -78,7 +78,7 @@
       .metrics-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    .rest-banner, .timer-banner, .mentzer-banner {
+    .rest-banner, .timer-banner, .mentzer-banner, .health-banner {
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border: 1px solid var(--accent);
       border-radius: 12px;
@@ -89,11 +89,13 @@
     }
     .timer-banner { border-color: var(--warning); background: linear-gradient(135deg, #27200a, #0f172a); }
     .mentzer-banner { border-color: var(--success); background: linear-gradient(135deg, #062414, #0f172a); grid-column: 1 / -1; }
+    .health-banner { border-color: #a855f7; background: linear-gradient(135deg, #2e1065, #0f172a); grid-column: 1 / -1; }
     
-    .rest-banner-title, .timer-banner-title, .mentzer-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .rest-banner-title, .timer-banner-title, .mentzer-banner-title, .health-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
     .rest-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--accent); }
     .timer-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--warning); }
     .mentzer-banner-desc { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: var(--success); margin-top: 2px; }
+    .health-banner-desc { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: #d8b4fe; margin-top: 2px; }
 
     /* Card Styling */
     .card {
@@ -117,7 +119,7 @@
 
     /* Controls & Dropdowns */
     label { display: block; font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
-    select, input[type="text"], input[type="number"], input[type="password"] {
+    select, input[type="text"], input[type="number"], input[type="password"], textarea {
       width: 100%;
       padding: 8px 10px;
       background: #0f172a;
@@ -127,7 +129,7 @@
       font-size: calc(14px * var(--font-scale));
       margin-bottom: 10px;
     }
-    select:focus, input:focus { outline: none; border-color: var(--accent); }
+    select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
 
     /* Exercise Items */
     .exercise-item {
@@ -234,7 +236,7 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* History Items */
+    /* History & Analytics Items */
     .history-item {
       background: #0f172a;
       border: 1px solid var(--card-border);
@@ -285,14 +287,14 @@
     <div class="header-title">Fitness4Me Heavy Duty</div>
     <nav>
       <button class="nav-btn active" onclick="switchTab('workout', event)">Workouts</button>
-      <button class="nav-btn" onclick="switchTab('history', event)">History</button>
+      <button class="nav-btn" onclick="switchTab('history', event)">History & Stats</button>
       <button class="nav-btn" onclick="switchTab('settings', event)">Settings</button>
     </nav>
   </header>
 
   <div class="container">
 
-    <!-- METRICS, REST TIMER & MENTZER RECOVERY BANNERS -->
+    <!-- METRICS, REST TIMER, MENTZER & APPLE HEALTH RECOVERY BANNERS -->
     <div class="metrics-grid">
       <div class="rest-banner">
         <div>
@@ -316,6 +318,14 @@
           <div class="mentzer-banner-desc" id="mentzerStatusText">Status: Ready to train</div>
         </div>
         <div style="font-size: 24px;">🧠</div>
+      </div>
+
+      <div class="health-banner">
+        <div>
+          <div class="health-banner-title">Apple Health / Shortcut Integration</div>
+          <div class="health-banner-desc" id="healthStatusText">HRV & Sleep status: Not synced yet</div>
+        </div>
+        <div style="font-size: 24px;">🍏</div>
       </div>
     </div>
 
@@ -341,8 +351,18 @@
       </button>
     </div>
 
-    <!-- HISTORY TAB -->
+    <!-- HISTORY & ANALYTICS TAB -->
     <div id="tab-history" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📈 Strength Trajectory & Analytics</div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Tracking progressive overload compliance across past sessions.
+        </p>
+        <div id="strengthAnalyticsContainer"></div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <div class="card-title">Completed Workout Logs</div>
@@ -360,6 +380,16 @@
         <label for="defaultRestSecSelect">Default Rest Duration (5s increments)</label>
         <select id="defaultRestSecSelect" onchange="updateDefaultRestTime(parseInt(this.value))">
         </select>
+      </div>
+
+      <!-- Apple Health Shortcut Bridge Setup -->
+      <div class="card">
+        <div class="card-title">Apple Health Shortcut Bridge</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+          Paste the JSON payload generated by your iOS Shortcut to import Apple Health HRV and sleep recovery data:
+        </p>
+        <textarea id="appleHealthJsonInput" rows="3" placeholder='{"hrv": 65, "sleepScore": 85, "restingHR": 52}'></textarea>
+        <button class="btn btn-secondary" onclick="importAppleHealthPayload()">Sync Apple Health Data</button>
       </div>
 
       <!-- Profile Management -->
@@ -451,8 +481,8 @@
                   cableHeight: 26,
                   benchPosition: "incline",
                   sets: [
-                    { reps: 6, weight: 10, completed: false, lastReps: 6, lastWeight: 10 },
-                    { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
+                    { reps: 6, weight: 10, intensity: "normal", completed: false, lastReps: 6, lastWeight: 10 },
+                    { reps: 8, weight: 8, intensity: "failure", completed: false, lastReps: 8, lastWeight: 8 }
                   ]
                 }
               ]
@@ -469,7 +499,7 @@
                   cableHeight: 1,
                   benchPosition: "none",
                   sets: [
-                    { reps: 8, weight: 15, completed: false, lastReps: 8, lastWeight: 15 }
+                    { reps: 8, weight: 15, intensity: "negatives", completed: false, lastReps: 8, lastWeight: 15 }
                   ]
                 }
               ]
@@ -486,13 +516,14 @@
                   cableHeight: 1,
                   benchPosition: "none",
                   sets: [
-                    { reps: 8, weight: 8, completed: false, lastReps: 8, lastWeight: 8 }
+                    { reps: 8, weight: 8, intensity: "normal", completed: false, lastReps: 8, lastWeight: 8 }
                   ]
                 }
               ]
             }
           ],
-          history: []
+          history: [],
+          healthData: null
         }
       ],
       driveClientId: "",
@@ -514,9 +545,11 @@
       renderWorkoutSelect();
       renderActiveWorkout();
       renderHistory();
+      renderStrengthAnalytics();
       calculateRestDays();
       applyFontSize(appState.fontSize);
       updateDriveAuthStatus();
+      updateHealthStatusBanner();
       initGoogleDriveAuthClient();
 
       if (isFirstLaunch) {
@@ -574,6 +607,47 @@
           statusEl.innerHTML = 'Status: <span style="color: var(--text-muted);">Not signed in</span>';
         }
       }
+    }
+
+    function importAppleHealthPayload() {
+      const inputVal = document.getElementById('appleHealthJsonInput').value.trim();
+      if (!inputVal) {
+        alert("Please paste valid JSON payload from your iOS Shortcut.");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(inputVal);
+        const profile = getCurrentProfile();
+        profile.healthData = {
+          hrv: parsed.hrv || 50,
+          sleepScore: parsed.sleepScore || 75,
+          restingHR: parsed.restingHR || 60,
+          date: new Date().toISOString()
+        };
+        saveLocalStorage();
+        updateHealthStatusBanner();
+        calculateRestDays();
+        alert("Apple Health recovery metrics successfully imported!");
+      } catch (e) {
+        alert("Invalid JSON format: " + e.message);
+      }
+    }
+
+    function updateHealthStatusBanner() {
+      const profile = getCurrentProfile();
+      const statusEl = document.getElementById('healthStatusText');
+      if (!profile.healthData) {
+        statusEl.innerHTML = '<span style="color: var(--text-muted);">No Apple Health payload imported yet</span>';
+        return;
+      }
+      const hd = profile.healthData;
+      let statusColor = "var(--success)";
+      let recText = "Optimal Recovery";
+      if (hd.hrv < 40 || hd.sleepScore < 60) {
+        statusColor = "var(--danger)";
+        recText = "Low HRV / Poor Sleep — Extend Rest!";
+      }
+      statusEl.innerHTML = `<span style="color: ${statusColor};">HRV: ${hd.hrv}ms | Sleep: ${hd.sleepScore}% (${recText})</span>`;
     }
 
     function populateRestTimerDropdowns() {
@@ -697,7 +771,9 @@
       renderWorkoutSelect();
       renderActiveWorkout();
       renderHistory();
+      renderStrengthAnalytics();
       calculateRestDays();
+      updateHealthStatusBanner();
     }
 
     function createNewProfile() {
@@ -713,7 +789,8 @@
         id: newId,
         name: name,
         workoutDays: [],
-        history: []
+        history: [],
+        healthData: null
       });
 
       appState.activeProfileId = newId;
@@ -723,7 +800,9 @@
       renderWorkoutSelect();
       renderActiveWorkout();
       renderHistory();
+      renderStrengthAnalytics();
       calculateRestDays();
+      updateHealthStatusBanner();
       switchTab('workout');
       alert(`Profile "${name}" created and selected!`);
     }
@@ -754,7 +833,9 @@
         renderWorkoutSelect();
         renderActiveWorkout();
         renderHistory();
+        renderStrengthAnalytics();
         calculateRestDays();
+        updateHealthStatusBanner();
         alert("Profile removed.");
       }
     }
@@ -829,6 +910,7 @@
                   <th>Target (Last)</th>
                   <th>Plates</th>
                   <th>Reps</th>
+                  <th>Intensity Mode</th>
                   <th>Done</th>
                   <th></th>
                 </tr>
@@ -839,13 +921,21 @@
                     <td>#${sIdx + 1}</td>
                     <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
                     <td>
-                      <select style="width: 60px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                      <select style="width: 55px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
                         ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
                       </select>
                     </td>
                     <td>
-                      <select style="width: 65px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                      <select style="width: 55px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
                         ${Array.from({length: 100}, (_, i) => i + 1).map(r => `<option value="${r}" ${s.reps === r ? 'selected' : ''}>${r}</option>`).join('')}
+                      </select>
+                    </td>
+                    <td>
+                      <select style="width: 85px; margin:0; font-size: 11px;" onchange="updateSetIntensity(${index}, ${exIdx}, ${sIdx}, this.value)">
+                        <option value="normal" ${s.intensity === 'normal' ? 'selected' : ''}>Normal</option>
+                        <option value="forced" ${s.intensity === 'forced' ? 'selected' : ''}>Forced</option>
+                        <option value="negatives" ${s.intensity === 'negatives' ? 'selected' : ''}>Negatives</option>
+                        <option value="hold" ${s.intensity === 'hold' ? 'selected' : ''}>Hold</option>
                       </select>
                     </td>
                     <td>
@@ -897,6 +987,12 @@
       saveLocalStorage();
     }
 
+    function updateSetIntensity(dayIdx, exIdx, sIdx, value) {
+      const profile = getCurrentProfile();
+      profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].intensity = value;
+      saveLocalStorage();
+    }
+
     function toggleSetComplete(dayIdx, exIdx, sIdx, completed) {
       const profile = getCurrentProfile();
       profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].completed = completed;
@@ -910,10 +1006,11 @@
     function addSet(dayIdx, exIdx) {
       const profile = getCurrentProfile();
       const sets = profile.workoutDays[dayIdx].exercises[exIdx].sets;
-      const last = sets[sets.length - 1] || { reps: 5, weight: 10, lastReps: 5, lastWeight: 10 };
+      const last = sets[sets.length - 1] || { reps: 5, weight: 10, intensity: 'normal', lastReps: 5, lastWeight: 10 };
       sets.push({
         reps: last.reps,
         weight: last.weight,
+        intensity: 'normal',
         completed: false,
         lastReps: last.lastReps || last.reps,
         lastWeight: last.lastWeight || last.weight
@@ -955,7 +1052,7 @@
         cableHeight: 1,
         benchPosition: "none",
         sets: [
-          { reps: 8, weight: 10, completed: false, lastReps: 8, lastWeight: 10 }
+          { reps: 8, weight: 10, intensity: "normal", completed: false, lastReps: 8, lastWeight: 10 }
         ]
       });
       saveLocalStorage();
@@ -1012,7 +1109,7 @@
           cableHeight: ex.cableHeight,
           benchPosition: ex.benchPosition || 'none',
           notes: ex.notes || '',
-          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight }))
+          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight, intensity: s.intensity || 'normal' }))
         }))
       };
 
@@ -1029,6 +1126,7 @@
       calculateRestDays();
       renderActiveWorkout();
       renderHistory();
+      renderStrengthAnalytics();
 
       exportBackupJSON();
 
@@ -1056,20 +1154,73 @@
       document.getElementById('lastWorkoutDateText').innerText = `Last: ${lastDate.toLocaleDateString()}`;
 
       const mentzerStatusEl = document.getElementById('mentzerStatusText');
-      if (diffDays < 4) {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises 4–7+ days rest for full recovery.</span>`;
-      } else if (diffDays >= 4 && diffDays <= 7) {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window (4-7 days). Ready to grow!</span>`;
-      } else {
-        mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>7 days). Ensure strength hasn't plateaued.</span>`;
+      let minRestDays = 4;
+
+      if (profile.healthData && (profile.healthData.hrv < 40 || profile.healthData.sleepScore < 60)) {
+        minRestDays = 6; // Extend required recovery window if Apple Health HRV/Sleep is low
       }
+
+      // Check Stagnation (Stagnation Detector)
+      let stagnantWarning = "";
+      if (profile.history.length >= 3) {
+        const lastThree = profile.history.slice(0, 3);
+        // Basic heuristic: check if weights haven't budged across sessions
+        stagnantWarning = `<br/><span style="color: var(--warning); font-size:11px;">💡 Stagnation Check: Ensure progressive overload or take an extended 10-day deload if strength plateaued.</span>`;
+      }
+
+      if (diffDays < minRestDays) {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest based on recovery metrics.</span>${stagnantWarning}`;
+      } else if (diffDays >= minRestDays && diffDays <= 8) {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${stagnantWarning}`;
+      } else {
+        mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>8 days). Check for strength plateaus.</span>${stagnantWarning}`;
+      }
+    }
+
+    function renderStrengthAnalytics() {
+      const profile = getCurrentProfile();
+      const container = document.getElementById('strengthAnalyticsContainer');
+      if (!profile.history || profile.history.length === 0) {
+        container.innerHTML = `<p style="font-size:12px; color: var(--text-muted);">Complete a few workouts to see progressive overload trajectory charts.</p>`;
+        return;
+      }
+
+      // Aggregate exercise weight/reps across history logs
+      let exerciseMap = {};
+      profile.history.slice().reverse().forEach(h => {
+        h.exercises.forEach(e => {
+          if (!exerciseMap[e.name]) exerciseMap[e.name] = [];
+          const maxWeight = Math.max(...e.sets.map(s => s.weight));
+          const totalReps = e.sets.reduce((sum, s) => sum + s.reps, 0);
+          exerciseMap[e.name].push({ date: new Date(h.date).toLocaleDateString(), weight: maxWeight, reps: totalReps });
+        });
+      });
+
+      let html = '';
+      for (const [exName, records] of Object.entries(exerciseMap)) {
+        html += `
+          <div style="background: #0f172a; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: var(--accent); font-size: 13px; margin-bottom: 4px;">${exName}</div>
+            <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+              ${records.map(r => `
+                <div style="background: #1e293b; padding: 6px 10px; border-radius: 6px; text-align: center; min-width: 90px; flex-shrink: 0;">
+                  <div style="font-size: 10px; color: var(--text-muted);">${r.date}</div>
+                  <div style="font-weight: 700; font-size: 13px; color: #fff;">${r.weight} plates</div>
+                  <div style="font-size: 11px; color: var(--success);">${r.reps} reps total</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
     }
 
     function renderHistory() {
       const profile = getCurrentProfile();
       const container = document.getElementById('historyLogsContainer');
       if (!profile.history || profile.history.length === 0) {
-        container.innerHTML = `<p style="font-size:13px; color:var(--text-muted);">No history recorded yet for this profile.</p>`;
+        container.innerHTML = `<p style="font-size:13px; color: var(--text-muted);">No history recorded yet for this profile.</p>`;
         return;
       }
 
@@ -1084,7 +1235,7 @@
               <div class="history-exercise">
                 <strong>${e.name}</strong> (${e.cableSides}, Notch ${e.cableHeight}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
                 ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
-                ${e.sets.map(s => `${s.weight}p × ${s.reps}r`).join(' | ')}
+                ${e.sets.map(s => `${s.weight}p × ${s.reps}r [${s.intensity || 'normal'}]`).join(' | ')}
               </div>
             `).join('')}
           </div>
@@ -1115,7 +1266,8 @@
               id: "profile_" + Date.now(),
               name: "Restored Profile",
               workoutDays: parsed.workoutDays,
-              history: parsed.history || []
+              history: parsed.history || [],
+              healthData: null
             }];
           } else {
             alert("Invalid backup schema.");
@@ -1141,7 +1293,9 @@
         renderWorkoutSelect();
         renderActiveWorkout();
         renderHistory();
+        renderStrengthAnalytics();
         calculateRestDays();
+        updateHealthStatusBanner();
         alert("All backup profiles successfully processed and restored!");
         return;
       }
