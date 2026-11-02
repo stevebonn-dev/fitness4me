@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Fitness4Me - High-Intensity Heavy Duty Tracker</title>
+  <title>Fitness4Me - High-Intensity Heavy Duty & Cardio Tracker</title>
   <!-- Google Identity Services Script -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -284,7 +284,7 @@
   </div>
 
   <header>
-    <div class="header-title">Fitness4Me Heavy Duty</div>
+    <div class="header-title">Fitness4Me Heavy Duty & Cardio</div>
     <nav>
       <button class="nav-btn active" onclick="switchTab('home', event)">Home</button>
       <button class="nav-btn" onclick="switchTab('workout', event)">Workout</button>
@@ -354,8 +354,9 @@
         <select id="workoutDaySelect" onchange="syncHomeRoutineSelection(this.value); renderActiveWorkout()"></select>
         
         <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptAddExercise()">+ Add Exercise</button>
-          <button class="btn btn-danger-mini" style="flex:1; margin-bottom:0; border-radius:8px; font-weight:700;" onclick="promptDeleteWorkout()">🗑️ Delete Routine</button>
+          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptAddExercise()">+ Strength Exercise</button>
+          <button class="btn btn-warning" style="flex:1; margin-bottom:0;" onclick="promptAddTreadmillExercise()">+ Treadmill</button>
+          <button class="btn btn-danger-mini" style="width: 45px; margin-bottom:0; border-radius:8px; font-weight:700;" onclick="promptDeleteWorkout()">🗑️</button>
         </div>
       </div>
 
@@ -427,7 +428,7 @@
       <div class="card">
         <div class="card-title">Create New Workout Routine</div>
         <label for="newWorkoutTitle">Routine Name</label>
-        <input type="text" id="newWorkoutTitle" placeholder="e.g., Workout Day 4 (Core & Legs)" />
+        <input type="text" id="newWorkoutTitle" placeholder="e.g., Treadmill & Cardio Day" />
         <button class="btn btn-primary" onclick="createNewWorkoutRoutine()">Create Routine</button>
       </div>
 
@@ -491,6 +492,7 @@
                 {
                   id: "ex_1",
                   name: "Cable Incline Press",
+                  type: "strength",
                   notes: "Bench on 2nd highest setting",
                   cableSides: "both",
                   cableHeight: 26,
@@ -503,36 +505,18 @@
               ]
             },
             {
-              id: "day_2",
-              title: "Workout Day 2 (Legs)",
+              id: "day_cardio",
+              title: "Workout Day 4 (Treadmill Cardio)",
               exercises: [
                 {
-                  id: "ex_2",
-                  name: "Leg Press / Squat",
-                  notes: "Heavy HIT set to failure",
-                  cableSides: "both",
-                  cableHeight: 1,
-                  benchPosition: "none",
-                  sets: [
-                    { reps: 8, weight: 15, intensity: "negatives", completed: false, lastReps: 8, lastWeight: 15 }
-                  ]
-                }
-              ]
-            },
-            {
-              id: "day_3",
-              title: "Workout Day 3 (Arms & Shoulders)",
-              exercises: [
-                {
-                  id: "ex_3",
-                  name: "Barbell / Cable Curl",
-                  notes: "Strict form",
-                  cableSides: "both",
-                  cableHeight: 1,
-                  benchPosition: "none",
-                  sets: [
-                    { reps: 8, weight: 8, intensity: "normal", completed: false, lastReps: 8, lastWeight: 8 }
-                  ]
+                  id: "ex_treadmill_1",
+                  name: "Treadmill Jog / Sprint",
+                  type: "treadmill",
+                  notes: "Interval cardio session",
+                  incline: 5,
+                  speed: 10,
+                  durationMinutes: 20,
+                  completed: false
                 }
               ]
             }
@@ -905,99 +889,144 @@
 
       let html = '';
       day.exercises.forEach((ex, exIdx) => {
-        const benchPos = ex.benchPosition || 'none';
         const notes = ex.notes || '';
+        const isTreadmill = ex.type === 'treadmill';
 
-        html += `
-          <div class="exercise-item">
-            <div class="exercise-header">
-              <span class="exercise-title">${ex.name}</span>
-              <div class="reorder-btns">
-                <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
-                <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
-                <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
+        if (isTreadmill) {
+          html += `
+            <div class="exercise-item" style="border-color: var(--warning);">
+              <div class="exercise-header">
+                <span class="exercise-title">🏃‍♂️ ${ex.name}</span>
+                <div class="reorder-btns">
+                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
+                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
+                  <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 8px;">
+                <label>Cardio Notes</label>
+                <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. Interval warmup" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
+              </div>
+
+              <div class="exercise-settings-grid">
+                <div>
+                  <label>Incline (1-20)</label>
+                  <select onchange="updateExSetting(${index}, ${exIdx}, 'incline', parseInt(this.value))">
+                    ${Array.from({length: 20}, (_, i) => i + 1).map(inc => `<option value="${inc}" ${ex.incline === inc ? 'selected' : ''}>Incline ${inc}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label>Speed (1-20)</label>
+                  <select onchange="updateExSetting(${index}, ${exIdx}, 'speed', parseInt(this.value))">
+                    ${Array.from({length: 20}, (_, i) => i + 1).map(spd => `<option value="${spd}" ${ex.speed === spd ? 'selected' : ''}>Speed ${spd}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label>Duration (Mins)</label>
+                  <input type="number" min="1" max="180" value="${ex.durationMinutes || 20}" style="margin-bottom:0; padding:8px;" onchange="updateExSetting(${index}, ${exIdx}, 'durationMinutes', parseInt(this.value))" />
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #090d16; padding: 8px 12px; border-radius: 6px;">
+                <span style="font-size: 13px; font-weight: 700;">Cardio Completed?</span>
+                <input type="checkbox" class="checkbox-custom" ${ex.completed ? 'checked' : ''} onchange="updateExSetting(${index}, ${exIdx}, 'completed', this.checked)" />
               </div>
             </div>
-
-            <div class="exercise-settings-grid">
-              <div>
-                <label>Cable Sides</label>
-                <select onchange="updateExSetting(${index}, ${exIdx}, 'cableSides', this.value)">
-                  <option value="single" ${ex.cableSides === 'single' ? 'selected' : ''}>single</option>
-                  <option value="both" ${ex.cableSides === 'both' ? 'selected' : ''}>both</option>
-                </select>
+          `;
+        } else {
+          const benchPos = ex.benchPosition || 'none';
+          html += `
+            <div class="exercise-item">
+              <div class="exercise-header">
+                <span class="exercise-title">${ex.name}</span>
+                <div class="reorder-btns">
+                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
+                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
+                  <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
+                </div>
               </div>
-              <div>
-                <label>Cable Height</label>
-                <select onchange="updateExSetting(${index}, ${exIdx}, 'cableHeight', parseInt(this.value))">
-                  ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>${h}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <label>Bench</label>
-                <select onchange="updateExSetting(${index}, ${exIdx}, 'benchPosition', this.value)">
-                  <option value="none" ${benchPos === 'none' ? 'selected' : ''}>none</option>
-                  <option value="flat" ${benchPos === 'flat' ? 'selected' : ''}>flat</option>
-                  <option value="incline" ${benchPos === 'incline' ? 'selected' : ''}>incline</option>
-                  <option value="decline" ${benchPos === 'decline' ? 'selected' : ''}>decline</option>
-                </select>
-              </div>
-            </div>
 
-            <div style="margin-bottom: 8px;">
-              <label>Comments / Notes</label>
-              <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. 2nd notch on bench" style="margin-bottom: 4px;" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
-            </div>
+              <div class="exercise-settings-grid">
+                <div>
+                  <label>Cable Sides</label>
+                  <select onchange="updateExSetting(${index}, ${exIdx}, 'cableSides', this.value)">
+                    <option value="single" ${ex.cableSides === 'single' ? 'selected' : ''}>single</option>
+                    <option value="both" ${ex.cableSides === 'both' ? 'selected' : ''}>both</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Cable Height</label>
+                  <select onchange="updateExSetting(${index}, ${exIdx}, 'cableHeight', parseInt(this.value))">
+                    ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>${h}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label>Bench</label>
+                  <select onchange="updateExSetting(${index}, ${exIdx}, 'benchPosition', this.value)">
+                    <option value="none" ${benchPos === 'none' ? 'selected' : ''}>none</option>
+                    <option value="flat" ${benchPos === 'flat' ? 'selected' : ''}>flat</option>
+                    <option value="incline" ${benchPos === 'incline' ? 'selected' : ''}>incline</option>
+                    <option value="decline" ${benchPos === 'decline' ? 'selected' : ''}>decline</option>
+                  </select>
+                </div>
+              </div>
 
-            <table class="sets-table">
-              <thead>
-                <tr>
-                  <th>Set</th>
-                  <th>Target (Last)</th>
-                  <th>Plates</th>
-                  <th>Reps</th>
-                  <th>Intensity Mode</th>
-                  <th>Done</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                ${ex.sets.map((s, sIdx) => `
+              <div style="margin-bottom: 8px;">
+                <label>Comments / Notes</label>
+                <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. 2nd notch on bench" style="margin-bottom: 4px;" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
+              </div>
+
+              <table class="sets-table">
+                <thead>
                   <tr>
-                    <td>#${sIdx + 1}</td>
-                    <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
-                    <td>
-                      <select style="width: 55px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
-                        ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
-                      </select>
-                    </td>
-                    <td>
-                      <select style="width: 55px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
-                        ${Array.from({length: 100}, (_, i) => i + 1).map(r => `<option value="${r}" ${s.reps === r ? 'selected' : ''}>${r}</option>`).join('')}
-                      </select>
-                    </td>
-                    <td>
-                      <select style="width: 85px; margin:0; font-size: 11px;" onchange="updateSetIntensity(${index}, ${exIdx}, ${sIdx}, this.value)">
-                        <option value="normal" ${s.intensity === 'normal' ? 'selected' : ''}>Normal</option>
-                        <option value="forced" ${s.intensity === 'forced' ? 'selected' : ''}>Forced</option>
-                        <option value="negatives" ${s.intensity === 'negatives' ? 'selected' : ''}>Negatives</option>
-                        <option value="hold" ${s.intensity === 'hold' ? 'selected' : ''}>Hold</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
-                    </td>
-                    <td>
-                      <button class="btn-mini btn-danger-mini" onclick="promptDeleteSet(${index}, ${exIdx}, ${sIdx})">✕</button>
-                    </td>
+                    <th>Set</th>
+                    <th>Target (Last)</th>
+                    <th>Plates</th>
+                    <th>Reps</th>
+                    <th>Intensity Mode</th>
+                    <th>Done</th>
+                    <th></th>
                   </tr>
-                `).join('')}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  ${(ex.sets || []).map((s, sIdx) => `
+                    <tr>
+                      <td>#${sIdx + 1}</td>
+                      <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
+                      <td>
+                        <select style="width: 55px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                          ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        </select>
+                      </td>
+                      <td>
+                        <select style="width: 55px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
+                          ${Array.from({length: 100}, (_, i) => i + 1).map(r => `<option value="${r}" ${s.reps === r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
+                      </td>
+                      <td>
+                        <select style="width: 85px; margin:0; font-size: 11px;" onchange="updateSetIntensity(${index}, ${exIdx}, ${sIdx}, this.value)">
+                          <option value="normal" ${s.intensity === 'normal' ? 'selected' : ''}>Normal</option>
+                          <option value="forced" ${s.intensity === 'forced' ? 'selected' : ''}>Forced</option>
+                          <option value="negatives" ${s.intensity === 'negatives' ? 'selected' : ''}>Negatives</option>
+                          <option value="hold" ${s.intensity === 'hold' ? 'selected' : ''}>Hold</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
+                      </td>
+                      <td>
+                        <button class="btn-mini btn-danger-mini" onclick="promptDeleteSet(${index}, ${exIdx}, ${sIdx})">✕</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
 
-            <button class="btn btn-secondary" style="margin-top: 10px; padding: 6px; font-size: 13px;" onclick="addSet(${index}, ${exIdx})">+ Add Set</button>
-          </div>
-        `;
+              <button class="btn btn-secondary" style="margin-top: 10px; padding: 6px; font-size: 13px;" onclick="addSet(${index}, ${exIdx})">+ Add Set</button>
+            </div>
+          `;
+        }
       });
 
       container.innerHTML = html;
@@ -1087,12 +1116,13 @@
     function promptAddExercise() {
       const profile = getCurrentProfile();
       const dayIdx = document.getElementById('workoutDaySelect').value || 0;
-      const name = prompt("Enter exercise name:");
+      const name = prompt("Enter strength exercise name:");
       if (!name) return;
 
       profile.workoutDays[dayIdx].exercises.push({
         id: "ex_" + Date.now(),
         name: name,
+        type: "strength",
         notes: "",
         cableSides: "both",
         cableHeight: 1,
@@ -1100,6 +1130,26 @@
         sets: [
           { reps: 8, weight: 10, intensity: "normal", completed: false, lastReps: 8, lastWeight: 10 }
         ]
+      });
+      saveLocalStorage();
+      renderActiveWorkout();
+    }
+
+    function promptAddTreadmillExercise() {
+      const profile = getCurrentProfile();
+      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
+      const name = prompt("Enter treadmill session name:", "Treadmill Cardio");
+      if (!name) return;
+
+      profile.workoutDays[dayIdx].exercises.push({
+        id: "ex_tread_" + Date.now(),
+        name: name,
+        type: "treadmill",
+        notes: "",
+        incline: 5,
+        speed: 10,
+        durationMinutes: 20,
+        completed: false
       });
       saveLocalStorage();
       renderActiveWorkout();
@@ -1149,22 +1199,40 @@
       const log = {
         date: new Date().toISOString(),
         title: day.title,
-        exercises: day.exercises.map(ex => ({
-          name: ex.name,
-          cableSides: ex.cableSides,
-          cableHeight: ex.cableHeight,
-          benchPosition: ex.benchPosition || 'none',
-          notes: ex.notes || '',
-          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight, intensity: s.intensity || 'normal' }))
-        }))
+        exercises: day.exercises.map(ex => {
+          if (ex.type === 'treadmill') {
+            return {
+              name: ex.name,
+              type: 'treadmill',
+              incline: ex.incline || 1,
+              speed: ex.speed || 1,
+              durationMinutes: ex.durationMinutes || 20,
+              notes: ex.notes || ''
+            };
+          } else {
+            return {
+              name: ex.name,
+              type: 'strength',
+              cableSides: ex.cableSides,
+              cableHeight: ex.cableHeight,
+              benchPosition: ex.benchPosition || 'none',
+              notes: ex.notes || '',
+              sets: (ex.sets || []).map(s => ({ reps: s.reps, weight: s.weight, intensity: s.intensity || 'normal' }))
+            };
+          }
+        })
       };
 
       day.exercises.forEach(ex => {
-        ex.sets.forEach(s => {
-          s.lastWeight = s.weight;
-          s.lastReps = s.reps;
-          s.completed = false;
-        });
+        if (ex.type === 'strength') {
+          (ex.sets || []).forEach(s => {
+            s.lastWeight = s.weight;
+            s.lastReps = s.reps;
+            s.completed = false;
+          });
+        } else if (ex.type === 'treadmill') {
+          ex.completed = false;
+        }
       });
 
       profile.history.unshift(log);
@@ -1196,7 +1264,6 @@
         return;
       }
 
-      // Ensure proper parsing of history dates (supporting ISO strings or timestamps)
       const lastLog = profile.history[0];
       const lastDate = new Date(lastLog.date || lastLog.timestamp || Date.now());
       const now = new Date();
@@ -1206,11 +1273,30 @@
       if (restDaysEl) restDaysEl.innerText = `${diffDays} Days`;
       if (lastDateEl) lastDateEl.innerText = `Last: ${lastDate.toLocaleDateString()}`;
 
-      let minRestDays = 4;
-      if (profile.healthData && (profile.healthData.hrv < 40 || profile.healthData.sleepScore < 60)) {
-        minRestDays = 6;
+      // Check if the last workout contained high-intensity treadmill work
+      let maxTreadmillTax = 0;
+      if (lastLog.exercises) {
+        lastLog.exercises.forEach(e => {
+          if (e.type === 'treadmill') {
+            const incline = e.incline || 1;
+            const speed = e.speed || 1;
+            const duration = e.durationMinutes || 20;
+            // High intensity score if incline >= 13 or speed >= 15 or duration >= 35 mins
+            if (incline >= 13 || speed >= 15 || duration >= 35) {
+              maxTreadmillTax = 2; // Extra rest days needed
+            } else if (incline >= 7 || speed >= 9 || duration >= 25) {
+              maxTreadmillTax = 1;
+            }
+          }
+        });
       }
 
+      let minRestDays = 4 + maxTreadmillTax;
+      if (profile.healthData && (profile.healthData.hrv < 40 || profile.healthData.sleepScore < 60)) {
+        minRestDays += 2;
+      }
+
+      let cardioNotice = maxTreadmillTax > 0 ? `<br/><span style="color: var(--warning); font-size:11px;">🏃‍♂️ High cardio intensity detected (+${maxTreadmillTax} day recovery buffer).</span>` : "";
       let stagnantWarning = "";
       if (profile.history.length >= 3) {
         stagnantWarning = `<br/><span style="color: var(--warning); font-size:11px;">💡 Stagnation Check: Ensure progressive overload or take a deload if plateaued.</span>`;
@@ -1218,11 +1304,11 @@
 
       if (mentzerStatusEl) {
         if (diffDays < minRestDays) {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest.</span>${stagnantWarning}`;
-        } else if (diffDays >= minRestDays && diffDays <= 8) {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${stagnantWarning}`;
+          mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest.</span>${cardioNotice}${stagnantWarning}`;
+        } else if (diffDays >= minRestDays && diffDays <= (minRestDays + 4)) {
+          mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${cardioNotice}${stagnantWarning}`;
         } else {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (>8 days). Check for strength plateaus.</span>${stagnantWarning}`;
+          mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (> ${minRestDays} days). Check for strength plateaus.</span>${cardioNotice}${stagnantWarning}`;
         }
       }
     }
@@ -1239,6 +1325,7 @@
       profile.history.slice().reverse().forEach(h => {
         if (!h.exercises) return;
         h.exercises.forEach(e => {
+          if (e.type === 'treadmill') return;
           if (!exerciseMap[e.name]) exerciseMap[e.name] = [];
           const setsArr = e.sets || [];
           const maxWeight = setsArr.length > 0 ? Math.max(...setsArr.map(s => s.weight || s.lastWeight || 0)) : 0;
@@ -1265,7 +1352,7 @@
           </div>
         `;
       }
-      container.innerHTML = html;
+      container.innerHTML = html || `<p style="font-size:12px; color: var(--text-muted);">No strength exercises recorded yet.</p>`;
     }
 
     function renderHistory() {
@@ -1285,20 +1372,35 @@
           <div class="history-item">
             <div class="history-date">${h.title || 'Workout Routine'} - ${d.toLocaleDateString()}</div>
             <div class="history-meta">${elapsed} days ago</div>
-            ${exercisesList.map(e => `
-              <div class="history-exercise">
-                <strong>${e.name || 'Exercise'}</strong> (${e.cableSides || 'both'}, Notch ${e.cableHeight || 1}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
-                ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
-                <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
-                  ${(e.sets || []).map((s, idx) => `
-                    <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between;">
-                      <span>Set #${idx + 1}: <strong>${s.weight || s.lastWeight || 0} plates</strong> × <strong>${s.reps || s.lastReps || 0} reps</strong></span>
-                      <span style="color: var(--accent); text-transform: uppercase; font-size: 10px;">[${s.intensity || 'normal'}]</span>
+            ${exercisesList.map(e => {
+              if (e.type === 'treadmill') {
+                return `
+                  <div class="history-exercise" style="border-color: var(--warning);">
+                    🏃‍♂️ <strong>${e.name || 'Treadmill'}</strong><br/>
+                    ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
+                    <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; margin-top: 4px; display: flex; justify-content: space-between;">
+                      <span>Incline: <strong>${e.incline}</strong> | Speed: <strong>${e.speed}</strong></span>
+                      <span style="color: var(--warning);">Duration: <strong>${e.durationMinutes} mins</strong></span>
                     </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('')}
+                  </div>
+                `;
+              } else {
+                return `
+                  <div class="history-exercise">
+                    <strong>${e.name || 'Exercise'}</strong> (${e.cableSides || 'both'}, Notch ${e.cableHeight || 1}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
+                    ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
+                    <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                      ${(e.sets || []).map((s, idx) => `
+                        <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between;">
+                          <span>Set #${idx + 1}: <strong>${s.weight || s.lastWeight || 0} plates</strong> × <strong>${s.reps || s.lastReps || 0} reps</strong></span>
+                          <span style="color: var(--accent); text-transform: uppercase; font-size: 10px;">[${s.intensity || 'normal'}]</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+              }
+            }).join('')}
           </div>
         `;
       }).join('');
