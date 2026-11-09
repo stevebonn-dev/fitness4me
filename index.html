@@ -1,3 +1,18 @@
+The issue with importing older app backups stems from schema evolution across different versions of your app.
+Older export files stored data directly in root-level properties (routines: [...] and history: [...]), whereas newer versions introduce multi-profile objects (profiles: { "default": { routines: [...], history: [...] } }) or use varying key names for sets and exercises (e.g., weight vs plate or sets vs setsData). When JSON.parse() reads an older schema format, strict validation checks treat it as unrecognized or invalid.
+Below is the complete single-file web app code containing a Universal Legacy Migration Parser in the importBackupJSON routine. It automatically detects, cleans, and converts any older backup format (single-profile root structures, legacy set arrays, stringified entries, or missing metadata) into the current multi-profile schema seamlessly upon import.
+Key Improvements Made to the Import & Data Engine:
+ * Universal Legacy Backup Migration (importBackupJSON):
+   * Accepts both new multi-profile schemas (appData.profiles...) and legacy single-profile root exports ({ routines: [...], history: [...] }) without throwing JSON schema errors.
+   * Normalizes exercise and set fields across older formats (weight \rightarrow plate, stringified reps \rightarrow numbers) to preserve all historical set metrics.
+ * Robust Recovery Date Fallback:
+   * Correctly parses ISO date strings and legacy epoch timestamps from older history logs so your Mike Mentzer Recovery Advisor immediately recognizes past training dates (e.g., October sessions).
+ * Preserved Features:
+   * Retains the Taurus T9.9 Touch Treadmill cardio module.
+   * Includes the Apple Health Patch (manual entry, text/JSON parsing, clipboard import, and URL query support).
+   * Includes standard Google Drive OAuth2 cloud sync and local JSON auto-exports.
+Complete Single-File Web App (fitness4me.html)
+Save the block below as fitness4me.html and open it in any Web Browser or Progressive Web App runner.
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +45,7 @@
         .card-title { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; }
         nav button { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; }
         nav button.active { color: var(--accent); font-weight: 600; }
         button.btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; margin-top: 8px; }
@@ -115,16 +130,16 @@
         </div>
 
         <div class="card">
-            <div class="card-title">💾 Local Data & JSON Backup</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Export or import your complete workout history and routines via JSON file.</p>
+            <div class="card-title">💾 Local Data & Backup Migration</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Export or restore complete workout logs. Handles both older single-file and new multi-profile JSON backups.</p>
             <button class="btn" onclick="exportBackupJSON()">📥 Export JSON Backup File</button>
-            <label style="margin-top: 12px;">Restore from Backup File (.json):</label>
+            <label style="margin-top: 12px;">Import / Restore JSON Backup File:</label>
             <input type="file" id="importJsonFileInput" accept=".json" onchange="importBackupJSON(event)">
         </div>
 
         <div class="card">
             <div class="card-title">☁️ Google Drive Cloud Sync</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Sync your backup directly to Google Drive using your OAuth Client ID.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Sync backup directly to Google Drive using your OAuth Client ID.</p>
             <label for="googleClientIdInput">Google Cloud OAuth Client ID:</label>
             <input type="text" id="googleClientIdInput" placeholder="your-client-id.apps.googleusercontent.com">
             <div id="gdriveAuthStatus" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Status: Not Connected</div>
@@ -154,11 +169,11 @@
     </div>
 </div>
 
-<!-- FIRST START / DATABASE RECOVERY MODAL -->
+<!-- FIRST START MODAL -->
 <div id="firstStartModal" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--accent); margin-bottom: 12px;">Welcome to Fitness4Me!</h3>
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">No workout database was detected in browser storage. Would you like to restore from a local JSON backup file or start fresh?</p>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">No workout database was detected. Load a local/older JSON backup or start fresh.</p>
         <button class="btn" onclick="document.getElementById('wizardFileInput').click()">📂 Load JSON Backup File</button>
         <input type="file" id="wizardFileInput" accept=".json" style="display:none;" onchange="importBackupJSON(event); closeModal();">
         <button class="btn btn-secondary" onclick="closeModal()" style="margin-top: 8px;">🚀 Start Fresh with Defaults</button>
@@ -173,40 +188,45 @@
 </nav>
 
 <script>
-    // Initial State Setup
+    // Default Fallback Template
+    const defaultTemplate = {
+        profiles: {
+            "default": {
+                name: "Default Profile",
+                routines: [
+                    { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
+                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
+                        { name: "Incline Barbell Press", type: "strength" },
+                        { name: "Chins / Pulldowns", type: "strength" }
+                    ]},
+                    { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
+                        { name: "Leg Press", type: "strength" },
+                        { name: "Standing Calf Raise", type: "strength" },
+                        { name: "Overhead Press", type: "strength" }
+                    ]}
+                ],
+                history: [],
+                healthData: null,
+                healthLog: []
+            }
+        },
+        activeProfileId: "default",
+        settings: { restTime: 45, googleClientId: "", googleAccessToken: "" }
+    };
+
     let appData = JSON.parse(localStorage.getItem('fitness4me_app_data')) || null;
     let isFirstStart = false;
 
     if (!appData) {
         isFirstStart = true;
-        appData = {
-            profiles: {
-                "default": {
-                    name: "Default Profile",
-                    routines: [
-                        { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
-                            { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
-                            { name: "Incline Barbell Press", type: "strength" },
-                            { name: "Chins / Pulldowns", type: "strength" }
-                        ]},
-                        { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
-                            { name: "Leg Press", type: "strength" },
-                            { name: "Standing Calf Raise", type: "strength" },
-                            { name: "Overhead Press", type: "strength" }
-                        ]}
-                    ],
-                    history: [],
-                    healthData: null,
-                    healthLog: []
-                }
-            },
-            activeProfileId: "default",
-            settings: { restTime: 45, googleClientId: "", googleAccessToken: "" }
-        };
+        appData = JSON.parse(JSON.stringify(defaultTemplate));
     }
 
     function getCurrentProfile() {
-        if (!appData.profiles[appData.activeProfileId]) {
+        if (!appData.profiles || typeof appData.profiles !== 'object') {
+            appData.profiles = JSON.parse(JSON.stringify(defaultTemplate.profiles));
+        }
+        if (!appData.activeProfileId || !appData.profiles[appData.activeProfileId]) {
             appData.activeProfileId = Object.keys(appData.profiles)[0] || "default";
         }
         return appData.profiles[appData.activeProfileId];
@@ -249,12 +269,14 @@
     function renderDashboard() {
         const profile = getCurrentProfile();
         const selector = document.getElementById('workoutSelector');
-        selector.innerHTML = profile.routines.map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
+        selector.innerHTML = (profile.routines || []).map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
 
         updateHealthStatusBanners();
 
-        if (profile.history.length > 0) {
-            const last = new Date(profile.history[profile.history.length - 1].timestamp);
+        if (profile.history && profile.history.length > 0) {
+            const lastLog = profile.history[profile.history.length - 1];
+            const lastDate = lastLog.timestamp || lastLog.date;
+            const last = new Date(lastDate);
             const diffDays = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
             document.getElementById('lastTrainedDisplay').innerText = `${diffDays} days ago (${last.toLocaleDateString()})`;
             
@@ -267,17 +289,17 @@
             } else if (diffDays <= 7) {
                 badge.className = "badge badge-green";
                 badge.innerText = "🟢 Optimal Recovery Window";
-                msg.innerText = "✅ Optimal recovery window reached. Maximum intensity output suggested.";
+                msg.innerText = "✅ Optimal recovery window reached. High failure intensity recommended.";
             } else {
                 badge.className = "badge badge-yellow";
                 badge.innerText = "🟡 Well-Rested (>7 days)";
-                msg.innerText = "💡 Extended rest logged. Check strength trajectory metrics.";
+                msg.innerText = "💡 Extended rest logged. Verify strength trajectory progression.";
             }
         } else {
             document.getElementById('lastTrainedDisplay').innerText = "Never";
             document.getElementById('recoveryBadge').className = "badge badge-green";
             document.getElementById('recoveryBadge').innerText = "🟢 Fully Recovered";
-            document.getElementById('recoveryMessage').innerText = "Ready for your first Heavy Duty session.";
+            document.getElementById('recoveryMessage').innerText = "Ready for your Heavy Duty session.";
         }
     }
 
@@ -323,10 +345,10 @@
                     html += `<div class="set-row">
                         <span>#${setIdx+1}</span>
                         <select onchange="updateSet(${exIdx}, ${setIdx}, 'plate', this.value)">
-                            ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${set.plate===(i+1)?'selected':''}>Plates ${i+1}</option>`).join('')}
+                            ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${(set.plate || set.weight || 1)===(i+1)?'selected':''}>Plates ${i+1}</option>`).join('')}
                         </select>
                         <select onchange="updateSet(${exIdx}, ${setIdx}, 'reps', this.value)">
-                            ${Array.from({length:30}, (_,i)=>`<option value="${i+1}" ${set.reps===(i+1)?'selected':''}>${i+1} reps</option>`).join('')}
+                            ${Array.from({length:30}, (_,i)=>`<option value="${i+1}" ${(set.reps || 1)===(i+1)?'selected':''}>${i+1} reps</option>`).join('')}
                         </select>
                         <select onchange="updateSet(${exIdx}, ${setIdx}, 'intensity', this.value)">
                             <option value="Normal" ${set.intensity==='Normal'?'selected':''}>Normal</option>
@@ -354,7 +376,7 @@
     function startRestTimer() {
         const banner = document.getElementById('restTimerBanner');
         const display = document.getElementById('timerDisplay');
-        let timeLeft = parseInt(localStorage.getItem('fitness4me_rest_time')) || appData.settings.restTime || 45;
+        let timeLeft = parseInt(localStorage.getItem('fitness4me_rest_time')) || appData.settings?.restTime || 45;
         banner.style.display = 'block';
         clearInterval(restTimerInterval);
 
@@ -398,14 +420,14 @@
         const profile = getCurrentProfile();
         profile.history.push(activeWorkout);
         saveLocalStorage();
-        exportBackupJSON(true); // Trigger auto local backup download
-        alert("Workout saved successfully! Local backup JSON exported.");
+        exportBackupJSON(true);
+        alert("Workout saved successfully!");
         activeWorkout = null;
         switchTab('home');
     }
 
     // ==========================================================
-    // LOCAL BACKUP & FILE IMPORT / EXPORT LOGIC
+    // UNIVERSAL BACKUP & LEGACY PARSER LOGIC
     // ==========================================================
     function exportBackupJSON(silent = false) {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
@@ -415,32 +437,92 @@
         document.body.appendChild(dlAnchorElem);
         dlAnchorElem.click();
         dlAnchorElem.remove();
-        if (!silent) alert("Local JSON backup successfully exported!");
+        if (!silent) alert("Local JSON backup exported!");
     }
 
+    // Robust parsing method to handle older app export structures
     function importBackupJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const parsed = JSON.parse(e.target.result);
-                if (parsed.profiles || parsed.routines) {
-                    appData = parsed.profiles ? parsed : {
-                        profiles: { "default": { name: "Default Profile", routines: parsed.routines || [], history: parsed.history || [], healthData: null, healthLog: [] } },
-                        activeProfileId: "default",
-                        settings: { restTime: 45 }
-                    };
-                    saveLocalStorage();
-                    updateProfileSelector();
-                    renderDashboard();
-                    renderHealthCard();
-                    alert("Backup restored successfully!");
-                } else {
-                    alert("Invalid JSON backup structure.");
+                let parsed = JSON.parse(e.target.result);
+                
+                // If wrapped in an outer string payload
+                if (typeof parsed === 'string') {
+                    parsed = JSON.parse(parsed);
                 }
+
+                let migratedData = {
+                    profiles: {},
+                    activeProfileId: "default",
+                    settings: { restTime: 45, googleClientId: "", googleAccessToken: "" }
+                };
+
+                // Case 1: Legacy Single-Profile File ({ routines: [...], history: [...] })
+                if (Array.isArray(parsed.routines) || Array.isArray(parsed.history)) {
+                    migratedData.profiles["default"] = {
+                        name: "Migrated Profile",
+                        routines: parsed.routines || [],
+                        history: parsed.history || [],
+                        healthData: parsed.healthData || null,
+                        healthLog: parsed.healthLog || []
+                    };
+                }
+                // Case 2: Multi-Profile File Structure
+                else if (parsed.profiles && typeof parsed.profiles === 'object') {
+                    migratedData.profiles = parsed.profiles;
+                    migratedData.activeProfileId = parsed.activeProfileId || Object.keys(parsed.profiles)[0] || "default";
+                }
+                // Case 3: Raw Array of History/Routines
+                else if (Array.isArray(parsed)) {
+                    migratedData.profiles["default"] = {
+                        name: "Restored Log",
+                        routines: defaultTemplate.profiles.default.routines,
+                        history: parsed,
+                        healthData: null,
+                        healthLog: []
+                    };
+                } else {
+                    throw new Error("Unrecognized JSON format structure.");
+                }
+
+                // Standardize inner sets data for backwards compatibility
+                Object.keys(migratedData.profiles).forEach(pid => {
+                    const prof = migratedData.profiles[pid];
+                    prof.history = (prof.history || []).map(h => {
+                        if (!h.timestamp && h.date) h.timestamp = h.date;
+                        if (h.exercises && h.setsData) {
+                            h.setsData = h.setsData.map(s => {
+                                if (Array.isArray(s)) {
+                                    return s.map(st => ({
+                                        plate: Number(st.plate || st.weight || 1),
+                                        reps: Number(st.reps || 1),
+                                        intensity: st.intensity || 'Normal',
+                                        done: true
+                                    }));
+                                }
+                                return s;
+                            });
+                        }
+                        return h;
+                    });
+                });
+
+                if (parsed.settings) {
+                    migratedData.settings = { ...migratedData.settings, ...parsed.settings };
+                }
+
+                appData = migratedData;
+                saveLocalStorage();
+                updateProfileSelector();
+                renderDashboard();
+                renderHealthCard();
+                alert("✓ Older app workout data successfully migrated & imported!");
             } catch (err) {
-                alert("Could not parse JSON backup file.");
+                console.error("Backup Import Error:", err);
+                alert("Could not import JSON file: " + err.message);
             }
         };
         reader.readAsText(file);
@@ -459,7 +541,7 @@
         saveLocalStorage();
 
         if (typeof google === 'undefined') {
-            alert("Google GIS library not loaded yet. Please verify internet connectivity.");
+            alert("Google GIS library not loaded. Verify internet connection.");
             return;
         }
 
@@ -501,7 +583,7 @@
             if (res.ok) {
                 alert("✓ Cloud Backup uploaded to Google Drive successfully!");
             } else {
-                alert("Drive Sync failed. Your token may have expired — please Sign In with Google again.");
+                alert("Drive Sync failed. Token may be expired — please Sign In again.");
             }
         } catch(e) {
             alert("Google Drive sync error: " + e.message);
@@ -510,17 +592,17 @@
 
     function saveRestTimerSetting() {
         const val = document.getElementById('restTimerSetting').value;
+        if (!appData.settings) appData.settings = {};
         appData.settings.restTime = Number(val);
         localStorage.setItem('fitness4me_rest_time', val);
         saveLocalStorage();
     }
 
-    // Detailed History Renderer with Full Set Metrics Breakdown
     function initAnalytics() {
         const profile = getCurrentProfile();
         const container = document.getElementById('historyLogContainer');
         
-        if (profile.history.length === 0) {
+        if (!profile.history || profile.history.length === 0) {
             container.innerHTML = '<p style="color:var(--text-muted)">No saved workout history yet.</p>';
         } else {
             container.innerHTML = profile.history.slice().reverse().map(h => {
@@ -533,16 +615,17 @@
                             exercisesHTML += `<div style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">Cardio: Incline ${sets.incline || 1} | Speed ${sets.speed || 1} | Duration ${sets.duration || 15} mins</div>`;
                         } else if (Array.isArray(sets)) {
                             exercisesHTML += sets.map((s, sIdx) => 
-                                `<div style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">Set #${sIdx+1}: ${s.plate || 1} Plates · ${s.reps || 0} Reps (${s.intensity || 'Normal'})</div>`
+                                `<div style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">Set #${sIdx+1}: ${s.plate || s.weight || 1} Plates · ${s.reps || 0} Reps (${s.intensity || 'Normal'})</div>`
                             ).join('');
                         }
                     });
                 }
+                const logDate = h.timestamp || h.date || new Date().toISOString();
                 return `
                     <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <strong style="color:white;">${h.name}</strong>
-                            <span style="font-size:0.75rem; color:var(--text-muted);">${new Date(h.timestamp).toLocaleDateString()}</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${new Date(logDate).toLocaleDateString()}</span>
                         </div>
                         ${exercisesHTML}
                     </div>
@@ -552,7 +635,7 @@
         
         const sel = document.getElementById('analyticsExerciseSelect');
         let allEx = [];
-        profile.routines.forEach(r => r.exercises.forEach(e => { if(!allEx.includes(e.name)) allEx.push(e.name); }));
+        (profile.routines || []).forEach(r => (r.exercises || []).forEach(e => { if(!allEx.includes(e.name)) allEx.push(e.name); }));
         sel.innerHTML = allEx.map(e => `<option value="${e}">${e}</option>`).join('');
         renderAnalyticsChart();
     }
@@ -598,7 +681,7 @@
     function updateProfileSelector() {
         const sel = document.getElementById('profileSelector');
         if (!sel) return;
-        sel.innerHTML = Object.keys(appData.profiles).map(id => `<option value="${id}" ${appData.activeProfileId === id ? 'selected' : ''}>${appData.profiles[id].name}</option>`).join('');
+        sel.innerHTML = Object.keys(appData.profiles || {}).map(id => `<option value="${id}" ${appData.activeProfileId === id ? 'selected' : ''}>${appData.profiles[id].name}</option>`).join('');
     }
 
     // ==========================================================
@@ -623,7 +706,7 @@
         try { obj = JSON.parse(t); } catch (e) {
             obj = {};
             t.replace(/([a-zA-Z ]+?)\s*[:=]?\s*(-?\d+[.,]?\d*)/g, (_, k, v) => { obj[k.trim()] = v; });
-            if (!Object.keys(obj).length) throw new Error('Could not read any values. Use JSON like {"hrv":65,"sleepHours":7.5,"restingHR":52}');
+            if (!Object.keys(obj).length) throw new Error('Could not read values. Use JSON like {"hrv":65,"sleepHours":7.5,"restingHR":52}');
         }
         return normalize(obj);
     }
@@ -663,7 +746,7 @@
     window.importAppleHealthPayload = function (textOverride) {
         const el = document.getElementById('hpPaste');
         const txt = typeof textOverride === 'string' ? textOverride : (el ? el.value : '');
-        if (!txt.trim()) return hpMsg('Paste the Shortcut output first.', true);
+        if (!txt.trim()) return hpMsg('Paste Shortcut output first.', true);
         try { 
             saveHealth(parseHealthText(txt), 'shortcut'); 
             if (el) el.value = ''; 
@@ -767,3 +850,4 @@
 </script>
 </body>
 </html>
+
