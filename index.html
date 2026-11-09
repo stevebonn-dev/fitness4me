@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness4Me Heavy Duty & Cardio Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -29,8 +30,8 @@
         .card-title { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; }
-        nav button { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; }
+        nav button { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; }
         nav button.active { color: var(--accent); font-weight: 600; }
         button.btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; margin-top: 8px; }
         button.btn:hover { background: var(--primary-hover); }
@@ -46,7 +47,9 @@
         .set-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr 50px; gap: 8px; align-items: center; margin-bottom: 8px; background: rgba(15, 23, 42, 0.5); padding: 8px; border-radius: 6px; }
         .exercise-settings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .health-banner { cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); transition: background 0.2s; }
-        .health-banner:hover { background: rgba(255,255,255,0.06); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card-bg); padding: 24px; border-radius: 12px; max-width: 500px; width: 100%; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -112,6 +115,24 @@
         </div>
 
         <div class="card">
+            <div class="card-title">💾 Local Data & JSON Backup</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Export or import your complete workout history and routines via JSON file.</p>
+            <button class="btn" onclick="exportBackupJSON()">📥 Export JSON Backup File</button>
+            <label style="margin-top: 12px;">Restore from Backup File (.json):</label>
+            <input type="file" id="importJsonFileInput" accept=".json" onchange="importBackupJSON(event)">
+        </div>
+
+        <div class="card">
+            <div class="card-title">☁️ Google Drive Cloud Sync</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Sync your backup directly to Google Drive using your OAuth Client ID.</p>
+            <label for="googleClientIdInput">Google Cloud OAuth Client ID:</label>
+            <input type="text" id="googleClientIdInput" placeholder="your-client-id.apps.googleusercontent.com">
+            <div id="gdriveAuthStatus" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Status: Not Connected</div>
+            <button class="btn" onclick="initGoogleDriveAuth()">🔐 Sign In with Google</button>
+            <button class="btn btn-secondary" onclick="syncToGoogleDrive()" style="margin-top: 6px;">☁️ Sync Backup to Google Drive Now</button>
+        </div>
+
+        <div class="card">
             <h3>Rest Timer Default (Seconds)</h3>
             <select id="restTimerSetting" onchange="saveRestTimerSetting()">
                 <option value="30">30 seconds</option>
@@ -133,39 +154,56 @@
     </div>
 </div>
 
+<!-- FIRST START / DATABASE RECOVERY MODAL -->
+<div id="firstStartModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--accent); margin-bottom: 12px;">Welcome to Fitness4Me!</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">No workout database was detected in browser storage. Would you like to restore from a local JSON backup file or start fresh?</p>
+        <button class="btn" onclick="document.getElementById('wizardFileInput').click()">📂 Load JSON Backup File</button>
+        <input type="file" id="wizardFileInput" accept=".json" style="display:none;" onchange="importBackupJSON(event); closeModal();">
+        <button class="btn btn-secondary" onclick="closeModal()" style="margin-top: 8px;">🚀 Start Fresh with Defaults</button>
+    </div>
+</div>
+
 <nav>
     <button onclick="switchTab('home')" class="active" id="nav-home">🏠 Home</button>
     <button onclick="switchTab('workout')" id="nav-workout">💪 Workout</button>
-    <button onclick="switchTab('history')" id="nav-history">📊 Analytics</button>
+    <button onclick="switchTab('history')" id="nav-history">📊 History</button>
     <button onclick="switchTab('settings')" id="nav-settings">⚙️ Settings</button>
 </nav>
 
 <script>
-    // App State & Multi-Profile Support
-    let appData = JSON.parse(localStorage.getItem('fitness4me_app_data')) || {
-        profiles: {
-            "default": {
-                name: "Default Profile",
-                routines: [
-                    { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
-                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
-                        { name: "Incline Barbell Press", type: "strength" },
-                        { name: "Chins / Pulldowns", type: "strength" }
-                    ]},
-                    { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
-                        { name: "Leg Press", type: "strength" },
-                        { name: "Standing Calf Raise", type: "strength" },
-                        { name: "Overhead Press", type: "strength" }
-                    ]}
-                ],
-                history: [],
-                healthData: null,
-                healthLog: []
-            }
-        },
-        activeProfileId: "default",
-        settings: { restTime: 45 }
-    };
+    // Initial State Setup
+    let appData = JSON.parse(localStorage.getItem('fitness4me_app_data')) || null;
+    let isFirstStart = false;
+
+    if (!appData) {
+        isFirstStart = true;
+        appData = {
+            profiles: {
+                "default": {
+                    name: "Default Profile",
+                    routines: [
+                        { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
+                            { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
+                            { name: "Incline Barbell Press", type: "strength" },
+                            { name: "Chins / Pulldowns", type: "strength" }
+                        ]},
+                        { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
+                            { name: "Leg Press", type: "strength" },
+                            { name: "Standing Calf Raise", type: "strength" },
+                            { name: "Overhead Press", type: "strength" }
+                        ]}
+                    ],
+                    history: [],
+                    healthData: null,
+                    healthLog: []
+                }
+            },
+            activeProfileId: "default",
+            settings: { restTime: 45, googleClientId: "", googleAccessToken: "" }
+        };
+    }
 
     function getCurrentProfile() {
         if (!appData.profiles[appData.activeProfileId]) {
@@ -180,6 +218,23 @@
 
     let activeWorkout = null;
     let restTimerInterval = null;
+    let tokenClient = null;
+
+    window.onload = function() {
+        if (isFirstStart) {
+            document.getElementById('firstStartModal').classList.add('active');
+        }
+        if (appData.settings && appData.settings.googleClientId) {
+            document.getElementById('googleClientIdInput').value = appData.settings.googleClientId;
+        }
+        updateProfileSelector();
+        renderDashboard();
+        renderHealthCard();
+    };
+
+    function closeModal() {
+        document.getElementById('firstStartModal').classList.remove('active');
+    }
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -208,15 +263,15 @@
             if (diffDays < 4) {
                 badge.className = "badge badge-red";
                 badge.innerText = "🔴 CNS Overreached / Overtrained";
-                msg.innerText = "⚠️ Too soon! Mentzer advises 4–7+ days rest for full growth.";
+                msg.innerText = "⚠️ Mentzer advises 4–7+ days rest for full muscle recovery.";
             } else if (diffDays <= 7) {
                 badge.className = "badge badge-green";
                 badge.innerText = "🟢 Optimal Recovery Window";
-                msg.innerText = "✅ Optimal recovery window (4-7 days). Ready for maximum intensity!";
+                msg.innerText = "✅ Optimal recovery window reached. Maximum intensity output suggested.";
             } else {
                 badge.className = "badge badge-yellow";
                 badge.innerText = "🟡 Well-Rested (>7 days)";
-                msg.innerText = "💡 Extended rest logged. Check strength metrics before proceeding.";
+                msg.innerText = "💡 Extended rest logged. Check strength trajectory metrics.";
             }
         } else {
             document.getElementById('lastTrainedDisplay').innerText = "Never";
@@ -226,9 +281,7 @@
         }
     }
 
-    function calculateRestDays() {
-        renderDashboard();
-    }
+    function calculateRestDays() { renderDashboard(); }
 
     function startSelectedWorkout() {
         const profile = getCurrentProfile();
@@ -265,7 +318,7 @@
                     <input type="number" value="${activeWorkout.setsData[exIdx].duration}" onchange="updateTreadmill(${exIdx}, 'duration', this.value)">
                 `;
             } else {
-                html += `<div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">Set | Plates/Wt | Reps | Intensity | Done</div>`;
+                html += `<div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">Set | Weight/Plates | Reps | Mode | Done</div>`;
                 activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
                     html += `<div class="set-row">
                         <span>#${setIdx+1}</span>
@@ -291,19 +344,11 @@
         container.innerHTML = html;
     }
 
-    function updateTreadmill(exIdx, field, val) {
-        activeWorkout.setsData[exIdx][field] = Number(val);
-    }
-
-    function updateSet(exIdx, setIdx, field, val) {
-        activeWorkout.setsData[exIdx][setIdx][field] = field === 'intensity' ? val : Number(val);
-    }
-
+    function updateTreadmill(exIdx, field, val) { activeWorkout.setsData[exIdx][field] = Number(val); }
+    function updateSet(exIdx, setIdx, field, val) { activeWorkout.setsData[exIdx][setIdx][field] = field === 'intensity' ? val : Number(val); }
     function toggleSetDone(exIdx, setIdx, isChecked) {
         activeWorkout.setsData[exIdx][setIdx].done = isChecked;
-        if (isChecked) {
-            startRestTimer();
-        }
+        if (isChecked) startRestTimer();
     }
 
     function startRestTimer() {
@@ -324,7 +369,6 @@
         }, 1000);
     }
 
-    // Robust audio unlock & triple beep + vibration
     let audioCtx = null;
     const unlockAudio = () => {
         try {
@@ -354,9 +398,114 @@
         const profile = getCurrentProfile();
         profile.history.push(activeWorkout);
         saveLocalStorage();
-        alert("Workout saved successfully!");
+        exportBackupJSON(true); // Trigger auto local backup download
+        alert("Workout saved successfully! Local backup JSON exported.");
         activeWorkout = null;
         switchTab('home');
+    }
+
+    // ==========================================================
+    // LOCAL BACKUP & FILE IMPORT / EXPORT LOGIC
+    // ==========================================================
+    function exportBackupJSON(silent = false) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", `heavyduty_backup_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(dlAnchorElem);
+        dlAnchorElem.click();
+        dlAnchorElem.remove();
+        if (!silent) alert("Local JSON backup successfully exported!");
+    }
+
+    function importBackupJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (parsed.profiles || parsed.routines) {
+                    appData = parsed.profiles ? parsed : {
+                        profiles: { "default": { name: "Default Profile", routines: parsed.routines || [], history: parsed.history || [], healthData: null, healthLog: [] } },
+                        activeProfileId: "default",
+                        settings: { restTime: 45 }
+                    };
+                    saveLocalStorage();
+                    updateProfileSelector();
+                    renderDashboard();
+                    renderHealthCard();
+                    alert("Backup restored successfully!");
+                } else {
+                    alert("Invalid JSON backup structure.");
+                }
+            } catch (err) {
+                alert("Could not parse JSON backup file.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // ==========================================================
+    // GOOGLE DRIVE OAUTH2 SYNC INTEGRATION
+    // ==========================================================
+    function initGoogleDriveAuth() {
+        const clientId = document.getElementById('googleClientIdInput').value.trim();
+        if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+            alert("Please enter a valid Google OAuth Client ID ending in .apps.googleusercontent.com");
+            return;
+        }
+        appData.settings.googleClientId = clientId;
+        saveLocalStorage();
+
+        if (typeof google === 'undefined') {
+            alert("Google GIS library not loaded yet. Please verify internet connectivity.");
+            return;
+        }
+
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (response) => {
+                if (response.access_token) {
+                    appData.settings.googleAccessToken = response.access_token;
+                    saveLocalStorage();
+                    document.getElementById('gdriveAuthStatus').innerHTML = '<span style="color:var(--success)">✓ Connected to Google Drive</span>';
+                    alert("Successfully authenticated with Google Drive!");
+                    syncToGoogleDrive();
+                }
+            },
+        });
+        tokenClient.requestAccessToken();
+    }
+
+    async function syncToGoogleDrive() {
+        const token = appData.settings?.googleAccessToken;
+        if (!token) {
+            alert("Please click 'Sign In with Google' first to authorize Drive sync.");
+            return;
+        }
+
+        const fileContent = JSON.stringify(appData, null, 2);
+        const metadata = { name: 'heavyduty_backup.json', mimeType: 'application/json' };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([fileContent], { type: 'application/json' }));
+
+        try {
+            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: form
+            });
+            if (res.ok) {
+                alert("✓ Cloud Backup uploaded to Google Drive successfully!");
+            } else {
+                alert("Drive Sync failed. Your token may have expired — please Sign In with Google again.");
+            }
+        } catch(e) {
+            alert("Google Drive sync error: " + e.message);
+        }
     }
 
     function saveRestTimerSetting() {
@@ -366,13 +515,40 @@
         saveLocalStorage();
     }
 
+    // Detailed History Renderer with Full Set Metrics Breakdown
     function initAnalytics() {
         const profile = getCurrentProfile();
         const container = document.getElementById('historyLogContainer');
-        container.innerHTML = profile.history.length === 0 ? '<p style="color:var(--text-muted)">No history yet.</p>' :
-            profile.history.map(h => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:8px;">
-                <strong>${h.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted); float:right;">${new Date(h.timestamp).toLocaleDateString()}</span>
-            </div>`).join('');
+        
+        if (profile.history.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-muted)">No saved workout history yet.</p>';
+        } else {
+            container.innerHTML = profile.history.slice().reverse().map(h => {
+                let exercisesHTML = '';
+                if (h.exercises && h.setsData) {
+                    h.exercises.forEach((ex, exIdx) => {
+                        const sets = h.setsData[exIdx];
+                        exercisesHTML += `<div style="margin-top:6px; font-size:0.85rem; color:var(--accent);"><strong>${ex.name}</strong></div>`;
+                        if (ex.type === 'treadmill') {
+                            exercisesHTML += `<div style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">Cardio: Incline ${sets.incline || 1} | Speed ${sets.speed || 1} | Duration ${sets.duration || 15} mins</div>`;
+                        } else if (Array.isArray(sets)) {
+                            exercisesHTML += sets.map((s, sIdx) => 
+                                `<div style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">Set #${sIdx+1}: ${s.plate || 1} Plates · ${s.reps || 0} Reps (${s.intensity || 'Normal'})</div>`
+                            ).join('');
+                        }
+                    });
+                }
+                return `
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:white;">${h.name}</strong>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${new Date(h.timestamp).toLocaleDateString()}</span>
+                        </div>
+                        ${exercisesHTML}
+                    </div>
+                `;
+            }).join('');
+        }
         
         const sel = document.getElementById('analyticsExerciseSelect');
         let allEx = [];
@@ -388,7 +564,7 @@
             type: 'line',
             data: {
                 labels: ['Session 1', 'Session 2', 'Session 3', 'Session 4'],
-                datasets: [{ label: 'Progress Trajectory', data: [10, 12, 12, 14], borderColor: '#3b82f6', tension: 0.1 }]
+                datasets: [{ label: 'Weight/Reps Progress', data: [10, 12, 12, 14], borderColor: '#3b82f6', tension: 0.1 }]
             },
             options: { responsive: true, maintainAspectRatio: false }
         });
@@ -426,7 +602,7 @@
     }
 
     // ==========================================================
-    // APPLE HEALTH PATCH LOGIC (Fully Integrated)
+    // APPLE HEALTH PATCH LOGIC
     // ==========================================================
     const daysOld = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
     const num = v => {
@@ -581,7 +757,6 @@
         saveLocalStorage(); updateHealthStatusBanners(); calculateRestDays(); renderHealthCard();
     };
 
-    // Check URL params for one-tap import on load
     const q = new URLSearchParams(location.search);
     if (q.has('hrv') || q.has('sleep') || q.has('rhr')) {
         try {
@@ -589,10 +764,6 @@
             history.replaceState(null, '', location.pathname);
         } catch (e) { console.warn(e.message); }
     }
-
-    updateProfileSelector();
-    renderDashboard();
-    renderHealthCard();
 </script>
 </body>
 </html>
