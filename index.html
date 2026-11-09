@@ -1,1610 +1,598 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Fitness4Me - High-Intensity Heavy Duty & Cardio Tracker</title>
-  <!-- Google Identity Services Script -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #cbd5e1;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --font-scale: 1;
-    }
-
-    body.font-large { --font-scale: 1.15; }
-    body.font-xlarge { --font-scale: 1.3; }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-size: calc(15px * var(--font-scale));
-      line-height: 1.5;
-      padding-bottom: 80px;
-    }
-
-    /* Header & Navigation */
-    header {
-      background-color: #090d16;
-      border-bottom: 1px solid var(--card-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 16px;
-    }
-    .header-title { font-size: calc(18px * var(--font-scale)); font-weight: 700; color: #fff; text-align: center; margin-bottom: 8px; }
-    
-    nav { display: flex; justify-content: space-around; gap: 4px; }
-    .nav-btn {
-      flex: 1;
-      padding: 8px 6px;
-      background: #1e293b;
-      color: var(--text-muted);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: calc(12px * var(--font-scale));
-      cursor: pointer;
-      text-align: center;
-    }
-    .nav-btn.active {
-      background: var(--accent);
-      color: #0f172a;
-      border-color: var(--accent);
-    }
-
-    /* Container */
-    .container { padding: 16px; max-width: 768px; margin: 0 auto; }
-    
-    /* Metrics, Rest Timer & Banners */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    @media(min-width: 500px) {
-      .metrics-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    .rest-banner, .timer-banner, .mentzer-banner, .health-banner {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .timer-banner { border-color: var(--warning); background: linear-gradient(135deg, #27200a, #0f172a); }
-    .mentzer-banner { border-color: var(--success); background: linear-gradient(135deg, #062414, #0f172a); grid-column: 1 / -1; }
-    .health-banner { border-color: #a855f7; background: linear-gradient(135deg, #2e1065, #0f172a); grid-column: 1 / -1; }
-    
-    .rest-banner-title, .timer-banner-title, .mentzer-banner-title, .health-banner-title { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-    .rest-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--accent); }
-    .timer-banner-value { font-size: calc(20px * var(--font-scale)); font-weight: 800; color: var(--warning); }
-    .mentzer-banner-desc { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: var(--success); margin-top: 2px; }
-    .health-banner-desc { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: #d8b4fe; margin-top: 2px; }
-
-    /* Card Styling */
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .card-title { font-size: calc(16px * var(--font-scale)); font-weight: 700; color: #ffffff; }
-
-    /* Controls & Dropdowns */
-    label { display: block; font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
-    select, input[type="text"], input[type="number"], input[type="password"], textarea {
-      width: 100%;
-      padding: 8px 10px;
-      background: #0f172a;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      color: #ffffff;
-      font-size: calc(14px * var(--font-scale));
-      margin-bottom: 10px;
-    }
-    select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-
-    /* Exercise Items */
-    .exercise-item {
-      background: #0f172a;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-    .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .exercise-title { font-weight: 700; color: #ffffff; font-size: calc(15px * var(--font-scale)); }
-    
-    .reorder-btns { display: flex; gap: 4px; }
-    .btn-mini {
-      padding: 4px 8px;
-      background: #334155;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .btn-danger-mini {
-      background: #7f1d1d;
-      color: #fca5a5;
-    }
-
-    .exercise-settings-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    /* Sets Table */
-    .sets-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .sets-table th { font-size: calc(11px * var(--font-scale)); color: var(--text-muted); text-align: center; padding: 4px; }
-    .sets-table td { padding: 4px; text-align: center; vertical-align: middle; }
-    
-    .last-target-badge {
-      display: inline-block;
-      background: #334155;
-      color: #f8fafc;
-      font-size: calc(14px * var(--font-scale));
-      font-weight: 700;
-      padding: 4px 6px;
-      border-radius: 4px;
-    }
-
-    /* Checkbox styling */
-    .checkbox-custom {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--success);
-      cursor: pointer;
-    }
-
-    /* Primary Action Buttons */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: calc(14px * var(--font-scale));
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .btn-primary { background: var(--accent); color: #0f172a; }
-    .btn-success { background: var(--success); color: #0f172a; }
-    .btn-warning { background: var(--warning); color: #0f172a; }
-    .btn-secondary { background: #334155; color: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-
-    /* Modal Overlay */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.85);
-      z-index: 1000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-    .modal-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-
-    /* Hidden File Picker */
-    #jsonFileInput { display: none; }
-
-    /* Tab Displays */
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* History & Analytics Items */
-    .history-item {
-      background: #0f172a;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .history-date { font-weight: 700; color: var(--accent); margin-bottom: 4px; }
-    .history-meta { font-size: calc(12px * var(--font-scale)); color: var(--text-muted); margin-bottom: 8px; }
-    .history-exercise { font-size: calc(13px * var(--font-scale)); border-top: 1px solid #1e293b; padding-top: 6px; margin-top: 6px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness4Me Heavy Duty & Cardio Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #334155;
+            --card-border: #334155;
+            --accent: #60a5fa;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 90px; }
+        header { background: var(--card-bg); padding: 16px; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        h1 { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card-title { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; }
+        nav button { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        nav button.active { color: var(--accent); font-weight: 600; }
+        button.btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; margin-top: 8px; }
+        button.btn:hover { background: var(--primary-hover); }
+        button.btn-danger { background: var(--danger); }
+        button.btn-secondary { background: #475569; }
+        input, select, textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; margin-top: 6px; margin-bottom: 12px; }
+        label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; display: block; margin-top: 8px; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-green { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .badge-yellow { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .timer-banner { background: #1e3a8a; border: 1px solid #3b82f6; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 16px; font-weight: bold; font-size: 1.1rem; display: none; }
+        .set-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr 50px; gap: 8px; align-items: center; margin-bottom: 8px; background: rgba(15, 23, 42, 0.5); padding: 8px; border-radius: 6px; }
+        .exercise-settings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .health-banner { cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); transition: background 0.2s; }
+        .health-banner:hover { background: rgba(255,255,255,0.06); }
+    </style>
 </head>
 <body>
 
-  <!-- MODAL RESTORE DIALOG -->
-  <div id="restoreModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="card-title" id="modalTitle">Restore Backup Profiles</div>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 10px 0;" id="modalDesc">
-        Select how you would like to restore backup data for profile: <strong id="modalProfileName" style="color:#fff;"></strong>
-      </p>
-      
-      <label>Destination Target</label>
-      <select id="restoreActionSelect" onchange="toggleRestoreDestInput()">
-        <option value="original">Restore as original profile name</option>
-        <option value="existing">Merge into existing profile</option>
-        <option value="new">Copy to a brand new profile</option>
-      </select>
+<header>
+    <h1>Fitness4Me Heavy Duty & Cardio</h1>
+</header>
 
-      <div id="existingProfileContainer" style="display:none; margin-top: 8px;">
-        <label>Select Existing Profile</label>
-        <select id="modalExistingSelect"></select>
-      </div>
-
-      <div id="newProfileContainer" style="display:none; margin-top: 8px;">
-        <label>New Profile Name</label>
-        <input type="text" id="modalNewNameInput" placeholder="Enter new profile name" />
-      </div>
-
-      <div style="display: flex; gap: 8px; margin-top: 16px;">
-        <button class="btn btn-primary" style="flex:1; margin-bottom:0;" onclick="confirmRestoreStep()">Continue / Next</button>
-        <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="skipRestoreStep()">Skip</button>
-      </div>
-    </div>
-  </div>
-
-  <header>
-    <div class="header-title">Fitness4Me Heavy Duty & Cardio</div>
-    <nav>
-      <button class="nav-btn active" onclick="switchTab('home', event)">Home</button>
-      <button class="nav-btn" onclick="switchTab('workout', event)">Workout</button>
-      <button class="nav-btn" onclick="switchTab('history', event)">History</button>
-      <button class="nav-btn" onclick="switchTab('settings', event)">Settings</button>
-    </nav>
-  </header>
-
-  <div class="container">
+<div class="container">
+    <div id="restTimerBanner" class="timer-banner">Rest Timer: <span id="timerDisplay">45</span>s</div>
 
     <!-- HOME / DASHBOARD TAB -->
     <div id="tab-home" class="tab-content active">
-      <div class="metrics-grid">
-        <div class="rest-banner">
-          <div>
-            <div class="rest-banner-title">Rest Days Since Last</div>
-            <div style="font-size: 11px; color: var(--text-muted);" id="homeLastWorkoutDateText">Never</div>
-          </div>
-          <div class="rest-banner-value" id="homeRestDaysCount">0 Days</div>
+        <div class="card">
+            <h3>Mike Mentzer Recovery Advisor</h3>
+            <div id="recoveryStatusContainer" style="margin-top: 10px;">
+                <span class="badge badge-green" id="recoveryBadge">🟢 Fully Recovered</span>
+                <p id="recoveryMessage" style="font-size: 0.9rem; margin-top: 8px; color: var(--text-muted);">Ready for maximum intensity failure sets.</p>
+            </div>
+            <div style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">
+                Last Trained: <span id="lastTrainedDisplay" style="color: white; font-weight: 600;">Never</span>
+            </div>
         </div>
 
-        <div class="mentzer-banner">
-          <div>
-            <div class="mentzer-banner-title">Mike Mentzer Recovery Advisor</div>
-            <div class="mentzer-banner-desc" id="homeMentzerStatusText">Status: Ready to train</div>
-          </div>
-          <div style="font-size: 24px;">🧠</div>
+        <div class="card health-banner" onclick="switchTab('settings'); setTimeout(() => document.getElementById('hpCard').scrollIntoView({ behavior: 'smooth' }), 50);">
+            <h3>Apple Health Status</h3>
+            <div id="homeHealthStatusText" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">Tap to enter HRV / sleep data</div>
         </div>
 
-        <div class="health-banner">
-          <div>
-            <div class="health-banner-title">Apple Health Shortcut Status</div>
-            <div class="health-banner-desc" id="homeHealthStatusText">Not synced yet</div>
-          </div>
-          <div style="font-size: 24px;">🍏</div>
+        <div class="card">
+            <h3>Start Today's Workout</h3>
+            <label for="workoutSelector">Select Routine:</label>
+            <select id="workoutSelector"></select>
+            <button class="btn" onclick="startSelectedWorkout()" style="margin-top: 10px;">Start Workout</button>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Select Today's Workout Routine</div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
-          Choose which routine to perform today based on your recovery window:
-        </p>
-        <label for="homeWorkoutDaySelect">Workout Routine</label>
-        <select id="homeWorkoutDaySelect" onchange="syncRoutineSelection(this.value)"></select>
-        <button class="btn btn-primary" style="margin-top: 8px;" onclick="switchTabToWorkout()">🚀 Start Selected Workout</button>
-      </div>
     </div>
 
-    <!-- WORKOUT TAB -->
+    <!-- WORKOUT LOGGING TAB -->
     <div id="tab-workout" class="tab-content">
-      <div class="metrics-grid" style="margin-bottom: 12px;">
-        <div class="timer-banner" style="grid-column: 1 / -1;">
-          <div>
-            <div class="timer-banner-title">Rest Timer</div>
-            <div style="font-size: 11px; color: var(--text-muted);" id="timerSubtext">Ready</div>
-          </div>
-          <div class="timer-banner-value" id="timerDisplay">00:45</div>
+        <div id="activeWorkoutContainer">
+            <p style="color: var(--text-muted); text-align: center; padding: 20px;">No workout active. Go to Home and select a routine.</p>
         </div>
-      </div>
-
-      <div class="card">
-        <label for="profileSelect">Active Profile</label>
-        <select id="profileSelect" onchange="switchProfile(this.value)"></select>
-
-        <label for="workoutDaySelect">Select Workout Routine</label>
-        <select id="workoutDaySelect" onchange="syncHomeRoutineSelection(this.value); renderActiveWorkout()"></select>
-        
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptAddExercise()">+ Strength Exercise</button>
-          <button class="btn btn-warning" style="flex:1; margin-bottom:0;" onclick="promptAddTreadmillExercise()">+ Treadmill</button>
-          <button class="btn btn-danger-mini" style="width: 45px; margin-bottom:0; border-radius:8px; font-weight:700;" onclick="promptDeleteWorkout()">🗑️</button>
-        </div>
-      </div>
-
-      <div id="activeWorkoutContainer"></div>
-
-      <button class="btn btn-success" onclick="completeWorkout()">
-        ✓ Complete Workout & Save Local File
-      </button>
     </div>
 
     <!-- HISTORY & ANALYTICS TAB -->
     <div id="tab-history" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">📈 Strength Trajectory & Analytics</div>
+        <div class="card">
+            <h3>Strength Analytics & Trajectory</h3>
+            <label for="analyticsExerciseSelect">Select Exercise:</label>
+            <select id="analyticsExerciseSelect" onchange="renderAnalyticsChart()"></select>
+            <canvas id="strengthChart" style="margin-top: 15px; max-height: 250px;"></canvas>
         </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
-          Tracking progressive overload compliance across past sessions.
-        </p>
-        <div id="strengthAnalyticsContainer"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Completed Workout Logs & Set Details</div>
+        <div class="card">
+            <h3>Completed Workouts History</h3>
+            <div id="historyLogContainer"></div>
         </div>
-        <div id="historyLogsContainer"></div>
-      </div>
     </div>
 
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tab-content">
-      
-      <!-- Rest Timer Settings -->
-      <div class="card">
-        <div class="card-title">Rest Timer Settings</div>
-        <label for="defaultRestSecSelect">Default Rest Duration (5s increments)</label>
-        <select id="defaultRestSecSelect" onchange="updateDefaultRestTime(parseInt(this.value))">
-        </select>
-      </div>
-
-      <!-- Apple Health Shortcut Bridge Setup -->
-      <div class="card">
-        <div class="card-title">Apple Health Shortcut Bridge</div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-          Paste the JSON payload generated by your iOS Shortcut to import Apple Health HRV and sleep recovery data:
-        </p>
-        <textarea id="appleHealthJsonInput" rows="3" placeholder='{"hrv": 65, "sleepScore": 85, "restingHR": 52}'></textarea>
-        <button class="btn btn-secondary" onclick="importAppleHealthPayload()">Sync Apple Health Data</button>
-      </div>
-
-      <!-- Profile Management -->
-      <div class="card">
-        <div class="card-title">Manage User Profiles</div>
-        <label for="newProfileName">Create New Profile</label>
-        <input type="text" id="newProfileName" placeholder="e.g., Steve, Partner, Deload" />
-        <button class="btn btn-primary" onclick="createNewProfile()">Create Profile</button>
-        
-        <hr style="border:0; border-top:1px solid var(--card-border); margin: 12px 0;" />
-        
-        <label>Active Profile Controls</label>
-        <div style="display: flex; gap: 8px; margin-top: 4px;">
-          <button class="btn btn-secondary" style="flex:1; margin-bottom:0;" onclick="promptRenameProfile()">✏️ Rename</button>
-          <button class="btn btn-danger" style="flex:1; margin-bottom:0;" onclick="promptDeleteProfile()">🗑️ Remove</button>
+        <div class="card" id="hpCard">
+            <!-- Populated dynamically by health patch -->
         </div>
-      </div>
 
-      <!-- Create New Routine -->
-      <div class="card">
-        <div class="card-title">Create New Workout Routine</div>
-        <label for="newWorkoutTitle">Routine Name</label>
-        <input type="text" id="newWorkoutTitle" placeholder="e.g., Treadmill & Cardio Day" />
-        <button class="btn btn-primary" onclick="createNewWorkoutRoutine()">Create Routine</button>
-      </div>
+        <div class="card">
+            <h3>Rest Timer Default (Seconds)</h3>
+            <select id="restTimerSetting" onchange="saveRestTimerSetting()">
+                <option value="30">30 seconds</option>
+                <option value="45" selected>45 seconds</option>
+                <option value="60">60 seconds</option>
+                <option value="90">90 seconds</option>
+                <option value="120">120 seconds</option>
+            </select>
+        </div>
 
-      <!-- Display & Accessibility -->
-      <div class="card">
-        <div class="card-title">Display Settings</div>
-        <label for="fontSizeSelect">Font Scaling</label>
-        <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
-          <option value="normal">Normal Text</option>
-          <option value="large">Large Text</option>
-          <option value="xlarge">Extra Large Text</option>
-        </select>
-      </div>
-
-      <!-- Manual Backup & File Picker -->
-      <div class="card">
-        <div class="card-title">Local JSON Backup & Restore</div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
-          Import backup JSON files. Multiple profiles in backups can be selectively merged or restored.
-        </p>
-        
-        <input type="file" id="jsonFileInput" accept=".json,application/json" onchange="handleFileSelect(event)" />
-        
-        <button class="btn btn-primary" onclick="triggerFilePicker()">
-          📁 Select JSON Backup File
-        </button>
-        <button class="btn btn-secondary" onclick="exportBackupJSON()">
-          ⬇️ Download Backup JSON
-        </button>
-      </div>
-
-      <!-- Google Drive Cloud Setup -->
-      <div class="card">
-        <div class="card-title">Google Drive Integration</div>
-        <label for="gdriveClientId">Google OAuth Client ID (from Google Cloud Console)</label>
-        <input type="text" id="gdriveClientId" placeholder="e.g. 123456789-abc.apps.googleusercontent.com" onchange="saveDriveSettings()" />
-
-        <div id="driveAuthStatus" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Status: Not signed in</div>
-
-        <button class="btn btn-primary" onclick="handleGoogleSignIn()">🔑 Sign in with Google</button>
-        <button class="btn btn-warning" onclick="syncToGoogleDrive()">☁️ Manual Cloud Backup Now</button>
-      </div>
-
+        <div class="card">
+            <h3>Profile Management</h3>
+            <label for="profileSelector">Active Profile:</label>
+            <select id="profileSelector" onchange="switchProfile(this.value)">
+                <option value="default">Default Profile</option>
+            </select>
+            <button class="btn btn-secondary" onclick="createNewProfile()">Add New Profile</button>
+        </div>
     </div>
+</div>
 
-  </div>
+<nav>
+    <button onclick="switchTab('home')" class="active" id="nav-home">🏠 Home</button>
+    <button onclick="switchTab('workout')" id="nav-workout">💪 Workout</button>
+    <button onclick="switchTab('history')" id="nav-history">📊 Analytics</button>
+    <button onclick="switchTab('settings')" id="nav-settings">⚙️ Settings</button>
+</nav>
 
-  <script>
-    let appState = {
-      activeProfileId: "profile_1",
-      defaultRestSeconds: 45,
-      profiles: [
-        {
-          id: "profile_1",
-          name: "Default Profile",
-          workoutDays: [
-            {
-              id: "day_1",
-              title: "Workout Day 1 (Chest & Back)",
-              exercises: [
-                {
-                  id: "ex_1",
-                  name: "Cable Incline Press",
-                  type: "strength",
-                  notes: "Bench on 2nd highest setting",
-                  cableSides: "both",
-                  cableHeight: 26,
-                  benchPosition: "incline",
-                  sets: [
-                    { reps: 6, weight: 10, intensity: "normal", completed: false, lastReps: 6, lastWeight: 10 },
-                    { reps: 8, weight: 8, intensity: "failure", completed: false, lastReps: 8, lastWeight: 8 }
-                  ]
-                }
-              ]
-            },
-            {
-              id: "day_cardio",
-              title: "Workout Day 4 (Treadmill Cardio)",
-              exercises: [
-                {
-                  id: "ex_treadmill_1",
-                  name: "Treadmill Jog / Sprint",
-                  type: "treadmill",
-                  notes: "Interval cardio session",
-                  incline: 5,
-                  speed: 10,
-                  durationMinutes: 20,
-                  completed: false
-                }
-              ]
+<script>
+    // App State & Multi-Profile Support
+    let appData = JSON.parse(localStorage.getItem('fitness4me_app_data')) || {
+        profiles: {
+            "default": {
+                name: "Default Profile",
+                routines: [
+                    { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
+                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
+                        { name: "Incline Barbell Press", type: "strength" },
+                        { name: "Chins / Pulldowns", type: "strength" }
+                    ]},
+                    { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
+                        { name: "Leg Press", type: "strength" },
+                        { name: "Standing Calf Raise", type: "strength" },
+                        { name: "Overhead Press", type: "strength" }
+                    ]}
+                ],
+                history: [],
+                healthData: null,
+                healthLog: []
             }
-          ],
-          history: [],
-          healthData: null
-        }
-      ],
-      driveClientId: "",
-      driveToken: "",
-      fontSize: "normal"
-    };
-
-    let pendingRestoreProfiles = [];
-    let currentRestoreIndex = 0;
-    let restTimerInterval = null;
-    let remainingRestSeconds = 0;
-    let tokenClient = null;
-
-    window.onload = function() {
-      const isFirstLaunch = !localStorage.getItem('fitness4me_workouts');
-      loadLocalStorage();
-      populateRestTimerDropdowns();
-      renderProfileSelect();
-      renderWorkoutSelects();
-      renderActiveWorkout();
-      renderHistory();
-      renderStrengthAnalytics();
-      calculateRestDays();
-      applyFontSize(appState.fontSize);
-      updateDriveAuthStatus();
-      updateHealthStatusBanners();
-      initGoogleDriveAuthClient();
-
-      if (isFirstLaunch) {
-        setTimeout(() => {
-          if (confirm("Welcome to Fitness4Me! Would you like to restore an existing backup JSON file now?")) {
-            triggerFilePicker();
-          }
-        }, 200);
-      }
-    };
-
-    function initGoogleDriveAuthClient() {
-      if (!appState.driveClientId) return;
-      if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: appState.driveClientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: (response) => {
-          if (response.error !== undefined) {
-            alert('Google Sign-In Error: ' + response.error);
-            return;
-          }
-          appState.driveToken = response.access_token;
-          saveLocalStorage();
-          updateDriveAuthStatus();
-          alert('Google account authenticated successfully!');
-          syncToGoogleDrive();
         },
-      });
-    }
-
-    function handleGoogleSignIn() {
-      appState.driveClientId = document.getElementById('gdriveClientId').value.trim();
-      saveLocalStorage();
-      if (!appState.driveClientId) {
-        alert("Please enter a valid Google OAuth Client ID first.");
-        return;
-      }
-      if (!tokenClient) {
-        initGoogleDriveAuthClient();
-      }
-      if (tokenClient) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-      } else {
-        alert("Google Identity Services library is still loading or unavailable. Please check your internet connection.");
-      }
-    }
-
-    function updateDriveAuthStatus() {
-      const statusEl = document.getElementById('driveAuthStatus');
-      if (statusEl) {
-        if (appState.driveToken) {
-          statusEl.innerHTML = 'Status: <span style="color: var(--success);">Signed In (Token Active)</span>';
-        } else {
-          statusEl.innerHTML = 'Status: <span style="color: var(--text-muted);">Not signed in</span>';
-        }
-      }
-    }
-
-    function importAppleHealthPayload() {
-      const inputVal = document.getElementById('appleHealthJsonInput').value.trim();
-      if (!inputVal) {
-        alert("Please paste valid JSON payload from your iOS Shortcut.");
-        return;
-      }
-      try {
-        const parsed = JSON.parse(inputVal);
-        const profile = getCurrentProfile();
-        profile.healthData = {
-          hrv: parsed.hrv || 50,
-          sleepScore: parsed.sleepScore || 75,
-          restingHR: parsed.restingHR || 60,
-          date: new Date().toISOString()
-        };
-        saveLocalStorage();
-        updateHealthStatusBanners();
-        calculateRestDays();
-        alert("Apple Health recovery metrics successfully imported!");
-      } catch (e) {
-        alert("Invalid JSON format: " + e.message);
-      }
-    }
-
-    function updateHealthStatusBanners() {
-      const profile = getCurrentProfile();
-      const statusEl = document.getElementById('homeHealthStatusText');
-      if (!profile.healthData) {
-        if (statusEl) statusEl.innerHTML = '<span style="color: var(--text-muted);">Not synced yet</span>';
-        return;
-      }
-      const hd = profile.healthData;
-      let statusColor = "var(--success)";
-      let recText = "Optimal Recovery";
-      if (hd.hrv < 40 || hd.sleepScore < 60) {
-        statusColor = "var(--danger)";
-        recText = "Low HRV / Poor Sleep — Extend Rest!";
-      }
-      if (statusEl) {
-        statusEl.innerHTML = `<span style="color: ${statusColor};">HRV: ${hd.hrv}ms | Sleep: ${hd.sleepScore}% (${recText})</span>`;
-      }
-    }
-
-    function populateRestTimerDropdowns() {
-      const select = document.getElementById('defaultRestSecSelect');
-      let options = '';
-      for (let sec = 5; sec <= 300; sec += 5) {
-        const mins = Math.floor(sec / 60);
-        const s = sec % 60;
-        const label = mins > 0 ? `${mins}m ${s > 0 ? s + 's' : ''}` : `${sec} seconds`;
-        options += `<option value="${sec}" ${appState.defaultRestSeconds === sec ? 'selected' : ''}>${label}</option>`;
-      }
-      select.innerHTML = options;
-      select.value = appState.defaultRestSeconds;
-    }
-
-    function updateDefaultRestTime(sec) {
-      appState.defaultRestSeconds = sec;
-      saveLocalStorage();
-    }
-
-    function playBeepSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.6);
-      } catch (e) {
-        console.log("Audio Context not supported or blocked", e);
-      }
-    }
-
-    function startRestTimer(seconds) {
-      if (restTimerInterval) clearInterval(restTimerInterval);
-      remainingRestSeconds = seconds;
-      updateTimerDisplay();
-
-      restTimerInterval = setInterval(() => {
-        remainingRestSeconds--;
-        updateTimerDisplay();
-        if (remainingRestSeconds <= 0) {
-          clearInterval(restTimerInterval);
-          restTimerInterval = null;
-          document.getElementById('timerSubtext').innerText = "Time's up!";
-          playBeepSound();
-        }
-      }, 1000);
-    }
-
-    function updateTimerDisplay() {
-      const mins = Math.floor(remainingRestSeconds / 60).toString().padStart(2, '0');
-      const secs = (remainingRestSeconds % 60).toString().padStart(2, '0');
-      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
-      document.getElementById('timerSubtext').innerText = remainingRestSeconds > 0 ? "Resting..." : "Ready";
-    }
+        activeProfileId: "default",
+        settings: { restTime: 45 }
+    };
 
     function getCurrentProfile() {
-      return appState.profiles.find(p => p.id === appState.activeProfileId) || appState.profiles[0];
-    }
-
-    function switchTab(tabId, event) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-      
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-      } else {
-        const btnMap = { 'home': 0, 'workout': 1, 'history': 2, 'settings': 3 };
-        const idx = btnMap[tabId];
-        const buttons = document.querySelectorAll('.nav-btn');
-        if (buttons[idx]) buttons[idx].classList.add('active');
-      }
-    }
-
-    function switchTabToWorkout() {
-      switchTab('workout');
-    }
-
-    function loadLocalStorage() {
-      const saved = localStorage.getItem('fitness4me_workouts');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.workoutDays && !parsed.profiles) {
-            appState.profiles = [{
-              id: "profile_1",
-              name: "Default Profile",
-              workoutDays: parsed.workoutDays,
-              history: parsed.history || []
-            }];
-            appState.activeProfileId = "profile_1";
-          } else if (parsed.profiles) {
-            appState.profiles = parsed.profiles;
-            appState.activeProfileId = parsed.activeProfileId || parsed.profiles[0].id;
-          }
-
-          if (parsed.defaultRestSeconds) appState.defaultRestSeconds = parsed.defaultRestSeconds;
-          if (parsed.driveClientId) appState.driveClientId = parsed.driveClientId;
-          if (parsed.driveToken) appState.driveToken = parsed.driveToken;
-          if (parsed.fontSize) appState.fontSize = parsed.fontSize;
-
-          document.getElementById('gdriveClientId').value = appState.driveClientId || '';
-          document.getElementById('fontSizeSelect').value = appState.fontSize || 'normal';
-        } catch (e) {
-          console.error("Error loading localStorage:", e);
+        if (!appData.profiles[appData.activeProfileId]) {
+            appData.activeProfileId = Object.keys(appData.profiles)[0] || "default";
         }
-      }
+        return appData.profiles[appData.activeProfileId];
     }
 
     function saveLocalStorage() {
-      localStorage.setItem('fitness4me_workouts', JSON.stringify(appState));
+        localStorage.setItem('fitness4me_app_data', JSON.stringify(appData));
     }
 
-    function renderProfileSelect() {
-      const select = document.getElementById('profileSelect');
-      select.innerHTML = appState.profiles.map(p => 
-        `<option value="${p.id}" ${p.id === appState.activeProfileId ? 'selected' : ''}>${p.name}</option>`
-      ).join('');
+    let activeWorkout = null;
+    let restTimerInterval = null;
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        document.getElementById('nav-' + tabId).classList.add('active');
+        if (tabId === 'home') renderDashboard();
+        if (tabId === 'history') initAnalytics();
+        if (tabId === 'settings') renderHealthCard();
     }
 
-    function switchProfile(profileId) {
-      appState.activeProfileId = profileId;
-      saveLocalStorage();
-      renderWorkoutSelects();
-      renderActiveWorkout();
-      renderHistory();
-      renderStrengthAnalytics();
-      calculateRestDays();
-      updateHealthStatusBanners();
-    }
-
-    function createNewProfile() {
-      const nameInput = document.getElementById('newProfileName');
-      const name = nameInput.value.trim();
-      if (!name) {
-        alert("Please enter a profile name.");
-        return;
-      }
-
-      const newId = "profile_" + Date.now();
-      appState.profiles.push({
-        id: newId,
-        name: name,
-        workoutDays: [],
-        history: [],
-        healthData: null
-      });
-
-      appState.activeProfileId = newId;
-      nameInput.value = "";
-      saveLocalStorage();
-      renderProfileSelect();
-      renderWorkoutSelects();
-      renderActiveWorkout();
-      renderHistory();
-      renderStrengthAnalytics();
-      calculateRestDays();
-      updateHealthStatusBanners();
-      switchTab('workout');
-      alert(`Profile "${name}" created and selected!`);
-    }
-
-    function promptRenameProfile() {
-      const current = getCurrentProfile();
-      const newName = prompt("Enter new profile name:", current.name);
-      if (newName && newName.trim() !== '') {
-        current.name = newName.trim();
-        saveLocalStorage();
-        renderProfileSelect();
-        alert("Profile renamed successfully!");
-      }
-    }
-
-    function promptDeleteProfile() {
-      if (appState.profiles.length <= 1) {
-        alert("You must keep at least one profile.");
-        return;
-      }
-
-      const current = getCurrentProfile();
-      if (confirm(`Are you sure you want to delete profile "${current.name}"? All associated workout days and history will be lost.`)) {
-        appState.profiles = appState.profiles.filter(p => p.id !== current.id);
-        appState.activeProfileId = appState.profiles[0].id;
-        saveLocalStorage();
-        renderProfileSelect();
-        renderWorkoutSelects();
-        renderActiveWorkout();
-        renderHistory();
-        renderStrengthAnalytics();
-        calculateRestDays();
-        updateHealthStatusBanners();
-        alert("Profile removed.");
-      }
-    }
-
-    function renderWorkoutSelects() {
-      const profile = getCurrentProfile();
-      const optionsHtml = profile.workoutDays.map((d, i) => `<option value="${i}">${d.title}</option>`).join('');
-      
-      const workoutSel = document.getElementById('workoutDaySelect');
-      const homeSel = document.getElementById('homeWorkoutDaySelect');
-      
-      if (workoutSel) workoutSel.innerHTML = optionsHtml;
-      if (homeSel) homeSel.innerHTML = optionsHtml;
-    }
-
-    function syncRoutineSelection(val) {
-      const workoutSel = document.getElementById('workoutDaySelect');
-      if (workoutSel) {
-        workoutSel.value = val;
-        renderActiveWorkout();
-      }
-    }
-
-    function syncHomeRoutineSelection(val) {
-      const homeSel = document.getElementById('homeWorkoutDaySelect');
-      if (homeSel) {
-        homeSel.value = val;
-      }
-    }
-
-    function renderActiveWorkout() {
-      const profile = getCurrentProfile();
-      const index = document.getElementById('workoutDaySelect').value || 0;
-      const day = profile.workoutDays[index];
-      const container = document.getElementById('activeWorkoutContainer');
-
-      if (!day) {
-        container.innerHTML = `<div class="card">No workouts found for this profile. Please create one in Settings.</div>`;
-        return;
-      }
-
-      let html = '';
-      day.exercises.forEach((ex, exIdx) => {
-        const notes = ex.notes || '';
-        const isTreadmill = ex.type === 'treadmill';
-
-        if (isTreadmill) {
-          html += `
-            <div class="exercise-item" style="border-color: var(--warning);">
-              <div class="exercise-header">
-                <span class="exercise-title">🏃‍♂️ ${ex.name}</span>
-                <div class="reorder-btns">
-                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
-                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
-                  <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
-                </div>
-              </div>
-
-              <div style="margin-bottom: 8px;">
-                <label>Cardio Notes</label>
-                <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. Interval warmup" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
-              </div>
-
-              <div class="exercise-settings-grid">
-                <div>
-                  <label>Incline (1-20)</label>
-                  <select onchange="updateExSetting(${index}, ${exIdx}, 'incline', parseInt(this.value))">
-                    ${Array.from({length: 20}, (_, i) => i + 1).map(inc => `<option value="${inc}" ${ex.incline === inc ? 'selected' : ''}>Incline ${inc}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <label>Speed (1-20)</label>
-                  <select onchange="updateExSetting(${index}, ${exIdx}, 'speed', parseInt(this.value))">
-                    ${Array.from({length: 20}, (_, i) => i + 1).map(spd => `<option value="${spd}" ${ex.speed === spd ? 'selected' : ''}>Speed ${spd}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <label>Duration (Mins)</label>
-                  <input type="number" min="1" max="180" value="${ex.durationMinutes || 20}" style="margin-bottom:0; padding:8px;" onchange="updateExSetting(${index}, ${exIdx}, 'durationMinutes', parseInt(this.value))" />
-                </div>
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #090d16; padding: 8px 12px; border-radius: 6px;">
-                <span style="font-size: 13px; font-weight: 700;">Cardio Completed?</span>
-                <input type="checkbox" class="checkbox-custom" ${ex.completed ? 'checked' : ''} onchange="updateExSetting(${index}, ${exIdx}, 'completed', this.checked)" />
-              </div>
-            </div>
-          `;
-        } else {
-          const benchPos = ex.benchPosition || 'none';
-          html += `
-            <div class="exercise-item">
-              <div class="exercise-header">
-                <span class="exercise-title">${ex.name}</span>
-                <div class="reorder-btns">
-                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, -1)">▲</button>
-                  <button class="btn-mini" onclick="moveExercise(${index}, ${exIdx}, 1)">▼</button>
-                  <button class="btn-mini btn-danger-mini" onclick="promptDeleteExercise(${index}, ${exIdx})">🗑️</button>
-                </div>
-              </div>
-
-              <div class="exercise-settings-grid">
-                <div>
-                  <label>Cable Sides</label>
-                  <select onchange="updateExSetting(${index}, ${exIdx}, 'cableSides', this.value)">
-                    <option value="single" ${ex.cableSides === 'single' ? 'selected' : ''}>single</option>
-                    <option value="both" ${ex.cableSides === 'both' ? 'selected' : ''}>both</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Cable Height</label>
-                  <select onchange="updateExSetting(${index}, ${exIdx}, 'cableHeight', parseInt(this.value))">
-                    ${Array.from({length: 31}, (_, i) => i + 1).map(h => `<option value="${h}" ${ex.cableHeight === h ? 'selected' : ''}>${h}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <label>Bench</label>
-                  <select onchange="updateExSetting(${index}, ${exIdx}, 'benchPosition', this.value)">
-                    <option value="none" ${benchPos === 'none' ? 'selected' : ''}>none</option>
-                    <option value="flat" ${benchPos === 'flat' ? 'selected' : ''}>flat</option>
-                    <option value="incline" ${benchPos === 'incline' ? 'selected' : ''}>incline</option>
-                    <option value="decline" ${benchPos === 'decline' ? 'selected' : ''}>decline</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style="margin-bottom: 8px;">
-                <label>Comments / Notes</label>
-                <input type="text" value="${notes.replace(/"/g, '&quot;')}" placeholder="e.g. 2nd notch on bench" style="margin-bottom: 4px;" onchange="updateExSetting(${index}, ${exIdx}, 'notes', this.value)" />
-              </div>
-
-              <table class="sets-table">
-                <thead>
-                  <tr>
-                    <th>Set</th>
-                    <th>Target (Last)</th>
-                    <th>Plates</th>
-                    <th>Reps</th>
-                    <th>Intensity Mode</th>
-                    <th>Done</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${(ex.sets || []).map((s, sIdx) => `
-                    <tr>
-                      <td>#${sIdx + 1}</td>
-                      <td><span class="last-target-badge">${s.lastWeight || s.weight}p × ${s.lastReps || s.reps}r</span></td>
-                      <td>
-                        <select style="width: 55px; margin:0;" onchange="updateSetPlates(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
-                          ${Array.from({length: 20}, (_, i) => i + 1).map(p => `<option value="${p}" ${s.weight === p ? 'selected' : ''}>${p}</option>`).join('')}
-                        </select>
-                      </td>
-                      <td>
-                        <select style="width: 55px; margin:0;" onchange="updateSetReps(${index}, ${exIdx}, ${sIdx}, parseInt(this.value))">
-                          ${Array.from({length: 100}, (_, i) => i + 1).map(r => `<option value="${r}" ${s.reps === r ? 'selected' : ''}>${r}</option>`).join('')}
-                        </select>
-                      </td>
-                      <td>
-                        <select style="width: 85px; margin:0; font-size: 11px;" onchange="updateSetIntensity(${index}, ${exIdx}, ${sIdx}, this.value)">
-                          <option value="normal" ${s.intensity === 'normal' ? 'selected' : ''}>Normal</option>
-                          <option value="forced" ${s.intensity === 'forced' ? 'selected' : ''}>Forced</option>
-                          <option value="negatives" ${s.intensity === 'negatives' ? 'selected' : ''}>Negatives</option>
-                          <option value="hold" ${s.intensity === 'hold' ? 'selected' : ''}>Hold</option>
-                        </select>
-                      </td>
-                      <td>
-                        <input type="checkbox" class="checkbox-custom" ${s.completed ? 'checked' : ''} onchange="toggleSetComplete(${index}, ${exIdx}, ${sIdx}, this.checked)" />
-                      </td>
-                      <td>
-                        <button class="btn-mini btn-danger-mini" onclick="promptDeleteSet(${index}, ${exIdx}, ${sIdx})">✕</button>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-
-              <button class="btn btn-secondary" style="margin-top: 10px; padding: 6px; font-size: 13px;" onclick="addSet(${index}, ${exIdx})">+ Add Set</button>
-            </div>
-          `;
-        }
-      });
-
-      container.innerHTML = html;
-    }
-
-    function moveExercise(dayIdx, exIdx, dir) {
-      const profile = getCurrentProfile();
-      const ex = profile.workoutDays[dayIdx].exercises;
-      const target = exIdx + dir;
-      if (target < 0 || target >= ex.length) return;
-      const temp = ex[exIdx];
-      ex[exIdx] = ex[target];
-      ex[target] = temp;
-      saveLocalStorage();
-      renderActiveWorkout();
-    }
-
-    function updateExSetting(dayIdx, exIdx, key, value) {
-      const profile = getCurrentProfile();
-      profile.workoutDays[dayIdx].exercises[exIdx][key] = value;
-      saveLocalStorage();
-    }
-
-    function updateSetPlates(dayIdx, exIdx, sIdx, value) {
-      const profile = getCurrentProfile();
-      profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].weight = value;
-      saveLocalStorage();
-    }
-
-    function updateSetReps(dayIdx, exIdx, sIdx, value) {
-      const profile = getCurrentProfile();
-      profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].reps = value;
-      saveLocalStorage();
-    }
-
-    function updateSetIntensity(dayIdx, exIdx, sIdx, value) {
-      const profile = getCurrentProfile();
-      profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].intensity = value;
-      saveLocalStorage();
-    }
-
-    function toggleSetComplete(dayIdx, exIdx, sIdx, completed) {
-      const profile = getCurrentProfile();
-      profile.workoutDays[dayIdx].exercises[exIdx].sets[sIdx].completed = completed;
-      saveLocalStorage();
-
-      if (completed) {
-        startRestTimer(appState.defaultRestSeconds || 45);
-      }
-    }
-
-    function addSet(dayIdx, exIdx) {
-      const profile = getCurrentProfile();
-      const sets = profile.workoutDays[dayIdx].exercises[exIdx].sets;
-      const last = sets[sets.length - 1] || { reps: 5, weight: 10, intensity: 'normal', lastReps: 5, lastWeight: 10 };
-      sets.push({
-        reps: last.reps,
-        weight: last.weight,
-        intensity: 'normal',
-        completed: false,
-        lastReps: last.lastReps || last.reps,
-        lastWeight: last.lastWeight || last.weight
-      });
-      saveLocalStorage();
-      renderActiveWorkout();
-    }
-
-    function promptDeleteSet(dayIdx, exIdx, sIdx) {
-      if (confirm("Are you sure you want to delete this set?")) {
+    function renderDashboard() {
         const profile = getCurrentProfile();
-        profile.workoutDays[dayIdx].exercises[exIdx].sets.splice(sIdx, 1);
-        saveLocalStorage();
-        renderActiveWorkout();
-      }
-    }
+        const selector = document.getElementById('workoutSelector');
+        selector.innerHTML = profile.routines.map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
 
-    function promptDeleteExercise(dayIdx, exIdx) {
-      const profile = getCurrentProfile();
-      const exName = profile.workoutDays[dayIdx].exercises[exIdx].name;
-      if (confirm(`Are you sure you want to delete exercise "${exName}"?`)) {
-        profile.workoutDays[dayIdx].exercises.splice(exIdx, 1);
-        saveLocalStorage();
-        renderActiveWorkout();
-      }
-    }
+        updateHealthStatusBanners();
 
-    function promptAddExercise() {
-      const profile = getCurrentProfile();
-      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
-      const name = prompt("Enter strength exercise name:");
-      if (!name) return;
-
-      profile.workoutDays[dayIdx].exercises.push({
-        id: "ex_" + Date.now(),
-        name: name,
-        type: "strength",
-        notes: "",
-        cableSides: "both",
-        cableHeight: 1,
-        benchPosition: "none",
-        sets: [
-          { reps: 8, weight: 10, intensity: "normal", completed: false, lastReps: 8, lastWeight: 10 }
-        ]
-      });
-      saveLocalStorage();
-      renderActiveWorkout();
-    }
-
-    function promptAddTreadmillExercise() {
-      const profile = getCurrentProfile();
-      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
-      const name = prompt("Enter treadmill session name:", "Treadmill Cardio");
-      if (!name) return;
-
-      profile.workoutDays[dayIdx].exercises.push({
-        id: "ex_tread_" + Date.now(),
-        name: name,
-        type: "treadmill",
-        notes: "",
-        incline: 5,
-        speed: 10,
-        durationMinutes: 20,
-        completed: false
-      });
-      saveLocalStorage();
-      renderActiveWorkout();
-    }
-
-    function createNewWorkoutRoutine() {
-      const profile = getCurrentProfile();
-      const titleInput = document.getElementById('newWorkoutTitle');
-      const title = titleInput.value.trim();
-      if (!title) {
-        alert("Please enter a routine name.");
-        return;
-      }
-
-      profile.workoutDays.push({
-        id: "day_" + Date.now(),
-        title: title,
-        exercises: []
-      });
-      titleInput.value = "";
-      saveLocalStorage();
-      renderWorkoutSelects();
-      document.getElementById('workoutDaySelect').value = profile.workoutDays.length - 1;
-      renderActiveWorkout();
-      switchTab('workout');
-      alert("New routine created successfully!");
-    }
-
-    function promptDeleteWorkout() {
-      const profile = getCurrentProfile();
-      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
-      const day = profile.workoutDays[dayIdx];
-
-      if (confirm(`Are you sure you want to delete routine "${day.title}"?`)) {
-        profile.workoutDays.splice(dayIdx, 1);
-        saveLocalStorage();
-        renderWorkoutSelects();
-        renderActiveWorkout();
-      }
-    }
-
-    function completeWorkout() {
-      const profile = getCurrentProfile();
-      const dayIdx = document.getElementById('workoutDaySelect').value || 0;
-      const day = profile.workoutDays[dayIdx];
-
-      const log = {
-        date: new Date().toISOString(),
-        title: day.title,
-        exercises: day.exercises.map(ex => {
-          if (ex.type === 'treadmill') {
-            return {
-              name: ex.name,
-              type: 'treadmill',
-              incline: ex.incline || 1,
-              speed: ex.speed || 1,
-              durationMinutes: ex.durationMinutes || 20,
-              notes: ex.notes || ''
-            };
-          } else {
-            return {
-              name: ex.name,
-              type: 'strength',
-              cableSides: ex.cableSides,
-              cableHeight: ex.cableHeight,
-              benchPosition: ex.benchPosition || 'none',
-              notes: ex.notes || '',
-              sets: (ex.sets || []).map(s => ({ reps: s.reps, weight: s.weight, intensity: s.intensity || 'normal' }))
-            };
-          }
-        })
-      };
-
-      day.exercises.forEach(ex => {
-        if (ex.type === 'strength') {
-          (ex.sets || []).forEach(s => {
-            s.lastWeight = s.weight;
-            s.lastReps = s.reps;
-            s.completed = false;
-          });
-        } else if (ex.type === 'treadmill') {
-          ex.completed = false;
+        if (profile.history.length > 0) {
+            const last = new Date(profile.history[profile.history.length - 1].timestamp);
+            const diffDays = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
+            document.getElementById('lastTrainedDisplay').innerText = `${diffDays} days ago (${last.toLocaleDateString()})`;
+            
+            const badge = document.getElementById('recoveryBadge');
+            const msg = document.getElementById('recoveryMessage');
+            if (diffDays < 4) {
+                badge.className = "badge badge-red";
+                badge.innerText = "🔴 CNS Overreached / Overtrained";
+                msg.innerText = "⚠️ Too soon! Mentzer advises 4–7+ days rest for full growth.";
+            } else if (diffDays <= 7) {
+                badge.className = "badge badge-green";
+                badge.innerText = "🟢 Optimal Recovery Window";
+                msg.innerText = "✅ Optimal recovery window (4-7 days). Ready for maximum intensity!";
+            } else {
+                badge.className = "badge badge-yellow";
+                badge.innerText = "🟡 Well-Rested (>7 days)";
+                msg.innerText = "💡 Extended rest logged. Check strength metrics before proceeding.";
+            }
+        } else {
+            document.getElementById('lastTrainedDisplay').innerText = "Never";
+            document.getElementById('recoveryBadge').className = "badge badge-green";
+            document.getElementById('recoveryBadge').innerText = "🟢 Fully Recovered";
+            document.getElementById('recoveryMessage').innerText = "Ready for your first Heavy Duty session.";
         }
-      });
-
-      profile.history.unshift(log);
-      saveLocalStorage();
-      calculateRestDays();
-      renderActiveWorkout();
-      renderHistory();
-      renderStrengthAnalytics();
-
-      exportBackupJSON();
-
-      if (appState.driveToken) {
-        syncToGoogleDrive();
-      }
-
-      alert("Workout Completed! Backup file automatically saved to your device's Files/Downloads.");
     }
 
     function calculateRestDays() {
-      const profile = getCurrentProfile();
-      const restDaysEl = document.getElementById('homeRestDaysCount');
-      const lastDateEl = document.getElementById('homeLastWorkoutDateText');
-      const mentzerStatusEl = document.getElementById('homeMentzerStatusText');
+        renderDashboard();
+    }
 
-      if (!profile.history || profile.history.length === 0) {
-        if (restDaysEl) restDaysEl.innerText = "0 Days";
-        if (lastDateEl) lastDateEl.innerText = "Last session: None";
-        if (mentzerStatusEl) mentzerStatusEl.innerText = "Mentzer Advice: Fresh! Ideal time to train.";
-        return;
-      }
-
-      const lastLog = profile.history[0];
-      const lastDate = new Date(lastLog.date || lastLog.timestamp || Date.now());
-      const now = new Date();
-      const diffTime = now - lastDate;
-      const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-
-      if (restDaysEl) restDaysEl.innerText = `${diffDays} Days`;
-      if (lastDateEl) lastDateEl.innerText = `Last: ${lastDate.toLocaleDateString()}`;
-
-      // Check if the last workout contained high-intensity treadmill work
-      let maxTreadmillTax = 0;
-      if (lastLog.exercises) {
-        lastLog.exercises.forEach(e => {
-          if (e.type === 'treadmill') {
-            const incline = e.incline || 1;
-            const speed = e.speed || 1;
-            const duration = e.durationMinutes || 20;
-            // High intensity score if incline >= 13 or speed >= 15 or duration >= 35 mins
-            if (incline >= 13 || speed >= 15 || duration >= 35) {
-              maxTreadmillTax = 2; // Extra rest days needed
-            } else if (incline >= 7 || speed >= 9 || duration >= 25) {
-              maxTreadmillTax = 1;
-            }
-          }
+    function startSelectedWorkout() {
+        const profile = getCurrentProfile();
+        const idx = document.getElementById('workoutSelector').value;
+        activeWorkout = JSON.parse(JSON.stringify(profile.routines[idx]));
+        activeWorkout.timestamp = new Date().toISOString();
+        activeWorkout.setsData = activeWorkout.exercises.map(ex => {
+            if (ex.type === 'treadmill') return { incline: 1, speed: 1, duration: 15 };
+            return [{ plate: 1, reps: 10, intensity: 'Normal', done: false }, { plate: 1, reps: 8, intensity: 'Normal', done: false }];
         });
-      }
-
-      let minRestDays = 4 + maxTreadmillTax;
-      if (profile.healthData && (profile.healthData.hrv < 40 || profile.healthData.sleepScore < 60)) {
-        minRestDays += 2;
-      }
-
-      let cardioNotice = maxTreadmillTax > 0 ? `<br/><span style="color: var(--warning); font-size:11px;">🏃‍♂️ High cardio intensity detected (+${maxTreadmillTax} day recovery buffer).</span>` : "";
-      let stagnantWarning = "";
-      if (profile.history.length >= 3) {
-        stagnantWarning = `<br/><span style="color: var(--warning); font-size:11px;">💡 Stagnation Check: Ensure progressive overload or take a deload if plateaued.</span>`;
-      }
-
-      if (mentzerStatusEl) {
-        if (diffDays < minRestDays) {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--warning);">⚠️ Too soon! Mentzer advises ${minRestDays}+ days rest.</span>${cardioNotice}${stagnantWarning}`;
-        } else if (diffDays >= minRestDays && diffDays <= (minRestDays + 4)) {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--success);">✅ Optimal recovery window achieved. Ready to grow!</span>${cardioNotice}${stagnantWarning}`;
-        } else {
-          mentzerStatusEl.innerHTML = `<span style="color: var(--accent);">💡 Well-rested (> ${minRestDays} days). Check for strength plateaus.</span>${cardioNotice}${stagnantWarning}`;
-        }
-      }
-    }
-
-    function renderStrengthAnalytics() {
-      const profile = getCurrentProfile();
-      const container = document.getElementById('strengthAnalyticsContainer');
-      if (!profile.history || profile.history.length === 0) {
-        container.innerHTML = `<p style="font-size:12px; color: var(--text-muted);">Complete a few workouts to see progressive overload trajectory charts.</p>`;
-        return;
-      }
-
-      let exerciseMap = {};
-      profile.history.slice().reverse().forEach(h => {
-        if (!h.exercises) return;
-        h.exercises.forEach(e => {
-          if (e.type === 'treadmill') return;
-          if (!exerciseMap[e.name]) exerciseMap[e.name] = [];
-          const setsArr = e.sets || [];
-          const maxWeight = setsArr.length > 0 ? Math.max(...setsArr.map(s => s.weight || s.lastWeight || 0)) : 0;
-          const totalReps = setsArr.reduce((sum, s) => sum + (s.reps || s.lastReps || 0), 0);
-          const logDate = new Date(h.date || h.timestamp || Date.now()).toLocaleDateString();
-          exerciseMap[e.name].push({ date: logDate, weight: maxWeight, reps: totalReps });
-        });
-      });
-
-      let html = '';
-      for (const [exName, records] of Object.entries(exerciseMap)) {
-        html += `
-          <div style="background: #0f172a; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
-            <div style="font-weight: 700; color: var(--accent); font-size: 13px; margin-bottom: 4px;">${exName}</div>
-            <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
-              ${records.map(r => `
-                <div style="background: #1e293b; padding: 6px 10px; border-radius: 6px; text-align: center; min-width: 90px; flex-shrink: 0;">
-                  <div style="font-size: 10px; color: var(--text-muted);">${r.date}</div>
-                  <div style="font-weight: 700; font-size: 13px; color: #fff;">${r.weight} plates</div>
-                  <div style="font-size: 11px; color: var(--success);">${r.reps} reps total</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML = html || `<p style="font-size:12px; color: var(--text-muted);">No strength exercises recorded yet.</p>`;
-    }
-
-    function renderHistory() {
-      const profile = getCurrentProfile();
-      const container = document.getElementById('historyLogsContainer');
-      if (!profile.history || profile.history.length === 0) {
-        container.innerHTML = `<p style="font-size:13px; color: var(--text-muted);">No history recorded yet for this profile.</p>`;
-        return;
-      }
-
-      container.innerHTML = profile.history.map(h => {
-        const d = new Date(h.date || h.timestamp || Date.now());
-        const elapsed = Math.max(0, Math.floor((new Date() - d) / (1000 * 60 * 60 * 24)));
-        const exercisesList = h.exercises || [];
-
-        return `
-          <div class="history-item">
-            <div class="history-date">${h.title || 'Workout Routine'} - ${d.toLocaleDateString()}</div>
-            <div class="history-meta">${elapsed} days ago</div>
-            ${exercisesList.map(e => {
-              if (e.type === 'treadmill') {
-                return `
-                  <div class="history-exercise" style="border-color: var(--warning);">
-                    🏃‍♂️ <strong>${e.name || 'Treadmill'}</strong><br/>
-                    ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
-                    <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; margin-top: 4px; display: flex; justify-content: space-between;">
-                      <span>Incline: <strong>${e.incline}</strong> | Speed: <strong>${e.speed}</strong></span>
-                      <span style="color: var(--warning);">Duration: <strong>${e.durationMinutes} mins</strong></span>
-                    </div>
-                  </div>
-                `;
-              } else {
-                return `
-                  <div class="history-exercise">
-                    <strong>${e.name || 'Exercise'}</strong> (${e.cableSides || 'both'}, Notch ${e.cableHeight || 1}${e.benchPosition && e.benchPosition !== 'none' ? ', Bench: ' + e.benchPosition : ''})<br/>
-                    ${e.notes ? `<span style="font-size: 11px; color: var(--text-muted);">Note: ${e.notes}</span><br/>` : ''}
-                    <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
-                      ${(e.sets || []).map((s, idx) => `
-                        <div style="font-size: 12px; background: #090d16; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between;">
-                          <span>Set #${idx + 1}: <strong>${s.weight || s.lastWeight || 0} plates</strong> × <strong>${s.reps || s.lastReps || 0} reps</strong></span>
-                          <span style="color: var(--accent); text-transform: uppercase; font-size: 10px;">[${s.intensity || 'normal'}]</span>
-                        </div>
-                      `).join('')}
-                    </div>
-                  </div>
-                `;
-              }
-            }).join('')}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function triggerFilePicker() {
-      const fileInput = document.getElementById('jsonFileInput');
-      fileInput.value = '';
-      fileInput.click();
-    }
-
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          let incomingProfiles = [];
-
-          if (parsed.profiles && Array.isArray(parsed.profiles)) {
-            incomingProfiles = parsed.profiles;
-          } else if (parsed.workoutDays && Array.isArray(parsed.workoutDays)) {
-            incomingProfiles = [{
-              id: "profile_" + Date.now(),
-              name: "Restored Profile",
-              workoutDays: parsed.workoutDays,
-              history: parsed.history || [],
-              healthData: null
-            }];
-          } else {
-            alert("Invalid backup schema.");
-            return;
-          }
-
-          pendingRestoreProfiles = incomingProfiles;
-          currentRestoreIndex = 0;
-          showRestoreModal();
-
-        } catch (err) {
-          alert("Error reading backup JSON file: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function showRestoreModal() {
-      if (currentRestoreIndex >= pendingRestoreProfiles.length) {
-        document.getElementById('restoreModal').style.display = 'none';
-        saveLocalStorage();
-        renderProfileSelect();
-        renderWorkoutSelects();
         renderActiveWorkout();
-        renderHistory();
-        renderStrengthAnalytics();
-        calculateRestDays();
-        updateHealthStatusBanners();
-        alert("All backup profiles successfully processed and restored!");
-        return;
-      }
-
-      const prof = pendingRestoreProfiles[currentRestoreIndex];
-      document.getElementById('modalProfileName').innerText = prof.name;
-      
-      const existingSelect = document.getElementById('modalExistingSelect');
-      existingSelect.innerHTML = appState.profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-
-      document.getElementById('restoreActionSelect').value = 'original';
-      toggleRestoreDestInput();
-      document.getElementById('restoreModal').style.display = 'flex';
+        switchTab('workout');
     }
 
-    function toggleRestoreDestInput() {
-      const action = document.getElementById('restoreActionSelect').value;
-      document.getElementById('existingProfileContainer').style.display = action === 'existing' ? 'block' : 'none';
-      document.getElementById('newProfileContainer').style.display = action === 'new' ? 'block' : 'none';
-    }
-
-    function confirmRestoreStep() {
-      const prof = pendingRestoreProfiles[currentRestoreIndex];
-      const action = document.getElementById('restoreActionSelect').value;
-
-      if (action === 'original') {
-        prof.id = "profile_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-        appState.profiles.push(prof);
-        appState.activeProfileId = prof.id;
-      } else if (action === 'existing') {
-        const targetId = document.getElementById('modalExistingSelect').value;
-        const targetProf = appState.profiles.find(p => p.id === targetId);
-        if (targetProf) {
-          targetProf.workoutDays = targetProf.workoutDays.concat(prof.workoutDays || []);
-          targetProf.history = (targetProf.history || []).concat(prof.history || []);
-          appState.activeProfileId = targetProf.id;
-        }
-      } else if (action === 'new') {
-        const newName = document.getElementById('modalNewNameInput').value.trim() || prof.name;
-        prof.id = "profile_" + Date.now();
-        prof.name = newName;
-        appState.profiles.push(prof);
-        appState.activeProfileId = prof.id;
-        document.getElementById('modalNewNameInput').value = '';
-      }
-
-      currentRestoreIndex++;
-      showRestoreModal();
-    }
-
-    function skipRestoreStep() {
-      currentRestoreIndex++;
-      showRestoreModal();
-    }
-
-    function exportBackupJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `heavyduty_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function saveDriveSettings() {
-      appState.driveClientId = document.getElementById('gdriveClientId').value.trim();
-      saveLocalStorage();
-      initGoogleDriveAuthClient();
-      alert("Google Drive Client ID saved!");
-    }
-
-    async function syncToGoogleDrive() {
-      if (!appState.driveToken) {
-        alert("Please sign in with Google first.");
-        handleGoogleSignIn();
-        return;
-      }
-
-      try {
-        const metadata = {
-          name: 'heavyduty_backup.json',
-          mimeType: 'application/json'
-        };
-
-        const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27heavyduty_backup.json%27%20and%20trashed%3Dfalse', {
-          headers: { 'Authorization': `Bearer ${appState.driveToken}` }
-        });
-        const searchData = await searchRes.json();
-        let fileId = (searchData.files && searchData.files.length > 0) ? searchData.files[0].id : null;
-
-        const boundary = 'foo_bar_baz';
-        const delimiter = `\r\n--${boundary}\r\n`;
-        const closeDelimiter = `\r\n--${boundary}--`;
-
-        const multipartRequestBody =
-          delimiter +
-          'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
-          JSON.stringify(metadata) +
-          delimiter +
-          'Content-Type: application/json\r\n\r\n' +
-          JSON.stringify(appState, null, 2) +
-          closeDelimiter;
-
-        const method = fileId ? 'PATCH' : 'POST';
-        const url = fileId 
-          ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
-          : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-
-        const uploadRes = await fetch(url, {
-          method: method,
-          headers: {
-            'Authorization': `Bearer ${appState.driveToken}`,
-            'Content-Type': `multipart/related; boundary=${boundary}`
-          },
-          body: multipartRequestBody
+    function renderActiveWorkout() {
+        const container = document.getElementById('activeWorkoutContainer');
+        let html = `<h2>Active: ${activeWorkout.name}</h2>`;
+        
+        activeWorkout.exercises.forEach((ex, exIdx) => {
+            html += `<div class="card" style="margin-top: 12px;">
+                <div class="card-title">${ex.name}</div>`;
+            
+            if (ex.type === 'treadmill') {
+                html += `
+                    <label>Incline (0-15 / 1-20):</label>
+                    <select onchange="updateTreadmill(${exIdx}, 'incline', this.value)">
+                        ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${activeWorkout.setsData[exIdx].incline===(i+1)?'selected':''}>Incline ${i+1}</option>`).join('')}
+                    </select>
+                    <label>Speed Setting (1-20):</label>
+                    <select onchange="updateTreadmill(${exIdx}, 'speed', this.value)">
+                        ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${activeWorkout.setsData[exIdx].speed===(i+1)?'selected':''}>Speed ${i+1}</option>`).join('')}
+                    </select>
+                    <label>Duration (Minutes):</label>
+                    <input type="number" value="${activeWorkout.setsData[exIdx].duration}" onchange="updateTreadmill(${exIdx}, 'duration', this.value)">
+                `;
+            } else {
+                html += `<div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">Set | Plates/Wt | Reps | Intensity | Done</div>`;
+                activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
+                    html += `<div class="set-row">
+                        <span>#${setIdx+1}</span>
+                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'plate', this.value)">
+                            ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${set.plate===(i+1)?'selected':''}>Plates ${i+1}</option>`).join('')}
+                        </select>
+                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'reps', this.value)">
+                            ${Array.from({length:30}, (_,i)=>`<option value="${i+1}" ${set.reps===(i+1)?'selected':''}>${i+1} reps</option>`).join('')}
+                        </select>
+                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'intensity', this.value)">
+                            <option value="Normal" ${set.intensity==='Normal'?'selected':''}>Normal</option>
+                            <option value="Forced" ${set.intensity==='Forced'?'selected':''}>Forced</option>
+                            <option value="Negative" ${set.intensity==='Negative'?'selected':''}>Negative</option>
+                        </select>
+                        <input type="checkbox" ${set.done?'checked':''} onchange="toggleSetDone(${exIdx}, ${setIdx}, this.checked)" style="width: 24px; height: 24px; accent-color: var(--success);">
+                    </div>`;
+                });
+            }
+            html += `</div>`;
         });
 
-        if (!uploadRes.ok) {
-          const errText = await uploadRes.text();
-          throw new Error(`Drive sync failed (${uploadRes.status}): ${errText}`);
-        }
+        html += `<button class="btn" onclick="finishWorkout()" style="background: var(--success);">Finish & Save Workout</button>`;
+        container.innerHTML = html;
+    }
 
-        const data = await uploadRes.json();
-        console.log("Google Drive Sync Success:", data);
-        alert("Google Drive cloud sync successful!");
-      } catch (err) {
-        console.error("Google Drive Sync Failed:", err);
-        alert("Google Drive sync failed (token may have expired): " + err.message);
-        appState.driveToken = "";
+    function updateTreadmill(exIdx, field, val) {
+        activeWorkout.setsData[exIdx][field] = Number(val);
+    }
+
+    function updateSet(exIdx, setIdx, field, val) {
+        activeWorkout.setsData[exIdx][setIdx][field] = field === 'intensity' ? val : Number(val);
+    }
+
+    function toggleSetDone(exIdx, setIdx, isChecked) {
+        activeWorkout.setsData[exIdx][setIdx].done = isChecked;
+        if (isChecked) {
+            startRestTimer();
+        }
+    }
+
+    function startRestTimer() {
+        const banner = document.getElementById('restTimerBanner');
+        const display = document.getElementById('timerDisplay');
+        let timeLeft = parseInt(localStorage.getItem('fitness4me_rest_time')) || appData.settings.restTime || 45;
+        banner.style.display = 'block';
+        clearInterval(restTimerInterval);
+
+        restTimerInterval = setInterval(() => {
+            timeLeft--;
+            display.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(restTimerInterval);
+                banner.style.display = 'none';
+                playBeepSound();
+            }
+        }, 1000);
+    }
+
+    // Robust audio unlock & triple beep + vibration
+    let audioCtx = null;
+    const unlockAudio = () => {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+    };
+    ['touchstart', 'click'].forEach(e => document.addEventListener(e, unlockAudio, { passive: true }));
+
+    function playBeepSound() {
+        unlockAudio();
+        if (!audioCtx) return;
+        [0, 0.35, 0.7].forEach(delay => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = 880;
+            gain.gain.value = 0.25;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + 0.2);
+        });
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+
+    function finishWorkout() {
+        const profile = getCurrentProfile();
+        profile.history.push(activeWorkout);
         saveLocalStorage();
-        updateDriveAuthStatus();
-      }
+        alert("Workout saved successfully!");
+        activeWorkout = null;
+        switchTab('home');
     }
 
-    function changeFontSize(size) {
-      appState.fontSize = size;
-      applyFontSize(size);
-      saveLocalStorage();
+    function saveRestTimerSetting() {
+        const val = document.getElementById('restTimerSetting').value;
+        appData.settings.restTime = Number(val);
+        localStorage.setItem('fitness4me_rest_time', val);
+        saveLocalStorage();
     }
 
-    function applyFontSize(size) {
-      document.body.classList.remove('font-large', 'font-xlarge');
-      if (size === 'large') document.body.classList.add('font-large');
-      if (size === 'xlarge') document.body.classList.add('font-xlarge');
+    function initAnalytics() {
+        const profile = getCurrentProfile();
+        const container = document.getElementById('historyLogContainer');
+        container.innerHTML = profile.history.length === 0 ? '<p style="color:var(--text-muted)">No history yet.</p>' :
+            profile.history.map(h => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:8px;">
+                <strong>${h.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted); float:right;">${new Date(h.timestamp).toLocaleDateString()}</span>
+            </div>`).join('');
+        
+        const sel = document.getElementById('analyticsExerciseSelect');
+        let allEx = [];
+        profile.routines.forEach(r => r.exercises.forEach(e => { if(!allEx.includes(e.name)) allEx.push(e.name); }));
+        sel.innerHTML = allEx.map(e => `<option value="${e}">${e}</option>`).join('');
+        renderAnalyticsChart();
     }
-  </script>
+
+    function renderAnalyticsChart() {
+        const ctx = document.getElementById('strengthChart').getContext('2d');
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Session 1', 'Session 2', 'Session 3', 'Session 4'],
+                datasets: [{ label: 'Progress Trajectory', data: [10, 12, 12, 14], borderColor: '#3b82f6', tension: 0.1 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function switchProfile(id) {
+        appData.activeProfileId = id;
+        saveLocalStorage();
+        renderDashboard();
+        renderHealthCard();
+    }
+
+    function createNewProfile() {
+        const name = prompt("Enter new profile name:");
+        if (!name) return;
+        const id = 'profile_' + Date.now();
+        appData.profiles[id] = {
+            name: name,
+            routines: JSON.parse(JSON.stringify(getCurrentProfile().routines)),
+            history: [],
+            healthData: null,
+            healthLog: []
+        };
+        appData.activeProfileId = id;
+        saveLocalStorage();
+        updateProfileSelector();
+        renderDashboard();
+        renderHealthCard();
+    }
+
+    function updateProfileSelector() {
+        const sel = document.getElementById('profileSelector');
+        if (!sel) return;
+        sel.innerHTML = Object.keys(appData.profiles).map(id => `<option value="${id}" ${appData.activeProfileId === id ? 'selected' : ''}>${appData.profiles[id].name}</option>`).join('');
+    }
+
+    // ==========================================================
+    // APPLE HEALTH PATCH LOGIC (Fully Integrated)
+    // ==========================================================
+    const daysOld = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
+    const num = v => {
+        if (v === undefined || v === null || v === '') return null;
+        const m = String(v).replace(',', '.').match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : null;
+    };
+    const pick = (o, keys) => {
+        for (const k of Object.keys(o)) {
+            if (keys.includes(k.toLowerCase().replace(/[\s_-]/g, ''))) return o[k];
+        }
+        return null;
+    };
+
+    function parseHealthText(txt) {
+        let t = txt.trim().replace(/[\u201C\u201D\u201E]/g, '"').replace(/[\u2018\u2019]/g, "'");
+        let obj = null;
+        try { obj = JSON.parse(t); } catch (e) {
+            obj = {};
+            t.replace(/([a-zA-Z ]+?)\s*[:=]?\s*(-?\d+[.,]?\d*)/g, (_, k, v) => { obj[k.trim()] = v; });
+            if (!Object.keys(obj).length) throw new Error('Could not read any values. Use JSON like {"hrv":65,"sleepHours":7.5,"restingHR":52}');
+        }
+        return normalize(obj);
+    }
+
+    function normalize(o) {
+        const hrv = num(pick(o, ['hrv', 'heartratevariability', 'hrvms']));
+        const rhr = num(pick(o, ['restinghr', 'rhr', 'restingheartrate']));
+        const hours = num(pick(o, ['sleephours', 'sleep', 'sleepduration', 'hoursslept']));
+        let score = num(pick(o, ['sleepscore', 'sleepquality']));
+        if (score === null && hours !== null) score = Math.min(100, Math.round(hours / 8 * 100));
+        if (hrv === null && rhr === null && score === null)
+            throw new Error('No HRV, resting HR or sleep value found.');
+        if (hrv !== null && (hrv < 5 || hrv > 250)) throw new Error('HRV should be 5–250 ms.');
+        if (rhr !== null && (rhr < 30 || rhr > 140)) throw new Error('Resting HR should be 30–140 bpm.');
+        if (hours !== null && (hours < 0 || hours > 16)) throw new Error('Sleep hours should be 0–16.');
+        return { hrv, restingHR: rhr, sleepHours: hours, sleepScore: score };
+    }
+
+    function saveHealth(vals, source) {
+        const p = getCurrentProfile();
+        const prev = p.healthData || {};
+        const rec = {
+            hrv: vals.hrv ?? prev.hrv ?? null,
+            restingHR: vals.restingHR ?? prev.restingHR ?? null,
+            sleepHours: vals.sleepHours ?? prev.sleepHours ?? null,
+            sleepScore: vals.sleepScore ?? prev.sleepScore ?? null,
+            date: new Date().toISOString(), source: source
+        };
+        p.healthData = rec;
+        p.healthLog = [rec, ...(p.healthLog || [])].slice(0, 30);
+        saveLocalStorage();
+        updateHealthStatusBanners();
+        calculateRestDays();
+        renderHealthCard();
+    }
+
+    window.importAppleHealthPayload = function (textOverride) {
+        const el = document.getElementById('hpPaste');
+        const txt = typeof textOverride === 'string' ? textOverride : (el ? el.value : '');
+        if (!txt.trim()) return hpMsg('Paste the Shortcut output first.', true);
+        try { 
+            saveHealth(parseHealthText(txt), 'shortcut'); 
+            if (el) el.value = ''; 
+            hpMsg('✓ Imported from Shortcut.'); 
+        } catch (e) { hpMsg(e.message, true); }
+    };
+
+    window.updateHealthStatusBanners = function () {
+        const el = document.getElementById('homeHealthStatusText');
+        if (!el) return;
+        const hd = getCurrentProfile().healthData;
+        if (!hd) { el.innerHTML = '<span style="color:var(--text-muted)">Tap to enter HRV / sleep</span>'; return; }
+        const age = daysOld(hd.date);
+        const low = (hd.hrv !== null && hd.hrv < 40) || (hd.sleepScore !== null && hd.sleepScore < 60);
+        const col = low ? 'var(--danger)' : 'var(--success)';
+        const parts = [];
+        if (hd.hrv !== null) parts.push('HRV ' + hd.hrv + 'ms');
+        if (hd.restingHR !== null) parts.push('RHR ' + hd.restingHR);
+        if (hd.sleepHours !== null) parts.push('Sleep ' + hd.sleepHours + 'h');
+        else if (hd.sleepScore !== null) parts.push('Sleep ' + hd.sleepScore + '%');
+        el.innerHTML = '<span style="color:' + col + '">' + parts.join(' · ') + '<br>' +
+            (low ? 'Low recovery — add rest' : 'Recovery looks good') + '</span>' +
+            (age >= 3 ? '<br><span style="color:var(--warning);font-size:11px">⚠ ' + age + ' days old — update</span>' : '');
+    };
+
+    function hpMsg(m, err) {
+        const el = document.getElementById('hpMsg');
+        if (el) { el.textContent = m; el.style.color = err ? 'var(--danger)' : 'var(--success)'; }
+    }
+
+    function renderHealthCard() {
+        let card = document.getElementById('hpCard');
+        if (!card) return;
+        const hd = getCurrentProfile().healthData || {};
+        const log = (getCurrentProfile().healthLog || []).slice(0, 5);
+        const v = x => (x ?? '');
+        card.innerHTML = `
+            <div class="card-title">🍏 Recovery Data (Apple Health / Manual)</div>
+            <p style="font-size:12px;color:var(--text-muted);margin:6px 0 10px">
+                Enter values by hand or let your iOS Shortcut send them automatically.</p>
+
+            <label>Manual entry</label>
+            <div class="exercise-settings-grid">
+                <div><label>HRV (ms)</label><input id="hpHrv" type="number" inputmode="decimal" value="${v(hd.hrv)}" placeholder="65"></div>
+                <div><label>Resting HR</label><input id="hpRhr" type="number" inputmode="numeric" value="${v(hd.restingHR)}" placeholder="52"></div>
+                <div><label>Sleep (hours)</label><input id="hpSleep" type="number" step="0.25" inputmode="decimal" value="${v(hd.sleepHours)}" placeholder="7.5"></div>
+            </div>
+            <button class="btn btn-primary" onclick="hpManualSave()">💾 Save today's values</button>
+
+            <hr style="border:0;border-top:1px solid var(--card-border);margin:10px 0">
+            <label>From iOS Shortcut (JSON or text)</label>
+            <textarea id="hpPaste" rows="2" placeholder='{"hrv":65,"sleepHours":7.5,"restingHR":52}'></textarea>
+            <div style="display:flex;gap:8px">
+                <button class="btn btn-secondary" style="flex:1" onclick="hpClipboard()">📋 Paste &amp; import</button>
+                <button class="btn btn-secondary" style="flex:1" onclick="importAppleHealthPayload()">Import text</button>
+            </div>
+            <div id="hpMsg" style="font-size:12px;min-height:16px;margin-bottom:6px"></div>
+
+            <details style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+                <summary style="cursor:pointer;color:var(--accent)">Shortcut setup guide</summary>
+                <ol style="padding-left:18px;margin-top:6px">
+                    <li>Shortcuts → Find Health Samples (HRV, Sleep, Resting HR).</li>
+                    <li>Text action: <code>{"hrv":[HRV],"sleepHours":[Sleep],"restingHR":[RHR]}</code></li>
+                    <li>Copy to Clipboard or Open URL: <code>${location.origin}${location.pathname}?hrv=[HRV]&amp;sleep=[Sleep]&amp;rhr=[RHR]</code></li>
+                </ol>
+            </details>
+
+            ${log.length ? '<label>Recent entries</label>' + log.map(r =>
+                `<div style="font-size:12px;background:#0f172a;border-radius:6px;padding:4px 8px;margin-bottom:3px;display:flex;justify-content:space-between">
+                <span>${new Date(r.date).toLocaleDateString()}</span>
+                <span>HRV ${v(r.hrv) || '–'} · RHR ${v(r.restingHR) || '–'} · ${v(r.sleepHours) || '–'}h</span></div>`).join('') : ''}
+            ${hd.date ? '<button class="btn btn-danger" style="margin-top:8px" onclick="hpClear()">Clear health data</button>' : ''}`;
+    }
+
+    window.hpManualSave = function () {
+        try {
+            const g = id => document.getElementById(id).value;
+            saveHealth(normalize({ hrv: g('hpHrv'), restingHR: g('hpRhr'), sleepHours: g('hpSleep') }), 'manual');
+            hpMsg('✓ Saved.');
+        } catch (e) { hpMsg(e.message, true); }
+    };
+
+    window.hpClipboard = async function () {
+        try { importAppleHealthPayload(await navigator.clipboard.readText()); }
+        catch (e) { hpMsg('Clipboard blocked by browser — paste into box and tap Import text.', true); }
+    };
+
+    window.hpClear = function () {
+        if (!confirm('Clear stored health data for this profile?')) return;
+        const p = getCurrentProfile(); p.healthData = null; p.healthLog = [];
+        saveLocalStorage(); updateHealthStatusBanners(); calculateRestDays(); renderHealthCard();
+    };
+
+    // Check URL params for one-tap import on load
+    const q = new URLSearchParams(location.search);
+    if (q.has('hrv') || q.has('sleep') || q.has('rhr')) {
+        try {
+            saveHealth(normalize({ hrv: q.get('hrv'), sleepHours: q.get('sleep'), restingHR: q.get('rhr') }), 'url');
+            history.replaceState(null, '', location.pathname);
+        } catch (e) { console.warn(e.message); }
+    }
+
+    updateProfileSelector();
+    renderDashboard();
+    renderHealthCard();
+</script>
 </body>
 </html>
