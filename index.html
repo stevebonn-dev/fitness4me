@@ -1,3 +1,4 @@
+Here is the complete, full-length source code from beginning to end for copying:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,6 +57,7 @@
         button.btn:hover { background: var(--primary-hover); }
         button.btn-danger { background: var(--danger); }
         button.btn-secondary { background: #475569; }
+        button.btn-small { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; display: inline-block; }
         input, select, textarea { width: 100%; padding: 0.75rem; background: #0f172a; border: 1px solid var(--border); color: var(--text-color); border-radius: 0.5rem; margin-top: 0.35rem; margin-bottom: 0.75rem; font-size: 1rem; }
         label { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; display: block; margin-top: 0.5rem; }
         .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
@@ -63,8 +65,8 @@
         .badge-yellow { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
         .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
         .timer-banner { background: #1e3a8a; border: 1px solid #3b82f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin-bottom: 1rem; font-weight: bold; font-size: 1.15rem; display: none; }
-        .set-row { display: grid; grid-template-columns: 45px 1fr 1fr 1fr 50px; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; background: rgba(15, 23, 42, 0.5); padding: 0.5rem; border-radius: 0.35rem; }
-        .exercise-settings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+        .set-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr 40px; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem; background: rgba(15, 23, 42, 0.5); padding: 0.5rem; border-radius: 0.35rem; }
+        .exercise-settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
         .health-banner { cursor: pointer; padding: 0.5rem; border-radius: 0.5rem; background: rgba(255,255,255,0.03); transition: background 0.2s; }
         .health-banner:hover { background: rgba(255,255,255,0.06); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
@@ -135,6 +137,15 @@
         </div>
 
         <div class="card">
+            <div class="card-title">⚙️ Routine & Exercise Customizer</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Rename workouts, add/remove/reorder exercises, and configure pulley & bench setups.</p>
+            <label for="routineManagerSelect">Select Routine to Edit:</label>
+            <select id="routineManagerSelect" onchange="renderRoutineEditor()"></select>
+            <div id="routineEditorContainer" style="margin-top: 0.75rem;"></div>
+            <button class="btn btn-secondary" onclick="addNewRoutine()" style="margin-top: 0.5rem;">+ Create New Routine</button>
+        </div>
+
+        <div class="card">
             <div class="card-title">🔠 Display & Font Size</div>
             <label for="fontSizeSelector">Choose Font Size:</label>
             <select id="fontSizeSelector" onchange="changeFontSize(this.value)">
@@ -147,7 +158,7 @@
 
         <div class="card">
             <div class="card-title">💾 Local Data & Backup Migration</div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Export or restore complete workout logs. Handles both older single-file and new multi-profile JSON backups.</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Export or restore complete workout logs and historical snapshots.</p>
             <button class="btn" onclick="exportBackupJSON()">📥 Export JSON Backup File</button>
             <label style="margin-top: 0.75rem;">Import / Restore JSON Backup File:</label>
             <input type="file" id="importJsonFileInput" accept=".json" onchange="importBackupJSON(event)">
@@ -155,7 +166,6 @@
 
         <div class="card">
             <div class="card-title">☁️ Google Drive Cloud Sync</div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Sync backup directly to Google Drive using your OAuth Client ID.</p>
             <label for="googleClientIdInput">Google Cloud OAuth Client ID:</label>
             <input type="text" id="googleClientIdInput" placeholder="your-client-id.apps.googleusercontent.com">
             <div id="gdriveAuthStatus" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Status: Not Connected</div>
@@ -196,7 +206,7 @@
     </div>
 </div>
 
-<!-- REDESIGNED ENLARGED USABLE BOTTOM NAVIGATION -->
+<!-- REDESIGNED USABLE BOTTOM NAVIGATION -->
 <nav>
     <button onclick="switchTab('home')" class="active" id="nav-home">
         <span class="nav-icon">🏠</span>
@@ -223,14 +233,14 @@
                 name: "Default Profile",
                 routines: [
                     { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
-                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill" },
-                        { name: "Incline Barbell Press", type: "strength" },
-                        { name: "Chins / Pulldowns", type: "strength" }
+                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" },
+                        { name: "Incline Barbell Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Incline", notes: "Keep elbows tucked" },
+                        { name: "Chins / Pulldowns", type: "strength", pulleyHeight: 15, pulleyMode: "Both", bench: "None", notes: "Strict form" }
                     ]},
                     { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
-                        { name: "Leg Press", type: "strength" },
-                        { name: "Standing Calf Raise", type: "strength" },
-                        { name: "Overhead Press", type: "strength" }
+                        { name: "Leg Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Flat", notes: "Deep stretch" },
+                        { name: "Standing Calf Raise", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" },
+                        { name: "Overhead Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Flat", notes: "" }
                     ]}
                 ],
                 history: [],
@@ -283,6 +293,7 @@
         updateProfileSelector();
         renderDashboard();
         renderHealthCard();
+        renderRoutineManagerSelector();
     };
 
     function changeFontSize(size) {
@@ -303,7 +314,10 @@
         document.getElementById('nav-' + tabId).classList.add('active');
         if (tabId === 'home') renderDashboard();
         if (tabId === 'history') initAnalytics();
-        if (tabId === 'settings') renderHealthCard();
+        if (tabId === 'settings') {
+            renderHealthCard();
+            renderRoutineManagerSelector();
+        }
     }
 
     function renderDashboard() {
@@ -348,12 +362,20 @@
     function startSelectedWorkout() {
         const profile = getCurrentProfile();
         const idx = document.getElementById('workoutSelector').value;
-        activeWorkout = JSON.parse(JSON.stringify(profile.routines[idx]));
-        activeWorkout.timestamp = new Date().toISOString();
-        activeWorkout.setsData = activeWorkout.exercises.map(ex => {
-            if (ex.type === 'treadmill') return { incline: 1, speed: 1, duration: 15 };
-            return [{ plate: 1, reps: 10, intensity: 'Normal', done: false }, { plate: 1, reps: 8, intensity: 'Normal', done: false }];
-        });
+        const routine = profile.routines[idx];
+        
+        activeWorkout = {
+            name: routine.name,
+            timestamp: new Date().toISOString(),
+            exercises: JSON.parse(JSON.stringify(routine.exercises)),
+            setsData: routine.exercises.map(ex => {
+                if (ex.type === 'treadmill') return { incline: 1, speed: 1, duration: 15 };
+                return [
+                    { plate: 1, reps: 10, intensity: 'Normal', done: false },
+                    { plate: 1, reps: 8, intensity: 'Normal', done: false }
+                ];
+            })
+        };
         renderActiveWorkout();
         switchTab('workout');
     }
@@ -363,8 +385,20 @@
         let html = `<h2>Active: ${activeWorkout.name}</h2>`;
         
         activeWorkout.exercises.forEach((ex, exIdx) => {
+            const pulleyH = ex.pulleyHeight || 1;
+            const pulleyM = ex.pulleyMode || 'None';
+            const benchPos = ex.bench || 'None';
+            const notesVal = ex.notes || '';
+
             html += `<div class="card" style="margin-top: 0.75rem;">
-                <div class="card-title">${ex.name}</div>`;
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="card-title">${ex.name}</div>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H: ${pulleyH} | ${pulleyM} | Bench: ${benchPos}</span>
+                </div>`;
+            
+            if (notesVal) {
+                html += `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:0.5rem;">Note: ${notesVal}</div>`;
+            }
             
             if (ex.type === 'treadmill') {
                 html += `
@@ -380,7 +414,7 @@
                     <input type="number" value="${activeWorkout.setsData[exIdx].duration}" onchange="updateTreadmill(${exIdx}, 'duration', this.value)">
                 `;
             } else {
-                html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Weight/Plates | Reps | Mode | Done</div>`;
+                html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Wt/Plates | Reps | Mode | Done</div>`;
                 activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
                     html += `<div class="set-row">
                         <span>#${setIdx+1}</span>
@@ -395,9 +429,10 @@
                             <option value="Forced" ${set.intensity==='Forced'?'selected':''}>Forced</option>
                             <option value="Negative" ${set.intensity==='Negative'?'selected':''}>Negative</option>
                         </select>
-                        <input type="checkbox" ${set.done?'checked':''} onchange="toggleSetDone(${exIdx}, ${setIdx}, this.checked)" style="width: 26px; height: 26px; accent-color: var(--success);">
+                        <button class="btn btn-danger btn-small" onclick="removeActiveSet(${exIdx}, ${setIdx})" title="Remove Set">✕</button>
                     </div>`;
                 });
+                html += `<button class="btn btn-secondary btn-small" onclick="addActiveSet(${exIdx})" style="margin-top:0.4rem;">+ Add Set</button>`;
             }
             html += `</div>`;
         });
@@ -406,12 +441,22 @@
         container.innerHTML = html;
     }
 
+    function addActiveSet(exIdx) {
+        activeWorkout.setsData[exIdx].push({ plate: 1, reps: 8, intensity: 'Normal', done: false });
+        renderActiveWorkout();
+    }
+
+    function removeActiveSet(exIdx, setIdx) {
+        if (activeWorkout.setsData[exIdx].length <= 1) {
+            alert("Exercise must have at least one set.");
+            return;
+        }
+        activeWorkout.setsData[exIdx].splice(setIdx, 1);
+        renderActiveWorkout();
+    }
+
     function updateTreadmill(exIdx, field, val) { activeWorkout.setsData[exIdx][field] = Number(val); }
     function updateSet(exIdx, setIdx, field, val) { activeWorkout.setsData[exIdx][setIdx][field] = field === 'intensity' ? val : Number(val); }
-    function toggleSetDone(exIdx, setIdx, isChecked) {
-        activeWorkout.setsData[exIdx][setIdx].done = isChecked;
-        if (isChecked) startRestTimer();
-    }
 
     function startRestTimer() {
         const banner = document.getElementById('restTimerBanner');
@@ -466,6 +511,154 @@
         switchTab('home');
     }
 
+    // ROUTINE EDITOR MANAGER
+    function renderRoutineManagerSelector() {
+        const profile = getCurrentProfile();
+        const sel = document.getElementById('routineManagerSelect');
+        if (!sel) return;
+        sel.innerHTML = (profile.routines || []).map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
+        renderRoutineEditor();
+    }
+
+    function renderRoutineEditor() {
+        const profile = getCurrentProfile();
+        const idx = document.getElementById('routineManagerSelect')?.value || 0;
+        const routine = profile.routines[idx];
+        const container = document.getElementById('routineEditorContainer');
+        if (!container || !routine) return;
+
+        let html = `
+            <label>Workout Title:</label>
+            <input type="text" id="editRoutineName" value="${routine.name}" onchange="updateRoutineTitle(${idx}, this.value)">
+            <h4 style="margin-top:0.75rem; color:var(--accent);">Exercises in Routine:</h4>
+        `;
+
+        (routine.exercises || []).forEach((ex, exIdx) => {
+            html += `
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:0.75rem; border-radius:0.5rem; margin-top:0.5rem;">
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <input type="text" value="${ex.name}" onchange="updateExerciseField(${idx}, ${exIdx}, 'name', this.value)" style="margin-bottom:0;">
+                        <button class="btn btn-secondary btn-small" onclick="moveExercise(${idx}, ${exIdx}, -1)" title="Move Up">▲</button>
+                        <button class="btn btn-secondary btn-small" onclick="moveExercise(${idx}, ${exIdx}, 1)" title="Move Down">▼</button>
+                        <button class="btn btn-danger btn-small" onclick="removeExerciseFromRoutine(${idx}, ${exIdx})" title="Remove Exercise">✕</button>
+                    </div>
+                    <div class="exercise-settings-grid" style="margin-top:0.5rem;">
+                        <div>
+                            <label>Type:</label>
+                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'type', this.value)">
+                                <option value="strength" ${ex.type==='strength'?'selected':''}>Strength</option>
+                                <option value="treadmill" ${ex.type==='treadmill'?'selected':''}>Treadmill / Cardio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Pulley Height (1-31):</label>
+                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyHeight', Number(this.value))">
+                                ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${(ex.pulleyHeight||1)===(i+1)?'selected':''}>Height ${i+1}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Pulley Usage:</label>
+                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyMode', this.value)">
+                                <option value="None" ${ex.pulleyMode==='None'?'selected':''}>None</option>
+                                <option value="Single" ${ex.pulleyMode==='Single'?'selected':''}>One Pulley</option>
+                                <option value="Both" ${ex.pulleyMode==='Both'?'selected':''}>Both Pulleys</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Bench Position:</label>
+                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'bench', this.value)">
+                                <option value="None" ${ex.bench==='None'?'selected':''}>None</option>
+                                <option value="Flat" ${ex.bench==='Flat'?'selected':''}>Flat</option>
+                                <option value="Incline" ${ex.bench==='Incline'?'selected':''}>Incline</option>
+                                <option value="Decline" ${ex.bench==='Decline'?'selected':''}>Decline</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label>Comments / Notes:</label>
+                    <input type="text" value="${ex.notes || ''}" placeholder="e.g. Keep elbows locked" onchange="updateExerciseField(${idx}, ${exIdx}, 'notes', this.value)">
+                </div>
+            `;
+        });
+
+        html += `
+            <button class="btn btn-secondary btn-small" onclick="addExerciseToRoutine(${idx})" style="margin-top:0.75rem;">+ Add Exercise</button>
+            <button class="btn btn-danger btn-small" onclick="deleteRoutine(${idx})" style="margin-top:0.75rem; float:right;">🗑️ Delete Workout</button>
+        `;
+        container.innerHTML = html;
+    }
+
+    function updateRoutineTitle(idx, val) {
+        const profile = getCurrentProfile();
+        profile.routines[idx].name = val;
+        saveLocalStorage();
+        renderRoutineManagerSelector();
+    }
+
+    function updateExerciseField(routineIdx, exIdx, field, val) {
+        const profile = getCurrentProfile();
+        profile.routines[routineIdx].exercises[exIdx][field] = val;
+        saveLocalStorage();
+    }
+
+    function moveExercise(routineIdx, exIdx, direction) {
+        const profile = getCurrentProfile();
+        const exs = profile.routines[routineIdx].exercises;
+        const newIdx = exIdx + direction;
+        if (newIdx < 0 || newIdx >= exs.length) return;
+        const temp = exs[exIdx];
+        exs[exIdx] = exs[newIdx];
+        exs[newIdx] = temp;
+        saveLocalStorage();
+        renderRoutineEditor();
+    }
+
+    function removeExerciseFromRoutine(routineIdx, exIdx) {
+        const profile = getCurrentProfile();
+        profile.routines[routineIdx].exercises.splice(exIdx, 1);
+        saveLocalStorage();
+        renderRoutineEditor();
+    }
+
+    function addExerciseToRoutine(routineIdx) {
+        const profile = getCurrentProfile();
+        profile.routines[routineIdx].exercises.push({
+            name: "New Exercise",
+            type: "strength",
+            pulleyHeight: 1,
+            pulleyMode: "None",
+            bench: "None",
+            notes: ""
+        });
+        saveLocalStorage();
+        renderRoutineEditor();
+    }
+
+    function addNewRoutine() {
+        const profile = getCurrentProfile();
+        const name = prompt("Enter new workout routine title:");
+        if (!name) return;
+        profile.routines.push({
+            name: name,
+            exercises: [
+                { name: "Barbell Curl", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" }
+            ]
+        });
+        saveLocalStorage();
+        renderRoutineManagerSelector();
+    }
+
+    function deleteRoutine(routineIdx) {
+        const profile = getCurrentProfile();
+        if (profile.routines.length <= 1) {
+            alert("You must keep at least one workout routine.");
+            return;
+        }
+        if (!confirm("Are you sure you want to delete this routine?")) return;
+        profile.routines.splice(routineIdx, 1);
+        saveLocalStorage();
+        renderRoutineManagerSelector();
+    }
+
     function exportBackupJSON(silent = false) {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
         const dlAnchorElem = document.createElement('a');
@@ -477,9 +670,6 @@
         if (!silent) alert("Local JSON backup exported!");
     }
 
-    // ==========================================================
-    // UNIVERSAL LEGACY BACKUP & DEEP MIGRATION PARSER
-    // ==========================================================
     function importBackupJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -488,14 +678,7 @@
             try {
                 let rawText = e.target.result;
                 rawText = rawText.replace(/^\uFEFF/, '').trim();
-                let parsed;
-                try {
-                    parsed = JSON.parse(rawText);
-                } catch (jsonErr) {
-                    const cleaned = rawText.replace(/,\s*([\]}])/g, '$1');
-                    parsed = JSON.parse(cleaned);
-                }
-
+                let parsed = JSON.parse(rawText);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed);
 
                 let migratedData = JSON.parse(JSON.stringify(defaultTemplate));
@@ -503,32 +686,14 @@
                 let extractedRoutines = [];
 
                 if (Array.isArray(parsed)) {
-                    if (parsed.length > 0 && (parsed[0].exercises || parsed[0].sets || parsed[0].history || parsed[0].setsData)) {
-                        extractedHistory = parsed;
-                    } else {
-                        extractedRoutines = parsed;
-                    }
+                    extractedHistory = parsed;
                 } else if (typeof parsed === 'object' && parsed !== null) {
                     if (parsed.profiles) {
                         migratedData.profiles = parsed.profiles;
                         migratedData.activeProfileId = parsed.activeProfileId || Object.keys(parsed.profiles)[0] || "default";
                     }
-                    
-                    const possibleHistoryKeys = ['history', 'logs', 'workouts', 'completedWorkouts', 'workoutHistory'];
-                    for (const key of possibleHistoryKeys) {
-                        if (Array.isArray(parsed[key]) && parsed[key].length > 0) {
-                            extractedHistory = parsed[key];
-                            break;
-                        }
-                    }
-
-                    const possibleRoutineKeys = ['routines', 'workoutRoutines', 'exercisesList', 'routineList'];
-                    for (const key of possibleRoutineKeys) {
-                        if (Array.isArray(parsed[key]) && parsed[key].length > 0) {
-                            extractedRoutines = parsed[key];
-                            break;
-                        }
-                    }
+                    if (Array.isArray(parsed.history)) extractedHistory = parsed.history;
+                    if (Array.isArray(parsed.routines)) extractedRoutines = parsed.routines;
 
                     if (parsed.profiles) {
                         Object.keys(parsed.profiles).forEach(pid => {
@@ -546,62 +711,8 @@
                 const normalizedHistory = extractedHistory.map(h => {
                     const timestamp = h.timestamp || h.date || h.time || h.savedAt || new Date().toISOString();
                     const name = h.name || h.routineName || h.title || h.workoutName || "Heavy Duty Session";
-                    const exercises = h.exercises || h.routineExercises || [];
-                    
-                    let rawSets = h.setsData || h.sets || h.setList || h.exerciseSets || [];
-                    let setsData = [];
-                    
-                    if (Array.isArray(rawSets)) {
-                        setsData = rawSets.map(s => {
-                            if (Array.isArray(s)) {
-                                return s.map(st => ({
-                                    plate: Number(st.plate || st.weight || st.resistance || 1),
-                                    reps: Number(st.reps || st.repetitions || 1),
-                                    intensity: st.intensity || st.mode || 'Normal',
-                                    done: true
-                                }));
-                            } else if (s && typeof s === 'object') {
-                                if (s.incline !== undefined || s.speed !== undefined) {
-                                    return { incline: Number(s.incline || 1), speed: Number(s.speed || 1), duration: Number(s.duration || 15) };
-                                }
-                                return [{
-                                    plate: Number(s.plate || s.weight || s.resistance || 1),
-                                    reps: Number(s.reps || s.repetitions || 1),
-                                    intensity: s.intensity || s.mode || 'Normal',
-                                    done: true
-                                }];
-                            }
-                            return [{ plate: 1, reps: 10, intensity: 'Normal', done: true }];
-                        });
-                    } else if (rawSets && typeof rawSets === 'object') {
-                        setsData = exercises.map((_, idx) => {
-                            const s = rawSets[idx] || rawSets[exercises[idx]?.name] || [{ plate: 1, reps: 10, intensity: 'Normal', done: true }];
-                            if (Array.isArray(s)) {
-                                return s.map(st => ({
-                                    plate: Number(st.plate || st.weight || 1),
-                                    reps: Number(st.reps || 1),
-                                    intensity: st.intensity || 'Normal',
-                                    done: true
-                                }));
-                            }
-                            return s;
-                        });
-                    }
-
-                    if (setsData.length < exercises.length) {
-                        for (let i = setsData.length; i < exercises.length; i++) {
-                            const ex = exercises[i];
-                            if (ex && ex.type === 'treadmill') {
-                                setsData.push({ incline: 1, speed: 1, duration: 15 });
-                            } else {
-                                setsData.push([
-                                    { plate: 1, reps: 10, intensity: 'Normal', done: true },
-                                    { plate: 1, reps: 8, intensity: 'Normal', done: true }
-                                ]);
-                            }
-                        }
-                    }
-
+                    const exercises = h.exercises || [];
+                    const setsData = h.setsData || h.sets || [];
                     return { name, timestamp, exercises, setsData };
                 });
 
@@ -624,7 +735,8 @@
                 updateProfileSelector();
                 renderDashboard();
                 renderHealthCard();
-                alert(`✓ Successfully restored ${normalizedHistory.length} workout logs and ${extractedRoutines.length} routines!`);
+                renderRoutineManagerSelector();
+                alert(`✓ Successfully restored ${normalizedHistory.length} workout logs with strict snapshot integrity!`);
             } catch (err) {
                 console.error("Backup Import Error:", err);
                 alert("Could not import backup file. Error: " + err.message);
@@ -712,7 +824,9 @@
                 if (h.exercises && h.setsData) {
                     h.exercises.forEach((ex, exIdx) => {
                         const sets = h.setsData[exIdx];
-                        exercisesHTML += `<div style="margin-top:0.4rem; font-size:0.9rem; color:var(--accent);"><strong>${ex.name}</strong></div>`;
+                        exercisesHTML += `<div style="margin-top:0.4rem; font-size:0.9rem; color:var(--accent);"><strong>${ex.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(${ex.pulleyMode !== 'None' ? 'Pulley H:' + ex.pulleyHeight + ' ' + ex.pulleyMode : ''} ${ex.bench !== 'None' ? 'Bench:' + ex.bench : ''})</span></div>`;
+                        if (ex.notes) exercisesHTML += `<div style="font-size:0.8rem; color:var(--text-muted); font-style:italic; margin-left:0.5rem;">Note: ${ex.notes}</div>`;
+                        
                         if (ex.type === 'treadmill') {
                             exercisesHTML += `<div style="font-size:0.85rem; color:var(--text-muted); margin-left:0.5rem;">Cardio: Incline ${sets.incline || 1} | Speed ${sets.speed || 1} | Duration ${sets.duration || 15} mins</div>`;
                         } else if (Array.isArray(sets)) {
@@ -760,6 +874,7 @@
         saveLocalStorage();
         renderDashboard();
         renderHealthCard();
+        renderRoutineManagerSelector();
     }
 
     function createNewProfile() {
@@ -778,6 +893,7 @@
         updateProfileSelector();
         renderDashboard();
         renderHealthCard();
+        renderRoutineManagerSelector();
     }
 
     function updateProfileSelector() {
@@ -801,7 +917,7 @@
     };
 
     function parseHealthText(txt) {
-        let t = txt.trim().replace(/[\u201C\u201D\u201E]/g, '"').replace(/[\u2018\u2019]/g, "'");
+        let t = txt.trim().replace(/[“”„]/g, '"').replace(/[‘’]/g, "'");
         let obj = null;
         try { obj = JSON.parse(t); } catch (e) {
             obj = {};
