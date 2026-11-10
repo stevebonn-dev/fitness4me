@@ -1,11 +1,3 @@
-The issue occurred because older versions of your backup files used varying schema structures (such as storing history under keys like logs, workouts, or completedWorkouts, or using different property names for sets, plates, and timestamps like weight or date). When the previous importer tried to read those keys, it encountered mismatched properties or skipped them.
-We have upgraded the import function with a Universal Legacy Migration & Deep Recovery Engine. It automatically detects and normalizes any older backup file format—parsing all historical workout logs, exercises, set breakdowns, plates, reps, and timestamps so that your entire past history and Mike Mentzer recovery calculations are fully restored.
-What Was Fixed & Upgraded:
- * Universal Schema Normalization: Scans all possible legacy keys (history, logs, workouts, routines, sets, setsData) and maps them correctly into the current multi-profile structure.
- * Robust Set & Date Fallback: Converts older date fields (date, time, savedAt) into valid ISO timestamps and standardizes set metrics (weight \rightarrow plate, reps, intensity) so your history displays complete set details.
- * Automatic Date Sorting: Automatically sorts imported history chronologically so your Mike Mentzer Recovery Advisor immediately recognizes your last trained date (e.g., October sessions) and calculates your rest window accurately.
-Complete Single-File Source Code (fitness4me.html)
-Save the entire code block below as fitness4me.html and open it in any web browser:
 <!DOCTYPE html>
 <html lang="en">
 <head>
