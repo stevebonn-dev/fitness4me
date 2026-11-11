@@ -1,4 +1,8 @@
-Here is the complete, full-length source code from beginning to end for copying:
+Here is your complete, fully updated single-file web application source code for your Fitness4Me Heavy Duty & Cardio Tracker.
+What Was Added & Enhanced:
+ * Last Workout Historical Reference per Exercise: When you start and log an active workout, each exercise card now automatically looks up your most recent previous session and displays a highlighted summary (showing the exact date, plates/weight, reps, intensity, bench position, and cable pulley height/mode used last time) right at the top of the exercise block.
+ * On-the-Fly Exercise Reordering in Active Workout: Added ▲ (Move Up) and ▼ (Move Down) buttons directly into the exercise header of active workouts. You can now rearrange the order of exercises dynamically on the fly while working out.
+Copy the entire block below and save it as fitness4me.html:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,6 +384,40 @@ Here is the complete, full-length source code from beginning to end for copying:
         switchTab('workout');
     }
 
+    // Helper to fetch last recorded history for a specific exercise
+    function getLastExerciseLog(exerciseName) {
+        const profile = getCurrentProfile();
+        if (!profile.history || profile.history.length === 0) return null;
+        for (let i = profile.history.length - 1; i >= 0; i--) {
+            const hist = profile.history[i];
+            if (hist.exercises && hist.setsData) {
+                const idx = hist.exercises.findIndex(e => e.name === exerciseName);
+                if (idx !== -1) {
+                    return {
+                        date: hist.timestamp || hist.date,
+                        exercise: hist.exercises[idx],
+                        sets: hist.setsData[idx]
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    // Reorder exercises during active workout
+    function moveActiveWorkoutExercise(exIdx, direction) {
+        const newIdx = exIdx + direction;
+        if (newIdx < 0 || newIdx >= activeWorkout.exercises.length) return;
+        const tempEx = activeWorkout.exercises[exIdx];
+        activeWorkout.exercises[exIdx] = activeWorkout.exercises[newIdx];
+        activeWorkout.exercises[newIdx] = tempEx;
+
+        const tempSets = activeWorkout.setsData[exIdx];
+        activeWorkout.setsData[exIdx] = activeWorkout.setsData[newIdx];
+        activeWorkout.setsData[newIdx] = tempSets;
+        renderActiveWorkout();
+    }
+
     function renderActiveWorkout() {
         const container = document.getElementById('activeWorkoutContainer');
         let html = `<h2>Active: ${activeWorkout.name}</h2>`;
@@ -390,12 +428,35 @@ Here is the complete, full-length source code from beginning to end for copying:
             const benchPos = ex.bench || 'None';
             const notesVal = ex.notes || '';
 
+            // Fetch last workout reference for this exercise
+            const lastLog = getLastExerciseLog(ex.name);
+            let lastLogHtml = '';
+            if (lastLog) {
+                let setsSummary = '';
+                if (ex.type === 'treadmill') {
+                    setsSummary = `Incline ${lastLog.sets.incline || 1} | Speed ${lastLog.sets.speed || 1} | ${lastLog.sets.duration || 15} mins`;
+                } else if (Array.isArray(lastLog.sets)) {
+                    setsSummary = lastLog.sets.map((s, si) => `Set #${si+1}: ${s.plate || s.weight || 1} Plates, ${s.reps || 0} reps (${s.intensity || 'Normal'})`).join(' | ');
+                }
+                lastLogHtml = `<div style="font-size:0.85rem; color:var(--accent); background:rgba(59,130,246,0.1); padding:0.4rem 0.6rem; border-radius:0.35rem; margin-bottom:0.5rem; border-left:3px solid var(--accent);">
+                    <strong>📌 Last Session (${newDate(lastLog.date).toLocaleDateString()}):</strong> ${setsSummary}
+                </div>`;
+            } else {
+                lastLogHtml = `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:0.5rem;">📌 Last Session: No prior records found</div>`;
+            }
+
             html += `<div class="card" style="margin-top: 0.75rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div class="card-title">${ex.name}</div>
-                    <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H: ${pulleyH} | ${pulleyM} | Bench: ${benchPos}</span>
+                    <div style="display:flex; gap:0.25rem; align-items:center;">
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H:${pulleyH} | ${pulleyM} | Bench:${benchPos}</span>
+                        <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, -1)" title="Move Up">▲</button>
+                        <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, 1)" title="Move Down">▼</button>
+                    </div>
                 </div>`;
             
+            html += lastLogHtml;
+
             if (notesVal) {
                 html += `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:0.5rem;">Note: ${notesVal}</div>`;
             }
