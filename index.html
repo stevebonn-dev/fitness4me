@@ -1,3 +1,8 @@
+Here is your complete, fully updated single-file web application source code for your Fitness4Me Heavy Duty & Cardio Tracker.
+What Was Added & Updated:
+ * Add & Remove Exercises on Demand in Active Workouts: You can now tap "+ Add Exercise to Workout" at the bottom of your active workout to dynamically add a new exercise on the fly, or tap the ✕ button on any exercise card to remove it.
+ * Confirmation Dialogs: Added confirmation prompts (confirm(...)) whenever you attempt to remove a set, remove an exercise from an active workout, or remove an exercise from your routine templates.
+Copy the entire block below and save it as fitness4me.html:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -413,6 +418,37 @@
         renderActiveWorkout();
     }
 
+    // Add exercise on demand in active workout
+    function addActiveWorkoutExercise() {
+        const name = prompt("Enter exercise name to add:");
+        if (!name || !name.trim()) return;
+        activeWorkout.exercises.push({
+            name: name.trim(),
+            type: "strength",
+            pulleyHeight: 1,
+            pulleyMode: "None",
+            bench: "None",
+            notes: ""
+        });
+        activeWorkout.setsData.push([
+            { plate: 1, reps: 10, intensity: 'Normal', done: false },
+            { plate: 1, reps: 8, intensity: 'Normal', done: false }
+        ]);
+        renderActiveWorkout();
+    }
+
+    // Remove exercise on demand in active workout with confirmation
+    function removeActiveWorkoutExercise(exIdx) {
+        if (activeWorkout.exercises.length <= 1) {
+            alert("Workout must have at least one exercise.");
+            return;
+        }
+        if (!confirm("Are you sure you want to remove this exercise from the active workout?")) return;
+        activeWorkout.exercises.splice(exIdx, 1);
+        activeWorkout.setsData.splice(exIdx, 1);
+        renderActiveWorkout();
+    }
+
     // Update comments/notes during active workout
     function updateActiveExerciseNotes(exIdx, val) {
         activeWorkout.exercises[exIdx].notes = val;
@@ -452,6 +488,7 @@
                         <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H:${pulleyH} | ${pulleyM} | Bench:${benchPos}</span>
                         <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, -1)" title="Move Up">▲</button>
                         <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, 1)" title="Move Down">▼</button>
+                        <button class="btn btn-danger btn-small" onclick="removeActiveWorkoutExercise(${exIdx})" title="Remove Exercise">✕</button>
                     </div>
                 </div>`;
             
@@ -499,7 +536,10 @@
             html += `</div>`;
         });
 
-        html += `<button class="btn" onclick="finishWorkout()" style="background: var(--success); margin-top: 1rem;">Finish & Save Workout</button>`;
+        html += `
+            <button class="btn btn-secondary" onclick="addActiveWorkoutExercise()" style="margin-top: 0.5rem;">+ Add Exercise to Workout</button>
+            <button class="btn" onclick="finishWorkout()" style="background: var(--success); margin-top: 0.75rem;">Finish & Save Workout</button>
+        `;
         container.innerHTML = html;
     }
 
@@ -513,6 +553,7 @@
             alert("Exercise must have at least one set.");
             return;
         }
+        if (!confirm("Are you sure you want to remove this set?")) return;
         activeWorkout.setsData[exIdx].splice(setIdx, 1);
         renderActiveWorkout();
     }
@@ -676,6 +717,11 @@
 
     function removeExerciseFromRoutine(routineIdx, exIdx) {
         const profile = getCurrentProfile();
+        if (profile.routines[routineIdx].exercises.length <= 1) {
+            alert("Routine must have at least one exercise.");
+            return;
+        }
+        if (!confirm("Are you sure you want to remove this exercise from the routine?")) return;
         profile.routines[routineIdx].exercises.splice(exIdx, 1);
         saveLocalStorage();
         renderRoutineEditor();
