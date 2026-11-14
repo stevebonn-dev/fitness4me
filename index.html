@@ -131,9 +131,7 @@
 
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tab-content">
-        <div class="card" id="hpCard">
-            <!-- Populated dynamically by health patch -->
-        </div>
+        <div class="card" id="hpCard"></div>
 
         <div class="card">
             <div class="card-title">⚙️ Routine & Exercise Customizer</div>
@@ -159,8 +157,8 @@
             <div class="card-title">💾 Local Data & Backup Migration</div>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Export or restore complete workout logs and historical snapshots.</p>
             <button class="btn" onclick="exportBackupJSON()">📥 Export JSON Backup File</button>
-            <label style="margin-top: 0.75rem;">Import / Restore JSON Backup File:</label>
-            <input type="file" id="importJsonFileInput" accept=".json" onchange="importBackupJSON(event)">
+            <label style="margin-top: 0.75rem;">Import / Restore JSON Backup or GymBook CSV File:</label>
+            <input type="file" id="importJsonFileInput" accept=".json,.csv" onchange="importBackupJSON(event)">
         </div>
 
         <div class="card">
@@ -199,8 +197,8 @@
     <div class="modal-content">
         <h3 style="color: var(--accent); margin-bottom: 0.75rem;">Welcome to Fitness4Me!</h3>
         <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem;">No workout database was detected. Load a local/older JSON backup or start fresh.</p>
-        <button class="btn" onclick="document.getElementById('wizardFileInput').click()">📂 Load JSON Backup File</button>
-        <input type="file" id="wizardFileInput" accept=".json" style="display:none;" onchange="importBackupJSON(event); closeModal();">
+        <button class="btn" onclick="document.getElementById('wizardFileInput').click()">📂 Load JSON or CSV Backup File</button>
+        <input type="file" id="wizardFileInput" accept=".json,.csv" style="display:none;" onchange="importBackupJSON(event); closeModal();">
         <button class="btn btn-secondary" onclick="closeModal()" style="margin-top: 0.5rem;">🚀 Start Fresh with Defaults</button>
     </div>
 </div>
@@ -369,84 +367,23 @@
             exercises: JSON.parse(JSON.stringify(routine.exercises)),
             setsData: routine.exercises.map(ex => {
                 if (ex.type === 'treadmill') return { incline: 1, speed: 1, duration: 15 };
+                if (Array.isArray(ex.defaultSets) && ex.defaultSets.length > 0) {
+                    return ex.defaultSets.map(s => ({
+                        plate: Number(s.plate ?? s.weight ?? 1),
+                        reps: Number(s.reps ?? 10),
+                        intensity: s.intensity || 'Normal',
+                        notes: s.notes || '',
+                        done: false
+                    }));
+                }
                 return [
-                    { plate: 1, reps: 10, intensity: 'Normal', done: false },
+                    { plate: 1, reps: 10, intensity: 'Warmup', done: false },
                     { plate: 1, reps: 8, intensity: 'Normal', done: false }
                 ];
             })
         };
         renderActiveWorkout();
         switchTab('workout');
-    }
-
-    // Helper to fetch last recorded history for a specific exercise
-    function getLastExerciseLog(exerciseName) {
-        const profile = getCurrentProfile();
-        if (!profile.history || profile.history.length === 0) return null;
-        for (let i = profile.history.length - 1; i >= 0; i--) {
-            const hist = profile.history[i];
-            if (hist.exercises && hist.setsData) {
-                const idx = hist.exercises.findIndex(e => e.name === exerciseName);
-                if (idx !== -1) {
-                    return {
-                        date: hist.timestamp || hist.date,
-                        exercise: hist.exercises[idx],
-                        sets: hist.setsData[idx]
-                    };
-                }
-            }
-        }
-        return null;
-    }
-
-    // Reorder exercises during active workout
-    function moveActiveWorkoutExercise(exIdx, direction) {
-        const newIdx = exIdx + direction;
-        if (newIdx < 0 || newIdx >= activeWorkout.exercises.length) return;
-        const tempEx = activeWorkout.exercises[exIdx];
-        activeWorkout.exercises[exIdx] = activeWorkout.exercises[newIdx];
-        activeWorkout.exercises[newIdx] = tempEx;
-
-        const tempSets = activeWorkout.setsData[exIdx];
-        activeWorkout.setsData[exIdx] = activeWorkout.setsData[newIdx];
-        activeWorkout.setsData[newIdx] = tempSets;
-        renderActiveWorkout();
-    }
-
-    // Add exercise on demand in active workout
-    function addActiveWorkoutExercise() {
-        const name = prompt("Enter exercise name to add:");
-        if (!name || !name.trim()) return;
-        activeWorkout.exercises.push({
-            name: name.trim(),
-            type: "strength",
-            pulleyHeight: 1,
-            pulleyMode: "None",
-            bench: "None",
-            notes: ""
-        });
-        activeWorkout.setsData.push([
-            { plate: 1, reps: 10, intensity: 'Normal', done: false },
-            { plate: 1, reps: 8, intensity: 'Normal', done: false }
-        ]);
-        renderActiveWorkout();
-    }
-
-    // Remove exercise on demand in active workout with confirmation
-    function removeActiveWorkoutExercise(exIdx) {
-        if (activeWorkout.exercises.length <= 1) {
-            alert("Workout must have at least one exercise.");
-            return;
-        }
-        if (!confirm("Are you sure you want to remove this exercise from the active workout?")) return;
-        activeWorkout.exercises.splice(exIdx, 1);
-        activeWorkout.setsData.splice(exIdx, 1);
-        renderActiveWorkout();
-    }
-
-    // Update comments/notes during active workout
-    function updateActiveExerciseNotes(exIdx, val) {
-        activeWorkout.exercises[exIdx].notes = val;
     }
 
     function renderActiveWorkout() {
@@ -459,40 +396,15 @@
             const benchPos = ex.bench || 'None';
             const notesVal = ex.notes || '';
 
-            // Fetch last workout reference for this exercise
-            const lastLog = getLastExerciseLog(ex.name);
-            let lastLogHtml = '';
-            if (lastLog) {
-                let setsSummary = '';
-                if (ex.type === 'treadmill') {
-                    setsSummary = `Incline ${lastLog.sets.incline || 1} | Speed ${lastLog.sets.speed || 1} | ${lastLog.sets.duration || 15} mins`;
-                } else if (Array.isArray(lastLog.sets)) {
-                    setsSummary = lastLog.sets.map((s, si) => `Set #${si+1}: ${s.plate || s.weight || 1} Plates, ${s.reps || 0} reps (${s.intensity || 'Normal'})`).join(' | ');
-                }
-                lastLogHtml = `<div style="font-size:0.85rem; color:var(--accent); background:rgba(59,130,246,0.1); padding:0.4rem 0.6rem; border-radius:0.35rem; margin-bottom:0.5rem; border-left:3px solid var(--accent);">
-                    <strong>📌 Last Session (${new Date(lastLog.date).toLocaleDateString()}):</strong> ${setsSummary}
-                </div>`;
-            } else {
-                lastLogHtml = `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:0.5rem;">📌 Last Session: No prior records found</div>`;
-            }
-
             html += `<div class="card" style="margin-top: 0.75rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div class="card-title">${ex.name}</div>
-                    <div style="display:flex; gap:0.25rem; align-items:center;">
-                        <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H:${pulleyH} | ${pulleyM} | Bench:${benchPos}</span>
-                        <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, -1)" title="Move Up">▲</button>
-                        <button class="btn btn-secondary btn-small" onclick="moveActiveWorkoutExercise(${exIdx}, 1)" title="Move Down">▼</button>
-                        <button class="btn btn-danger btn-small" onclick="removeActiveWorkoutExercise(${exIdx})" title="Remove Exercise">✕</button>
-                    </div>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Pulley H: ${pulleyH} | ${pulleyM} | Bench: ${benchPos}</span>
                 </div>`;
             
-            html += lastLogHtml;
-
-            html += `
-                <label>Comments / Notes:</label>
-                <input type="text" value="${notesVal}" placeholder="Add or update notes for this session..." onchange="updateActiveExerciseNotes(${exIdx}, this.value)">
-            `;
+            if (notesVal) {
+                html += `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:0.5rem;">Note: ${notesVal}</div>`;
+            }
             
             if (ex.type === 'treadmill') {
                 html += `
@@ -510,18 +422,17 @@
             } else {
                 html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Wt/Plates | Reps | Mode | Done</div>`;
                 activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
+                    const currentWt = Number(set.plate ?? set.weight ?? 1);
                     html += `<div class="set-row">
                         <span>#${setIdx+1}</span>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'plate', this.value)">
-                            ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${(set.plate || set.weight || 1)===(i+1)?'selected':''}>Plates ${i+1}</option>`).join('')}
-                        </select>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'reps', this.value)">
-                            ${Array.from({length:30}, (_,i)=>`<option value="${i+1}" ${(set.reps || 1)===(i+1)?'selected':''}>${i+1} reps</option>`).join('')}
-                        </select>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'intensity', this.value)">
+                        <input type="number" step="0.25" min="0" value="${currentWt}" onchange="updateSet(${exIdx}, ${setIdx}, 'plate', this.value)" style="margin-bottom:0; padding:0.4rem;">
+                        <input type="number" step="1" min="0" value="${set.reps || 0}" onchange="updateSet(${exIdx}, ${setIdx}, 'reps', this.value)" style="margin-bottom:0; padding:0.4rem;">
+                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'intensity', this.value)" style="margin-bottom:0; padding:0.4rem;">
+                            <option value="Warmup" ${set.intensity==='Warmup'?'selected':''}>Warmup</option>
                             <option value="Normal" ${set.intensity==='Normal'?'selected':''}>Normal</option>
                             <option value="Forced" ${set.intensity==='Forced'?'selected':''}>Forced</option>
                             <option value="Negative" ${set.intensity==='Negative'?'selected':''}>Negative</option>
+                            <option value="Cooldown" ${set.intensity==='Cooldown'?'selected':''}>Cooldown</option>
                         </select>
                         <button class="btn btn-danger btn-small" onclick="removeActiveSet(${exIdx}, ${setIdx})" title="Remove Set">✕</button>
                     </div>`;
@@ -531,10 +442,7 @@
             html += `</div>`;
         });
 
-        html += `
-            <button class="btn btn-secondary" onclick="addActiveWorkoutExercise()" style="margin-top: 0.5rem;">+ Add Exercise to Workout</button>
-            <button class="btn" onclick="finishWorkout()" style="background: var(--success); margin-top: 0.75rem;">Finish & Save Workout</button>
-        `;
+        html += `<button class="btn" onclick="finishWorkout()" style="background: var(--success); margin-top: 1rem;">Finish & Save Workout</button>`;
         container.innerHTML = html;
     }
 
@@ -548,7 +456,6 @@
             alert("Exercise must have at least one set.");
             return;
         }
-        if (!confirm("Are you sure you want to remove this set?")) return;
         activeWorkout.setsData[exIdx].splice(setIdx, 1);
         renderActiveWorkout();
     }
@@ -712,11 +619,6 @@
 
     function removeExerciseFromRoutine(routineIdx, exIdx) {
         const profile = getCurrentProfile();
-        if (profile.routines[routineIdx].exercises.length <= 1) {
-            alert("Routine must have at least one exercise.");
-            return;
-        }
-        if (!confirm("Are you sure you want to remove this exercise from the routine?")) return;
         profile.routines[routineIdx].exercises.splice(exIdx, 1);
         saveLocalStorage();
         renderRoutineEditor();
@@ -773,14 +675,190 @@
         if (!silent) alert("Local JSON backup exported!");
     }
 
+    function parseCSVRows(text) {
+        const rows = [];
+        let row = [], cur = '', inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i], next = text[i + 1];
+            if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; }
+            else if (ch === '"') { inQuotes = !inQuotes; }
+            else if (ch === ',' && !inQuotes) { row.push(cur); cur = ''; }
+            else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+                if (ch === '\r' && next === '\n') i++;
+                row.push(cur);
+                if (row.some(cell => cell.trim() !== '')) rows.push(row);
+                row = []; cur = '';
+            } else { cur += ch; }
+        }
+        if (cur.length || row.length) { row.push(cur); rows.push(row); }
+        return rows;
+    }
+
+    function parseGymBookCSV(rawText) {
+        const clean = rawText.replace(/^\uFEFF/, '').replace(/\u0000/g, '');
+        const rows = parseCSVRows(clean);
+        if (rows.length < 2) throw new Error("GymBook CSV appears empty.");
+
+        const headers = rows[0].map(h => h.trim());
+        const idx = name => headers.findIndex(h => h.toLowerCase().includes(name.toLowerCase()));
+
+        const cDate = idx('Date');
+        const cWorkout = idx('Workout');
+        const cTime = idx('Time');
+        const cExercise = idx('Exercise');
+        const cSetType = idx('Set / Warm');
+        const cReps = idx('Repetitions');
+        const cWeight = idx('Weight');
+        const cNotes = idx('Notes');
+        const cSkipped = idx('Skipped');
+
+        const sessionsMap = new Map();
+        const routinesMap = new Map();
+
+        for (let r = 1; r < rows.length; r++) {
+            const cols = rows[r];
+            if (cols.length < 4) continue;
+
+            const dateStr = (cols[cDate] || '').trim();
+            const workoutName = (cols[cWorkout] || 'GymBook Session').trim();
+            const timeStr = (cols[cTime] || '12:00').trim();
+            const exName = (cols[cExercise] || 'Unknown Exercise').trim();
+            const rawSetType = (cols[cSetType] || '').trim().toLowerCase();
+            const repsRaw = (cols[cReps] || '').trim();
+            const weightRaw = (cols[cWeight] || '').trim();
+            const noteStr = (cols[cNotes] || '').trim();
+            const skipped = ((cols[cSkipped] || '').trim().toLowerCase() === 'yes');
+
+            if (skipped) continue;
+
+            let isoTimestamp = new Date().toISOString();
+            const dMatch = dateStr.match(/^(\d{2})\.(\d{2})\.(\d{2,4})$/);
+            if (dMatch) {
+                const yyyy = dMatch[3].length === 2 ? '20' + dMatch[3] : dMatch[3];
+                isoTimestamp = `${yyyy}-${dMatch[2]}-${dMatch[1]}T${timeStr.padStart(5, '0')}:00.000Z`;
+            } else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+                isoTimestamp = `${dateStr}T${timeStr.padStart(5, '0')}:00.000Z`;
+            }
+
+            const repsMatch = repsRaw.match(/(\d+(\.\d+)?)/);
+            const weightMatch = weightRaw.replace(',', '.').match(/(\d+(\.\d+)?)/);
+            const reps = repsMatch ? Math.round(parseFloat(repsMatch[1])) : 0;
+            const plate = weightMatch ? parseFloat(weightMatch[1]) : 0;
+
+            let intensity = 'Normal';
+            if (rawSetType.includes('warm')) intensity = 'Warmup';
+            else if (rawSetType.includes('cool')) intensity = 'Cooldown';
+
+            const hMatch = noteStr.match(/height\s*(\d+)/i);
+            const pulleyHeight = hMatch ? Number(hMatch[1]) : 1;
+
+            const sessionKey = `${dateStr}__${workoutName}`;
+            if (!sessionsMap.has(sessionKey)) {
+                sessionsMap.set(sessionKey, {
+                    name: workoutName,
+                    timestamp: isoTimestamp,
+                    exercises: [],
+                    setsData: []
+                });
+            }
+            const session = sessionsMap.get(sessionKey);
+
+            let exIdx = session.exercises.findIndex(e => e.name === exName);
+            if (exIdx === -1) {
+                session.exercises.push({
+                    name: exName,
+                    type: 'strength',
+                    pulleyHeight,
+                    pulleyMode: 'None',
+                    bench: 'None',
+                    notes: noteStr
+                });
+                session.setsData.push([]);
+                exIdx = session.exercises.length - 1;
+            }
+            session.setsData[exIdx].push({
+                plate,
+                reps,
+                intensity,
+                notes: noteStr,
+                done: true
+            });
+
+            if (!routinesMap.has(workoutName)) {
+                routinesMap.set(workoutName, { name: workoutName, exercises: [] });
+            }
+            const rObj = routinesMap.get(workoutName);
+            if (!rObj.exercises.some(e => e.name === exName)) {
+                rObj.exercises.push({
+                    name: exName,
+                    type: 'strength',
+                    pulleyHeight,
+                    pulleyMode: 'None',
+                    bench: 'None',
+                    notes: noteStr,
+                    defaultSets: [{ plate, reps, intensity }]
+                });
+            }
+        }
+
+        const history = Array.from(sessionsMap.values()).sort(
+            (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        );
+        const routines = Array.from(routinesMap.values());
+        return { history, routines };
+    }
+
     function importBackupJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                let rawText = e.target.result;
+                const buffer = e.target.result;
+                const bytes = new Uint8Array(buffer);
+                let rawText = '';
+
+                if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+                    rawText = new TextDecoder('utf-16le').decode(buffer);
+                } else if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+                    rawText = new TextDecoder('utf-16be').decode(buffer);
+                } else {
+                    rawText = new TextDecoder('utf-8').decode(buffer);
+                }
+
                 rawText = rawText.replace(/^\uFEFF/, '').trim();
+
+                if (file.name.toLowerCase().endsWith('.csv') || rawText.startsWith('Date,Workout,')) {
+                    const { history, routines } = parseGymBookCSV(rawText);
+                    const profile = getCurrentProfile();
+
+                    routines.forEach(impR => {
+                        const existingIdx = profile.routines.findIndex(r => r.name === impR.name);
+                        if (existingIdx === -1) {
+                            profile.routines.push(impR);
+                        }
+                    });
+
+                    const existingKeys = new Set((profile.history || []).map(h => `${h.timestamp}__${h.name}`));
+                    let addedCount = 0;
+                    history.forEach(h => {
+                        const key = `${h.timestamp}__${h.name}`;
+                        if (!existingKeys.has(key)) {
+                            profile.history.push(h);
+                            existingKeys.add(key);
+                            addedCount++;
+                        }
+                    });
+                    profile.history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                    saveLocalStorage();
+                    updateProfileSelector();
+                    renderDashboard();
+                    renderRoutineManagerSelector();
+                    alert(`✓ Imported ${addedCount} GymBook workout sessions and ${routines.length} routines!`);
+                    return;
+                }
+
                 let parsed = JSON.parse(rawText);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed);
 
@@ -822,7 +900,7 @@
                 normalizedHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
                 migratedData.profiles["default"] = {
-                    name: "Restored Profile",
+                    name: parsed.profiles?.default?.name || "Restored Profile",
                     routines: extractedRoutines,
                     history: normalizedHistory,
                     healthData: parsed.healthData || parsed.profiles?.default?.healthData || null,
@@ -845,7 +923,7 @@
                 alert("Could not import backup file. Error: " + err.message);
             }
         };
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
     }
 
     function initGoogleDriveAuth() {
