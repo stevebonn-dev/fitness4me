@@ -390,10 +390,10 @@
         const valNum = Number(currentVal) || 1;
         let opts = '';
         for (let i = 1; i <= 25; i++) {
-            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i} Plates</option>`;
+            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i}</option>`;
         }
         if (valNum < 1 || valNum > 25 || !Number.isInteger(valNum)) {
-            opts += `<option value="${valNum}" selected>${valNum} Plates</option>`;
+            opts += `<option value="${valNum}" selected>${valNum}</option>`;
         }
         return opts;
     }
@@ -402,10 +402,10 @@
         const valNum = Number(currentVal) || 10;
         let opts = '';
         for (let i = 1; i <= 100; i++) {
-            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i} Reps</option>`;
+            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i}</option>`;
         }
         if (valNum < 1 || valNum > 100 || !Number.isInteger(valNum)) {
-            opts += `<option value="${valNum}" selected>${valNum} Reps</option>`;
+            opts += `<option value="${valNum}" selected>${valNum}</option>`;
         }
         return opts;
     }
@@ -431,17 +431,17 @@
             
             html += `<div class="exercise-settings-grid" style="margin-top:0.5rem; margin-bottom:0.5rem;">
                 <div>
-                    <label>Pulley Height (1-31):</label>
+                    <label>Height:</label>
                     <select onchange="updateActiveExerciseField(${exIdx}, 'pulleyHeight', Number(this.value))">
-                        ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${pulleyH===(i+1)?'selected':''}>Height ${i+1}</option>`).join('')}
+                        ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${pulleyH===(i+1)?'selected':''}>${i+1}</option>`).join('')}
                     </select>
                 </div>
                 <div>
-                    <label>Pulley Usage:</label>
+                    <label>Pulley:</label>
                     <select onchange="updateActiveExerciseField(${exIdx}, 'pulleyMode', this.value)">
                         <option value="None" ${pulleyM==='None'?'selected':''}>None</option>
-                        <option value="One" ${pulleyM==='One'?'selected':''}>One Pulley</option>
-                        <option value="Both" ${pulleyM==='Both'?'selected':''}>Both Pulleys</option>
+                        <option value="One" ${pulleyM==='One'?'selected':''}>One</option>
+                        <option value="Both" ${pulleyM==='Both'?'selected':''}>Both</option>
                     </select>
                 </div>
                 <div>
@@ -472,7 +472,7 @@
                     <input type="number" value="${activeWorkout.setsData[exIdx].duration}" onchange="updateTreadmill(${exIdx}, 'duration', this.value)">
                 `;
             } else {
-                html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Plates (1-25) | Reps (1-100) | Mode | Action</div>`;
+                html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Plate | Reps | Mode | Action</div>`;
                 activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
                     const currentWt = Number(set.plate ?? set.weight ?? 1);
                     const currentReps = Number(set.reps ?? 10);
@@ -613,18 +613,18 @@
                             </select>
                         </div>
                         <div>
-                            <label>Pulley Height (1-31):</label>
+                            <label>Height:</label>
                             <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyHeight', Number(this.value))">
-                                ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${(ex.pulleyHeight||1)===(i+1)?'selected':''}>Height ${i+1}</option>`).join('')}
+                                ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${(ex.pulleyHeight||1)===(i+1)?'selected':''}>${i+1}</option>`).join('')}
                             </select>
                         </div>
                         <div>
-                            <label>Pulley Usage:</label>
+                            <label>Pulley:</label>
                             <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyMode', this.value)">
                                 <option value="None" ${ex.pulleyMode==='None'?'selected':''}>None</option>
-                                <option value="One" ${ex.pulleyMode==='One'?'selected':''}>One Pulley</option>
-                                <option value="Single" ${ex.pulleyMode==='Single'?'selected':''}>One Pulley</option>
-                                <option value="Both" ${ex.pulleyMode==='Both'?'selected':''}>Both Pulleys</option>
+                                <option value="One" ${ex.pulleyMode==='One'?'selected':''}>One</option>
+                                <option value="Single" ${ex.pulleyMode==='Single'?'selected':''}>One</option>
+                                <option value="Both" ${ex.pulleyMode==='Both'?'selected':''}>Both</option>
                             </select>
                         </div>
                         <div>
