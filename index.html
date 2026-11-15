@@ -1,1308 +1,372 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness4Me Heavy Duty & Cardio Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --border: #334155;
-            --card-border: #334155;
-            --accent: #60a5fa;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CryptoAnalyst - Executive Intelligence Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: { 500: '#f59e0b', 600: '#d97706' }
+          }
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        html { font-size: 16px; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 110px; }
-        header { background: var(--card-bg); padding: 1rem; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
-        .container { max-width: 600px; margin: 0 auto; padding: 1rem; }
-        .card { background: var(--card-bg); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* ENLARGED & USABLE BOTTOM NAVIGATION */
-        nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: var(--card-bg); 
-            display: flex; justify-content: space-around; 
-            padding: 0.75rem 0.55rem; 
-            border-top: 2px solid var(--border); 
-            z-index: 1000; 
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
-        }
-        nav button { 
-            background: none; border: none; color: var(--text-muted); 
-            font-size: 0.85rem; font-weight: 500;
-            display: flex; flex-direction: column; align-items: center; gap: 0.3rem; 
-            cursor: pointer; flex: 1; padding: 0.4rem; 
-            border-radius: 0.5rem; transition: background 0.2s, color 0.2s;
-        }
-        nav button span.nav-icon { font-size: 1.5rem; }
-        nav button.active { color: var(--accent); font-weight: 700; background: rgba(59, 130, 246, 0.1); }
-
-        button.btn { background: var(--primary); color: white; border: none; padding: 0.75rem 1rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; margin-top: 0.5rem; font-size: 1rem; }
-        button.btn:hover { background: var(--primary-hover); }
-        button.btn-danger { background: var(--danger); }
-        button.btn-secondary { background: #475569; }
-        button.btn-small { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; display: inline-block; }
-        input, select, textarea { width: 100%; padding: 0.75rem; background: #0f172a; border: 1px solid var(--border); color: var(--text-color); border-radius: 0.5rem; margin-top: 0.35rem; margin-bottom: 0.75rem; font-size: 1rem; }
-        label { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; display: block; margin-top: 0.5rem; }
-        .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
-        .badge-green { background: rgba(34, 197, 94, 0.2); color: var(--success); }
-        .badge-yellow { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .timer-banner { background: #1e3a8a; border: 1px solid #3b82f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin-bottom: 1rem; font-weight: bold; font-size: 1.15rem; display: none; }
-        .set-row { display: grid; grid-template-columns: 35px 1fr 1fr 1fr 35px; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem; background: rgba(15, 23, 42, 0.5); padding: 0.5rem; border-radius: 0.35rem; }
-        .exercise-settings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
-        .health-banner { cursor: pointer; padding: 0.5rem; border-radius: 0.5rem; background: rgba(255,255,255,0.03); transition: background 0.2s; }
-        .health-banner:hover { background: rgba(255,255,255,0.06); }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card-bg); padding: 1.5rem; border-radius: 0.75rem; max-width: 500px; width: 100%; border: 1px solid var(--border); }
-    </style>
+      }
+    }
+  </script>
+  <style>
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans">
 
-<header>
-    <h1>Fitness4Me Heavy Duty & Cardio</h1>
-</header>
+  <!-- Header / Navigation -->
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="text-xl">📈</span>
+        <h1 class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">CryptoAnalyst Intel (Institutional Edition)</h1>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          <span id="theme-icon">🌙 Dark</span>
+        </button>
+        <button onclick="openSettingsModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          ⚙️ Settings
+        </button>
+      </div>
+    </div>
 
-<div class="container">
-    <div id="restTimerBanner" class="timer-banner">Rest Timer: <span id="timerDisplay">45</span>s</div>
+    <!-- Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 flex space-x-2 border-t border-slate-100 dark:border-slate-700/50 pt-2 pb-2 overflow-x-auto">
+      <button data-tab="dashboard" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-900 transition">Dashboard & MVRV</button>
+      <button data-tab="report" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Market Analyst Advisor Report</button>
+      <button data-tab="manager" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Asset Manager</button>
+      <button data-tab="history" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Feedback Telemetry</button>
+    </nav>
+  </header>
 
-    <!-- HOME / DASHBOARD TAB -->
-    <div id="tab-home" class="tab-content active">
-        <div class="card">
-            <h3>Mike Mentzer Recovery Advisor</h3>
-            <div id="recoveryStatusContainer" style="margin-top: 0.75rem;">
-                <span class="badge badge-green" id="recoveryBadge">🟢 Fully Recovered</span>
-                <p id="recoveryMessage" style="font-size: 0.95rem; margin-top: 0.5rem; color: var(--text-muted);">Ready for maximum intensity failure sets.</p>
+  <!-- Main Content Area -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- TAB 1: DASHBOARD & MVRV VALUATION -->
+    <section id="dashboard" class="tab-content active space-y-6">
+      <div class="flex justify-between items-center bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">🔍 MVRV Ratio & Electrical Cost Floor Active</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">MVRV &lt; 1.2 signals significant undervaluation and historical market bottoms. Electrical cost model establishes thermodynamic miner floor.</p>
+        </div>
+        <button onclick="switchTab('manager')" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow transition whitespace-nowrap">
+          + Onboard Asset
+        </button>
+      </div>
+
+      <div id="assets-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- TAB 2: MARKET ANALYST ADVISOR REPORT -->
+    <section id="report" class="tab-content space-y-6">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        
+        <div class="border-b border-slate-200 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
+              <span>🏛️</span><span>Market Analyst Advisor Report // Director’s Desk</span>
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Senior Investment Director Memorandum & Thermodynamic Valuation Suite</p>
+          </div>
+          <span class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[11px] font-bold rounded-lg">Master Report v5.2</span>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          
+          <!-- BTC -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">1. Bitcoin (BTC) — Macro Anchor & Energy Floor</span>
+              <span class="text-emerald-500 font-bold">MVRV: 1.15 (Significantly Undervalued — Bottom Signal)</span>
             </div>
-            <div style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-muted);">
-                Last Trained: <span id="lastTrainedDisplay" style="color: white; font-weight: 600;">Never</span>
+            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio sits at 1.15 (&lt; 1.2 threshold), historically signaling a macro market bottom and high-conviction buying opportunity. The Bitcoin electrical cost floor (~$68,500) and STH cost basis (~$76,150) provide robust thermodynamic support against macro friction.</p>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Coiling for a test of $85,000–$86,500 resistance. Sustained ETF net inflows and fundamental undervaluation support upside continuation toward $93,350.</p>
+          </div>
+
+          <!-- ETH -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">2. Ethereum (ETH) — Settlement Layer</span>
+              <span class="text-blue-500 font-bold">MVRV: 1.65 (Fairly Valued)</span>
             </div>
+            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.65 reflects balanced equilibrium within the 1.2–2.4 accumulation band. Whale netflows show steady exchange withdrawals above reclaimed 100 MWA (~$2,530).</p>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Defending 50 MWA pivot (~$2,640). Rotation back into infrastructure drives path of least resistance toward $2,780–$2,950.</p>
+          </div>
+
+          <!-- SOL -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">3. Solana (SOL) — High-Beta Momentum</span>
+              <span class="text-amber-500 font-bold">MVRV: 2.10 (Fairly Valued / Upper Bound)</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 2.10 approaches upper fair value thresholds. High-beta outperformance with elevated Open Interest Z-scores warrants tactical risk controls.</p>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Structural trend robust above $105–$109 50 MWA zone; take tactical profits on overbought RSI extensions while keeping dry powder for dips.</p>
+          </div>
+
+          <!-- XRP -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">4. XRP (XRP) — Cross-Border Settlement</span>
+              <span class="text-blue-500 font-bold">MVRV: 1.85 (Fairly Valued)</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.85 indicates healthy equilibrium. Backed by genuine spot volume velocity and cross-border liquidity channels holding above 50 MWA (~$1.41).</p>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Momentum favored toward $1.75 macro resistance node with disciplined trailing stops anchored beneath immediate support.</p>
+          </div>
+
+          <!-- ONDO -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">5. Ondo (ONDO) — RWA Pioneer</span>
+              <span class="text-blue-500 font-bold">MVRV: 1.40 (Fairly Valued / Accumulation)</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.40 rests comfortably in the accumulation corridor. Healthy horizontal base following broader RWA sector consolidation.</p>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Primed for rotational catch-up play targeting $0.62 psychological resistance and medium-term expansion ceiling above $1.00.</p>
+          </div>
+
         </div>
+      </div>
+    </section>
 
-        <div class="card health-banner" onclick="switchTab('settings'); setTimeout(() => document.getElementById('hpCard').scrollIntoView({ behavior: 'smooth' }), 50);">
-            <h3>Apple Health Status</h3>
-            <div id="homeHealthStatusText" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.4rem;">Tap to enter HRV / sleep data</div>
+    <!-- TAB 3: UNIVERSAL ASSET MANAGER -->
+    <section id="manager" class="tab-content space-y-6">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Universal Asset Onboarding Protocol</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Add any asset to dynamically provision MVRV valuation, electrical cost floors, and technical indicators.</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2">
+          <input type="text" id="new-ticker" placeholder="Ticker (e.g. AVAX)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 uppercase font-mono" />
+          <input type="number" id="new-mcap" placeholder="Market Cap ($B)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono" />
+          <input type="number" step="0.05" id="new-mvrv" placeholder="MVRV Ratio" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono" />
+          <button onclick="registerCustomAsset()" class="py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow transition">
+            Register Asset
+          </button>
         </div>
+      </div>
 
-        <div class="card">
-            <h3>Start Today's Workout</h3>
-            <label for="workoutSelector">Select Routine:</label>
-            <select id="workoutSelector"></select>
-            <button class="btn" onclick="startSelectedWorkout()" style="margin-top: 0.75rem;">Start Workout</button>
-        </div>
-    </div>
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tracked Watchlist Registry</h3>
+        <div id="watchlist-registry-container" class="space-y-2 text-xs"></div>
+      </div>
+    </section>
 
-    <!-- WORKOUT LOGGING TAB -->
-    <div id="tab-workout" class="tab-content">
-        <div id="activeWorkoutContainer">
-            <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">No workout active. Go to Home and select a routine.</p>
-        </div>
-    </div>
+    <!-- TAB 4: FEEDBACK TELEMETRY HISTORY -->
+    <section id="history" class="tab-content space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Self-Improving Feedback & MVRV Telemetry</h2>
+        <button onclick="clearTelemetryHistory()" class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold text-xs rounded-lg hover:bg-red-200">
+          Clear Telemetry Logs
+        </button>
+      </div>
+      <div id="telemetry-history-container" class="space-y-4"></div>
+    </section>
 
-    <!-- HISTORY & ANALYTICS TAB -->
-    <div id="tab-history" class="tab-content">
-        <div class="card">
-            <h3>Strength Analytics & Trajectory</h3>
-            <label for="analyticsExerciseSelect">Select Exercise:</label>
-            <select id="analyticsExerciseSelect" onchange="renderAnalyticsChart()"></select>
-            <canvas id="strengthChart" style="margin-top: 1rem; max-height: 250px;"></canvas>
-        </div>
-        <div class="card">
-            <h3>Completed Workouts History</h3>
-            <div id="historyLogContainer"></div>
-        </div>
-    </div>
+  </main>
 
-    <!-- SETTINGS TAB -->
-    <div id="tab-settings" class="tab-content">
-        <div class="card" id="hpCard"></div>
+  <script>
+    const defaultAssets = [
+      { ticker: 'BTC', name: 'Bitcoin', price: 85478.23, class: 'Macro Anchor', alpha: 0.08, mvrv: 1.15, electrical_cost: 68500, rsi: 64.5, mwa50: 'Bullish', outlook: 'MVRV < 1.2 signaling market bottom / strong buy.' },
+      { ticker: 'ETH', name: 'Ethereum', price: 2781.40, class: 'Macro Anchor', alpha: 0.08, mvrv: 1.65, rsi: 67.8, mwa50: 'Bullish', outlook: 'Fairly valued; holding 100 MWA support.' },
+      { ticker: 'SOL', name: 'Solana', price: 118.82, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 2.10, rsi: 73.5, mwa50: 'Strongly Bullish', outlook: 'Fairly valued with high-beta momentum.' },
+      { ticker: 'XRP', name: 'XRP', price: 1.5586, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 1.85, rsi: 66.8, mwa50: 'Bullish', outlook: 'Structural breakout toward $1.75.' },
+      { ticker: 'ONDO', name: 'Ondo Finance', price: 0.584, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 1.40, rsi: 58.2, mwa50: 'Consolidating', outlook: 'Accumulation phase for RWA rotation.' }
+    ];
 
-        <div class="card">
-            <div class="card-title">⚙️ Routine & Exercise Customizer</div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Rename workouts, add/remove/reorder exercises, and configure pulley & bench setups.</p>
-            <label for="routineManagerSelect">Select Routine to Edit:</label>
-            <select id="routineManagerSelect" onchange="renderRoutineEditor()"></select>
-            <div id="routineEditorContainer" style="margin-top: 0.75rem;"></div>
-            <button class="btn btn-secondary" onclick="addNewRoutine()" style="margin-top: 0.5rem;">+ Create New Routine</button>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🔠 Display & Font Size</div>
-            <label for="fontSizeSelector">Choose Font Size:</label>
-            <select id="fontSizeSelector" onchange="changeFontSize(this.value)">
-                <option value="14">Compact (14px)</option>
-                <option value="16" selected>Normal (16px)</option>
-                <option value="18">Large (18px)</option>
-                <option value="20">Extra Large (20px)</option>
-            </select>
-        </div>
-
-        <div class="card">
-            <div class="card-title">💾 Local Data & Backup Migration</div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Export or restore complete workout logs and historical snapshots.</p>
-            <button class="btn" onclick="exportBackupJSON()">📥 Export JSON Backup File</button>
-            <label style="margin-top: 0.75rem;">Import / Restore JSON Backup or GymBook CSV File:</label>
-            <input type="file" id="importJsonFileInput" accept=".json,.csv" onchange="importBackupJSON(event)">
-        </div>
-
-        <div class="card">
-            <div class="card-title">☁️ Google Drive Cloud Sync</div>
-            <label for="googleClientIdInput">Google Cloud OAuth Client ID:</label>
-            <input type="text" id="googleClientIdInput" placeholder="your-client-id.apps.googleusercontent.com">
-            <div id="gdriveAuthStatus" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Status: Not Connected</div>
-            <button class="btn" onclick="initGoogleDriveAuth()">🔐 Sign In with Google</button>
-            <button class="btn btn-secondary" onclick="syncToGoogleDrive()" style="margin-top: 0.5rem;">☁️ Sync Backup to Google Drive Now</button>
-        </div>
-
-        <div class="card">
-            <h3>Rest Timer Default (Seconds)</h3>
-            <select id="restTimerSetting" onchange="saveRestTimerSetting()">
-                <option value="30">30 seconds</option>
-                <option value="45" selected>45 seconds</option>
-                <option value="60">60 seconds</option>
-                <option value="90">90 seconds</option>
-                <option value="120">120 seconds</option>
-            </select>
-        </div>
-
-        <div class="card">
-            <h3>Profile Management</h3>
-            <label for="profileSelector">Active Profile:</label>
-            <select id="profileSelector" onchange="switchProfile(this.value)">
-                <option value="default">Default Profile</option>
-            </select>
-            <button class="btn btn-secondary" onclick="createNewProfile()">Add New Profile</button>
-        </div>
-    </div>
-</div>
-
-<!-- FIRST START MODAL -->
-<div id="firstStartModal" class="modal">
-    <div class="modal-content">
-        <h3 style="color: var(--accent); margin-bottom: 0.75rem;">Welcome to Fitness4Me!</h3>
-        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem;">No workout database was detected. Load a local/older JSON backup or start fresh.</p>
-        <button class="btn" onclick="document.getElementById('wizardFileInput').click()">📂 Load JSON or CSV Backup File</button>
-        <input type="file" id="wizardFileInput" accept=".json,.csv" style="display:none;" onchange="importBackupJSON(event); closeModal();">
-        <button class="btn btn-secondary" onclick="closeModal()" style="margin-top: 0.5rem;">🚀 Start Fresh with Defaults</button>
-    </div>
-</div>
-
-<!-- REDESIGNED USABLE BOTTOM NAVIGATION -->
-<nav>
-    <button onclick="switchTab('home')" class="active" id="nav-home">
-        <span class="nav-icon">🏠</span>
-        <span>Home</span>
-    </button>
-    <button onclick="switchTab('workout')" id="nav-workout">
-        <span class="nav-icon">💪</span>
-        <span>Workout</span>
-    </button>
-    <button onclick="switchTab('history')" id="nav-history">
-        <span class="nav-icon">📊</span>
-        <span>History</span>
-    </button>
-    <button onclick="switchTab('settings')" id="nav-settings">
-        <span class="nav-icon">⚙️</span>
-        <span>Settings</span>
-    </button>
-</nav>
-
-<script>
-    const defaultTemplate = {
-        profiles: {
-            "default": {
-                name: "Default Profile",
-                routines: [
-                    { name: "Heavy Duty Routine A (Chest & Back)", exercises: [
-                        { name: "Taurus T9.9 Touch Treadmill", type: "treadmill", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" },
-                        { name: "Incline Barbell Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Incline", notes: "Keep elbows tucked" },
-                        { name: "Chins / Pulldowns", type: "strength", pulleyHeight: 15, pulleyMode: "Both", bench: "None", notes: "Strict form" }
-                    ]},
-                    { name: "Heavy Duty Routine B (Legs & Shoulders)", exercises: [
-                        { name: "Leg Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Flat", notes: "Deep stretch" },
-                        { name: "Standing Calf Raise", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" },
-                        { name: "Overhead Press", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "Flat", notes: "" }
-                    ]}
-                ],
-                history: [],
-                healthData: null,
-                healthLog: []
-            }
-        },
-        activeProfileId: "default",
-        settings: { restTime: 45, fontSize: 16, googleClientId: "", googleAccessToken: "" }
-    };
-
-    let appData = JSON.parse(localStorage.getItem('fitness4me_app_data')) || null;
-    let isFirstStart = false;
-
-    if (!appData) {
-        isFirstStart = true;
-        appData = JSON.parse(JSON.stringify(defaultTemplate));
+    function getValuationStatus(mvrv) {
+      if (mvrv < 1.2) return { text: 'Significantly Undervalued (Bottom Signal)', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
+      if (mvrv <= 2.4) return { text: 'Fairly Valued (Neutral)', class: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
+      return { text: 'Overvalued (Euphoria)', class: 'bg-red-500/10 text-red-400 border-red-500/30' };
     }
 
-    function getCurrentProfile() {
-        if (!appData.profiles || typeof appData.profiles !== 'object') {
-            appData.profiles = JSON.parse(JSON.stringify(defaultTemplate.profiles));
-        }
-        if (!appData.activeProfileId || !appData.profiles[appData.activeProfileId]) {
-            appData.activeProfileId = Object.keys(appData.profiles)[0] || "default";
-        }
-        return appData.profiles[appData.activeProfileId];
+    function initTheme() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon').innerText = '☀️ Light';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').innerText = '🌙 Dark';
+      }
     }
 
-    function saveLocalStorage() {
-        localStorage.setItem('fitness4me_app_data', JSON.stringify(appData));
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('theme-icon').innerText = '☀️ Light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('theme-icon').innerText = '🌙 Dark';
+      }
     }
 
-    let activeWorkout = null;
-    let restTimerInterval = null;
-    let tokenClient = null;
-
-    window.onload = function() {
-        if (isFirstStart) {
-            document.getElementById('firstStartModal').classList.add('active');
-        }
-        const savedFontSize = appData.settings?.fontSize || 16;
-        document.documentElement.style.fontSize = savedFontSize + 'px';
-        const fontSizeSel = document.getElementById('fontSizeSelector');
-        if (fontSizeSel) fontSizeSel.value = savedFontSize;
-
-        if (appData.settings && appData.settings.googleClientId) {
-            document.getElementById('googleClientIdInput').value = appData.settings.googleClientId;
-        }
-        updateProfileSelector();
-        renderDashboard();
-        renderHealthCard();
-        renderRoutineManagerSelector();
-    };
-
-    function changeFontSize(size) {
-        document.documentElement.style.fontSize = size + 'px';
-        if (!appData.settings) appData.settings = {};
-        appData.settings.fontSize = Number(size);
-        saveLocalStorage();
+    function getWatchlist() {
+      const stored = localStorage.getItem('crypto_watchlist_institutional');
+      return stored ? JSON.parse(stored) : defaultAssets;
     }
 
-    function closeModal() {
-        document.getElementById('firstStartModal').classList.remove('active');
-    }
-
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        document.getElementById('nav-' + tabId).classList.add('active');
-        if (tabId === 'home') renderDashboard();
-        if (tabId === 'history') initAnalytics();
-        if (tabId === 'settings') {
-            renderHealthCard();
-            renderRoutineManagerSelector();
-        }
+    function saveWatchlist(list) {
+      localStorage.setItem('crypto_watchlist_institutional', JSON.stringify(list));
     }
 
     function renderDashboard() {
-        const profile = getCurrentProfile();
-        const selector = document.getElementById('workoutSelector');
-        selector.innerHTML = (profile.routines || []).map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
-
-        updateHealthStatusBanners();
-
-        if (profile.history && profile.history.length > 0) {
-            const lastLog = profile.history[profile.history.length - 1];
-            const lastDate = lastLog.timestamp || lastLog.date;
-            const last = new Date(lastDate);
-            const diffDays = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
-            document.getElementById('lastTrainedDisplay').innerText = `${diffDays} days ago (${last.toLocaleDateString()})`;
-            
-            const badge = document.getElementById('recoveryBadge');
-            const msg = document.getElementById('recoveryMessage');
-            if (diffDays < 4) {
-                badge.className = "badge badge-red";
-                badge.innerText = "🔴 CNS Overreached / Overtrained";
-                msg.innerText = "⚠️ Mentzer advises 4–7+ days rest for full muscle recovery.";
-            } else if (diffDays <= 7) {
-                badge.className = "badge badge-green";
-                badge.innerText = "🟢 Optimal Recovery Window";
-                msg.innerText = "✅ Optimal recovery window reached. High failure intensity recommended.";
-            } else {
-                badge.className = "badge badge-yellow";
-                badge.innerText = "🟡 Well-Rested (>7 days)";
-                msg.innerText = "💡 Extended rest logged. Verify strength trajectory progression.";
-            }
-        } else {
-            document.getElementById('lastTrainedDisplay').innerText = "Never";
-            document.getElementById('recoveryBadge').className = "badge badge-green";
-            document.getElementById('recoveryBadge').innerText = "🟢 Fully Recovered";
-            document.getElementById('recoveryMessage').innerText = "Ready for your Heavy Duty session.";
-        }
-    }
-
-    function calculateRestDays() { renderDashboard(); }
-
-    function startSelectedWorkout() {
-        const profile = getCurrentProfile();
-        const idx = document.getElementById('workoutSelector').value;
-        const routine = profile.routines[idx];
-        
-        activeWorkout = {
-            name: routine.name,
-            timestamp: new Date().toISOString(),
-            exercises: JSON.parse(JSON.stringify(routine.exercises)),
-            setsData: routine.exercises.map(ex => {
-                if (ex.type === 'treadmill') return { incline: 1, speed: 1, duration: 15 };
-                if (Array.isArray(ex.defaultSets) && ex.defaultSets.length > 0) {
-                    return ex.defaultSets.map(s => ({
-                        plate: Number(s.plate ?? s.weight ?? 1),
-                        reps: Number(s.reps ?? 10),
-                        intensity: s.intensity || 'Normal',
-                        notes: s.notes || '',
-                        done: false
-                    }));
-                }
-                return [
-                    { plate: 1, reps: 10, intensity: 'Warmup', done: false },
-                    { plate: 1, reps: 8, intensity: 'Normal', done: false }
-                ];
-            })
-        };
-        renderActiveWorkout();
-        switchTab('workout');
-    }
-
-    function getPlateOptions(currentVal) {
-        const valNum = Number(currentVal) || 1;
-        let opts = '';
-        for (let i = 1; i <= 25; i++) {
-            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i}</option>`;
-        }
-        if (valNum < 1 || valNum > 25 || !Number.isInteger(valNum)) {
-            opts += `<option value="${valNum}" selected>${valNum}</option>`;
-        }
-        return opts;
-    }
-
-    function getRepsOptions(currentVal) {
-        const valNum = Number(currentVal) || 10;
-        let opts = '';
-        for (let i = 1; i <= 100; i++) {
-            opts += `<option value="${i}" ${valNum === i ? 'selected' : ''}>${i}</option>`;
-        }
-        if (valNum < 1 || valNum > 100 || !Number.isInteger(valNum)) {
-            opts += `<option value="${valNum}" selected>${valNum}</option>`;
-        }
-        return opts;
-    }
-
-    function updateActiveExerciseField(exIdx, field, val) {
-        activeWorkout.exercises[exIdx][field] = val;
-    }
-
-    function renderActiveWorkout() {
-        const container = document.getElementById('activeWorkoutContainer');
-        let html = `<h2>Active: ${activeWorkout.name}</h2>`;
-        
-        activeWorkout.exercises.forEach((ex, exIdx) => {
-            const pulleyH = ex.pulleyHeight || 1;
-            const pulleyM = ex.pulleyMode || 'None';
-            const benchPos = ex.bench || 'None';
-            const notesVal = ex.notes || '';
-
-            html += `<div class="card" style="margin-top: 0.75rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div class="card-title">${ex.name}</div>
-                </div>`;
-            
-            html += `<div class="exercise-settings-grid" style="margin-top:0.5rem; margin-bottom:0.5rem;">
-                <div>
-                    <label>Height:</label>
-                    <select onchange="updateActiveExerciseField(${exIdx}, 'pulleyHeight', Number(this.value))">
-                        ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${pulleyH===(i+1)?'selected':''}>${i+1}</option>`).join('')}
-                    </select>
-                </div>
-                <div>
-                    <label>Pulley:</label>
-                    <select onchange="updateActiveExerciseField(${exIdx}, 'pulleyMode', this.value)">
-                        <option value="None" ${pulleyM==='None'?'selected':''}>None</option>
-                        <option value="One" ${pulleyM==='One'?'selected':''}>One</option>
-                        <option value="Both" ${pulleyM==='Both'?'selected':''}>Both</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Bench Position:</label>
-                    <select onchange="updateActiveExerciseField(${exIdx}, 'bench', this.value)">
-                        <option value="None" ${benchPos==='None'?'selected':''}>None</option>
-                        <option value="Flat" ${benchPos==='Flat'?'selected':''}>Flat</option>
-                        <option value="Incline" ${benchPos==='Incline'?'selected':''}>Incline</option>
-                        <option value="Decline" ${benchPos==='Decline'?'selected':''}>Decline</option>
-                    </select>
-                </div>
-            </div>`;
-
-            html += `<label>Exercise Comments / Notes:</label>
-            <input type="text" value="${notesVal}" placeholder="Add comments for this exercise..." onchange="updateActiveExerciseField(${exIdx}, 'notes', this.value)">`;
-            
-            if (ex.type === 'treadmill') {
-                html += `
-                    <label>Incline (1-20):</label>
-                    <select onchange="updateTreadmill(${exIdx}, 'incline', this.value)">
-                        ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${activeWorkout.setsData[exIdx].incline===(i+1)?'selected':''}>Incline ${i+1}</option>`).join('')}
-                    </select>
-                    <label>Speed Setting (1-20):</label>
-                    <select onchange="updateTreadmill(${exIdx}, 'speed', this.value)">
-                        ${Array.from({length:20}, (_,i)=>`<option value="${i+1}" ${activeWorkout.setsData[exIdx].speed===(i+1)?'selected':''}>Speed ${i+1}</option>`).join('')}
-                    </select>
-                    <label>Duration (Minutes):</label>
-                    <input type="number" value="${activeWorkout.setsData[exIdx].duration}" onchange="updateTreadmill(${exIdx}, 'duration', this.value)">
-                `;
-            } else {
-                html += `<div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Set | Plate | Reps | Mode | Action</div>`;
-                activeWorkout.setsData[exIdx].forEach((set, setIdx) => {
-                    const currentWt = Number(set.plate ?? set.weight ?? 1);
-                    const currentReps = Number(set.reps ?? 10);
-                    html += `<div class="set-row">
-                        <span>#${setIdx+1}</span>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'plate', this.value)" style="margin-bottom:0; padding:0.4rem;">
-                            ${getPlateOptions(currentWt)}
-                        </select>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'reps', this.value)" style="margin-bottom:0; padding:0.4rem;">
-                            ${getRepsOptions(currentReps)}
-                        </select>
-                        <select onchange="updateSet(${exIdx}, ${setIdx}, 'intensity', this.value)" style="margin-bottom:0; padding:0.4rem;">
-                            <option value="Warmup" ${set.intensity==='Warmup'?'selected':''}>Warmup</option>
-                            <option value="Normal" ${set.intensity==='Normal'?'selected':''}>Normal</option>
-                            <option value="Forced" ${set.intensity==='Forced'?'selected':''}>Forced</option>
-                            <option value="Negative" ${set.intensity==='Negative'?'selected':''}>Negative</option>
-                            <option value="Cooldown" ${set.intensity==='Cooldown'?'selected':''}>Cooldown</option>
-                        </select>
-                        <button class="btn btn-danger btn-small" onclick="removeActiveSet(${exIdx}, ${setIdx})" title="Remove Set">✕</button>
-                    </div>`;
-                });
-                html += `<button class="btn btn-secondary btn-small" onclick="addActiveSet(${exIdx})" style="margin-top:0.4rem;">+ Add Set</button>`;
-            }
-            html += `</div>`;
-        });
-
-        html += `<button class="btn" onclick="finishWorkout()" style="background: var(--success); margin-top: 1rem;">Finish & Save Workout</button>`;
-        container.innerHTML = html;
-    }
-
-    function addActiveSet(exIdx) {
-        activeWorkout.setsData[exIdx].push({ plate: 1, reps: 8, intensity: 'Normal', done: false });
-        renderActiveWorkout();
-    }
-
-    function removeActiveSet(exIdx, setIdx) {
-        if (activeWorkout.setsData[exIdx].length <= 1) {
-            alert("Exercise must have at least one set.");
-            return;
-        }
-        activeWorkout.setsData[exIdx].splice(setIdx, 1);
-        renderActiveWorkout();
-    }
-
-    function updateTreadmill(exIdx, field, val) { activeWorkout.setsData[exIdx][field] = Number(val); }
-    function updateSet(exIdx, setIdx, field, val) { activeWorkout.setsData[exIdx][setIdx][field] = field === 'intensity' ? val : Number(val); }
-
-    function startRestTimer() {
-        const banner = document.getElementById('restTimerBanner');
-        const display = document.getElementById('timerDisplay');
-        let timeLeft = parseInt(localStorage.getItem('fitness4me_rest_time')) || appData.settings?.restTime || 45;
-        banner.style.display = 'block';
-        clearInterval(restTimerInterval);
-
-        restTimerInterval = setInterval(() => {
-            timeLeft--;
-            display.innerText = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(restTimerInterval);
-                banner.style.display = 'none';
-                playBeepSound();
-            }
-        }, 1000);
-    }
-
-    let audioCtx = null;
-    const unlockAudio = () => {
-        try {
-            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        } catch (e) {}
-    };
-    ['touchstart', 'click'].forEach(e => document.addEventListener(e, unlockAudio, { passive: true }));
-
-    function playBeepSound() {
-        unlockAudio();
-        if (!audioCtx) return;
-        [0, 0.35, 0.7].forEach(delay => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.value = 880;
-            gain.gain.value = 0.25;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(audioCtx.currentTime + delay);
-            osc.stop(audioCtx.currentTime + delay + 0.2);
-        });
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-
-    function finishWorkout() {
-        const profile = getCurrentProfile();
-        profile.history.push(activeWorkout);
-        saveLocalStorage();
-        exportBackupJSON(true);
-        alert("Workout saved successfully!");
-        activeWorkout = null;
-        switchTab('home');
-    }
-
-    // ROUTINE EDITOR MANAGER
-    function renderRoutineManagerSelector() {
-        const profile = getCurrentProfile();
-        const sel = document.getElementById('routineManagerSelect');
-        if (!sel) return;
-        sel.innerHTML = (profile.routines || []).map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
-        renderRoutineEditor();
-    }
-
-    function renderRoutineEditor() {
-        const profile = getCurrentProfile();
-        const idx = document.getElementById('routineManagerSelect')?.value || 0;
-        const routine = profile.routines[idx];
-        const container = document.getElementById('routineEditorContainer');
-        if (!container || !routine) return;
-
-        let html = `
-            <label>Workout Title:</label>
-            <input type="text" id="editRoutineName" value="${routine.name}" onchange="updateRoutineTitle(${idx}, this.value)">
-            <h4 style="margin-top:0.75rem; color:var(--accent);">Exercises in Routine:</h4>
-        `;
-
-        (routine.exercises || []).forEach((ex, exIdx) => {
-            html += `
-                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:0.75rem; border-radius:0.5rem; margin-top:0.5rem;">
-                    <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <input type="text" value="${ex.name}" onchange="updateExerciseField(${idx}, ${exIdx}, 'name', this.value)" style="margin-bottom:0;">
-                        <button class="btn btn-secondary btn-small" onclick="moveExercise(${idx}, ${exIdx}, -1)" title="Move Up">▲</button>
-                        <button class="btn btn-secondary btn-small" onclick="moveExercise(${idx}, ${exIdx}, 1)" title="Move Down">▼</button>
-                        <button class="btn btn-danger btn-small" onclick="removeExerciseFromRoutine(${idx}, ${exIdx})" title="Remove Exercise">✕</button>
-                    </div>
-                    <div class="exercise-settings-grid" style="margin-top:0.5rem;">
-                        <div>
-                            <label>Type:</label>
-                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'type', this.value)">
-                                <option value="strength" ${ex.type==='strength'?'selected':''}>Strength</option>
-                                <option value="treadmill" ${ex.type==='treadmill'?'selected':''}>Treadmill / Cardio</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Height:</label>
-                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyHeight', Number(this.value))">
-                                ${Array.from({length:31}, (_,i)=>`<option value="${i+1}" ${(ex.pulleyHeight||1)===(i+1)?'selected':''}>${i+1}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label>Pulley:</label>
-                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'pulleyMode', this.value)">
-                                <option value="None" ${ex.pulleyMode==='None'?'selected':''}>None</option>
-                                <option value="One" ${ex.pulleyMode==='One'?'selected':''}>One</option>
-                                <option value="Single" ${ex.pulleyMode==='Single'?'selected':''}>One</option>
-                                <option value="Both" ${ex.pulleyMode==='Both'?'selected':''}>Both</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Bench Position:</label>
-                            <select onchange="updateExerciseField(${idx}, ${exIdx}, 'bench', this.value)">
-                                <option value="None" ${ex.bench==='None'?'selected':''}>None</option>
-                                <option value="Flat" ${ex.bench==='Flat'?'selected':''}>Flat</option>
-                                <option value="Incline" ${ex.bench==='Incline'?'selected':''}>Incline</option>
-                                <option value="Decline" ${ex.bench==='Decline'?'selected':''}>Decline</option>
-                            </select>
-                        </div>
-                    </div>
-                    <label>Comments / Notes:</label>
-                    <input type="text" value="${ex.notes || ''}" placeholder="e.g. Keep elbows locked" onchange="updateExerciseField(${idx}, ${exIdx}, 'notes', this.value)">
-                </div>
-            `;
-        });
-
-        html += `
-            <button class="btn btn-secondary btn-small" onclick="addExerciseToRoutine(${idx})" style="margin-top:0.75rem;">+ Add Exercise</button>
-            <button class="btn btn-danger btn-small" onclick="deleteRoutine(${idx})" style="margin-top:0.75rem; float:right;">🗑️ Delete Workout</button>
-        `;
-        container.innerHTML = html;
-    }
-
-    function updateRoutineTitle(idx, val) {
-        const profile = getCurrentProfile();
-        profile.routines[idx].name = val;
-        saveLocalStorage();
-        renderRoutineManagerSelector();
-    }
-
-    function updateExerciseField(routineIdx, exIdx, field, val) {
-        const profile = getCurrentProfile();
-        profile.routines[routineIdx].exercises[exIdx][field] = val;
-        saveLocalStorage();
-    }
-
-    function moveExercise(routineIdx, exIdx, direction) {
-        const profile = getCurrentProfile();
-        const exs = profile.routines[routineIdx].exercises;
-        const newIdx = exIdx + direction;
-        if (newIdx < 0 || newIdx >= exs.length) return;
-        const temp = exs[exIdx];
-        exs[exIdx] = exs[newIdx];
-        exs[newIdx] = temp;
-        saveLocalStorage();
-        renderRoutineEditor();
-    }
-
-    function removeExerciseFromRoutine(routineIdx, exIdx) {
-        const profile = getCurrentProfile();
-        profile.routines[routineIdx].exercises.splice(exIdx, 1);
-        saveLocalStorage();
-        renderRoutineEditor();
-    }
-
-    function addExerciseToRoutine(routineIdx) {
-        const profile = getCurrentProfile();
-        profile.routines[routineIdx].exercises.push({
-            name: "New Exercise",
-            type: "strength",
-            pulleyHeight: 1,
-            pulleyMode: "None",
-            bench: "None",
-            notes: ""
-        });
-        saveLocalStorage();
-        renderRoutineEditor();
-    }
-
-    function addNewRoutine() {
-        const profile = getCurrentProfile();
-        const name = prompt("Enter new workout routine title:");
-        if (!name) return;
-        profile.routines.push({
-            name: name,
-            exercises: [
-                { name: "Barbell Curl", type: "strength", pulleyHeight: 1, pulleyMode: "None", bench: "None", notes: "" }
-            ]
-        });
-        saveLocalStorage();
-        renderRoutineManagerSelector();
-    }
-
-    function deleteRoutine(routineIdx) {
-        const profile = getCurrentProfile();
-        if (profile.routines.length <= 1) {
-            alert("You must keep at least one workout routine.");
-            return;
-        }
-        if (!confirm("Are you sure you want to delete this routine?")) return;
-        profile.routines.splice(routineIdx, 1);
-        saveLocalStorage();
-        renderRoutineManagerSelector();
-    }
-
-    function exportBackupJSON(silent = false) {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-        const dlAnchorElem = document.createElement('a');
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", `heavyduty_backup_${new Date().toISOString().slice(0,10)}.json`);
-        document.body.appendChild(dlAnchorElem);
-        dlAnchorElem.click();
-        dlAnchorElem.remove();
-        if (!silent) alert("Local JSON backup exported!");
-    }
-
-    function parseCSVRows(text) {
-        const rows = [];
-        let row = [], cur = '', inQuotes = false;
-        for (let i = 0; i < text.length; i++) {
-            const ch = text[i], next = text[i + 1];
-            if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; }
-            else if (ch === '"') { inQuotes = !inQuotes; }
-            else if (ch === ',' && !inQuotes) { row.push(cur); cur = ''; }
-            else if ((ch === '\n' || ch === '\r') && !inQuotes) {
-                if (ch === '\r' && next === '\n') i++;
-                row.push(cur);
-                if (row.some(cell => cell.trim() !== '')) rows.push(row);
-                row = []; cur = '';
-            } else { cur += ch; }
-        }
-        if (cur.length || row.length) { row.push(cur); rows.push(row); }
-        return rows;
-    }
-
-    function parseGymBookCSV(rawText) {
-        const clean = rawText.replace(/^\uFEFF/, '').replace(/\u0000/g, '');
-        const rows = parseCSVRows(clean);
-        if (rows.length < 2) throw new Error("GymBook CSV appears empty.");
-
-        const headers = rows[0].map(h => h.trim());
-        const idx = name => headers.findIndex(h => h.toLowerCase().includes(name.toLowerCase()));
-
-        const cDate = idx('Date');
-        const cWorkout = idx('Workout');
-        const cTime = idx('Time');
-        const cExercise = idx('Exercise');
-        const cSetType = idx('Set / Warm');
-        const cReps = idx('Repetitions');
-        const cWeight = idx('Weight');
-        const cNotes = idx('Notes');
-        const cSkipped = idx('Skipped');
-
-        const sessionsMap = new Map();
-        const routinesMap = new Map();
-
-        for (let r = 1; r < rows.length; r++) {
-            const cols = rows[r];
-            if (cols.length < 4) continue;
-
-            const dateStr = (cols[cDate] || '').trim();
-            const workoutName = (cols[cWorkout] || 'GymBook Session').trim();
-            const timeStr = (cols[cTime] || '12:00').trim();
-            const exName = (cols[cExercise] || 'Unknown Exercise').trim();
-            const rawSetType = (cols[cSetType] || '').trim().toLowerCase();
-            const repsRaw = (cols[cReps] || '').trim();
-            const weightRaw = (cols[cWeight] || '').trim();
-            const noteStr = (cols[cNotes] || '').trim();
-            const skipped = ((cols[cSkipped] || '').trim().toLowerCase() === 'yes');
-
-            if (skipped) continue;
-
-            let isoTimestamp = new Date().toISOString();
-            const dMatch = dateStr.match(/^(\d{2})\.(\d{2})\.(\d{2,4})$/);
-            if (dMatch) {
-                const yyyy = dMatch[3].length === 2 ? '20' + dMatch[3] : dMatch[3];
-                isoTimestamp = `${yyyy}-${dMatch[2]}-${dMatch[1]}T${timeStr.padStart(5, '0')}:00.000Z`;
-            } else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-                isoTimestamp = `${dateStr}T${timeStr.padStart(5, '0')}:00.000Z`;
-            }
-
-            const repsMatch = repsRaw.match(/(\d+(\.\d+)?)/);
-            const weightMatch = weightRaw.replace(',', '.').match(/(\d+(\.\d+)?)/);
-            const reps = repsMatch ? Math.round(parseFloat(repsMatch[1])) : 0;
-            const plate = weightMatch ? parseFloat(weightMatch[1]) : 0;
-
-            let intensity = 'Normal';
-            if (rawSetType.includes('warm')) intensity = 'Warmup';
-            else if (rawSetType.includes('cool')) intensity = 'Cooldown';
-
-            const hMatch = noteStr.match(/height\s*(\d+)/i);
-            const pulleyHeight = hMatch ? Number(hMatch[1]) : 1;
-
-            const sessionKey = `${dateStr}__${workoutName}`;
-            if (!sessionsMap.has(sessionKey)) {
-                sessionsMap.set(sessionKey, {
-                    name: workoutName,
-                    timestamp: isoTimestamp,
-                    exercises: [],
-                    setsData: []
-                });
-            }
-            const session = sessionsMap.get(sessionKey);
-
-            let exIdx = session.exercises.findIndex(e => e.name === exName);
-            if (exIdx === -1) {
-                session.exercises.push({
-                    name: exName,
-                    type: 'strength',
-                    pulleyHeight,
-                    pulleyMode: 'None',
-                    bench: 'None',
-                    notes: noteStr
-                });
-                session.setsData.push([]);
-                exIdx = session.exercises.length - 1;
-            }
-            session.setsData[exIdx].push({
-                plate,
-                reps,
-                intensity,
-                notes: noteStr,
-                done: true
-            });
-
-            if (!routinesMap.has(workoutName)) {
-                routinesMap.set(workoutName, { name: workoutName, exercises: [] });
-            }
-            const rObj = routinesMap.get(workoutName);
-            if (!rObj.exercises.some(e => e.name === exName)) {
-                rObj.exercises.push({
-                    name: exName,
-                    type: 'strength',
-                    pulleyHeight,
-                    pulleyMode: 'None',
-                    bench: 'None',
-                    notes: noteStr,
-                    defaultSets: [{ plate, reps, intensity }]
-                });
-            }
-        }
-
-        const history = Array.from(sessionsMap.values()).sort(
-            (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-        );
-        const routines = Array.from(routinesMap.values());
-        return { history, routines };
-    }
-
-    function importBackupJSON(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const buffer = e.target.result;
-                const bytes = new Uint8Array(buffer);
-                let rawText = '';
-
-                if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
-                    rawText = new TextDecoder('utf-16le').decode(buffer);
-                } else if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
-                    rawText = new TextDecoder('utf-16be').decode(buffer);
-                } else {
-                    rawText = new TextDecoder('utf-8').decode(buffer);
-                }
-
-                rawText = rawText.replace(/^\uFEFF/, '').trim();
-
-                if (file.name.toLowerCase().endsWith('.csv') || rawText.startsWith('Date,Workout,')) {
-                    const { history, routines } = parseGymBookCSV(rawText);
-                    const profile = getCurrentProfile();
-
-                    routines.forEach(impR => {
-                        const existingIdx = profile.routines.findIndex(r => r.name === impR.name);
-                        if (existingIdx === -1) {
-                            profile.routines.push(impR);
-                        }
-                    });
-
-                    const existingKeys = new Set((profile.history || []).map(h => `${h.timestamp}__${h.name}`));
-                    let addedCount = 0;
-                    history.forEach(h => {
-                        const key = `${h.timestamp}__${h.name}`;
-                        if (!existingKeys.has(key)) {
-                            profile.history.push(h);
-                            existingKeys.add(key);
-                            addedCount++;
-                        }
-                    });
-                    profile.history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-                    saveLocalStorage();
-                    updateProfileSelector();
-                    renderDashboard();
-                    renderRoutineManagerSelector();
-                    alert(`✓ Imported ${addedCount} GymBook workout sessions and ${routines.length} routines!`);
-                    return;
-                }
-
-                let parsed = JSON.parse(rawText);
-                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-
-                let migratedData = JSON.parse(JSON.stringify(defaultTemplate));
-                let extractedHistory = [];
-                let extractedRoutines = [];
-
-                if (Array.isArray(parsed)) {
-                    extractedHistory = parsed;
-                } else if (typeof parsed === 'object' && parsed !== null) {
-                    if (parsed.profiles) {
-                        migratedData.profiles = parsed.profiles;
-                        migratedData.activeProfileId = parsed.activeProfileId || Object.keys(parsed.profiles)[0] || "default";
-                    }
-                    if (Array.isArray(parsed.history)) extractedHistory = parsed.history;
-                    if (Array.isArray(parsed.routines)) extractedRoutines = parsed.routines;
-
-                    if (parsed.profiles) {
-                        Object.keys(parsed.profiles).forEach(pid => {
-                            const prof = parsed.profiles[pid];
-                            if (Array.isArray(prof.history)) extractedHistory = extractedHistory.concat(prof.history);
-                            if (Array.isArray(prof.routines)) extractedRoutines = extractedRoutines.concat(prof.routines);
-                        });
-                    }
-                }
-
-                if (extractedRoutines.length === 0) {
-                    extractedRoutines = defaultTemplate.profiles.default.routines;
-                }
-
-                const normalizedHistory = extractedHistory.map(h => {
-                    const timestamp = h.timestamp || h.date || h.time || h.savedAt || new Date().toISOString();
-                    const name = h.name || h.routineName || h.title || h.workoutName || "Heavy Duty Session";
-                    const exercises = h.exercises || [];
-                    const setsData = h.setsData || h.sets || [];
-                    return { name, timestamp, exercises, setsData };
-                });
-
-                normalizedHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-                migratedData.profiles["default"] = {
-                    name: parsed.profiles?.default?.name || "Restored Profile",
-                    routines: extractedRoutines,
-                    history: normalizedHistory,
-                    healthData: parsed.healthData || parsed.profiles?.default?.healthData || null,
-                    healthLog: parsed.healthLog || parsed.profiles?.default?.healthLog || []
-                };
-
-                if (parsed.settings) {
-                    migratedData.settings = { ...migratedData.settings, ...parsed.settings };
-                }
-
-                appData = migratedData;
-                saveLocalStorage();
-                updateProfileSelector();
-                renderDashboard();
-                renderHealthCard();
-                renderRoutineManagerSelector();
-                alert(`✓ Successfully restored ${normalizedHistory.length} workout logs with strict snapshot integrity!`);
-            } catch (err) {
-                console.error("Backup Import Error:", err);
-                alert("Could not import backup file. Error: " + err.message);
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    function initGoogleDriveAuth() {
-        const clientId = document.getElementById('googleClientIdInput').value.trim();
-        if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
-            alert("Please enter a valid Google OAuth Client ID ending in .apps.googleusercontent.com");
-            return;
-        }
-        appData.settings.googleClientId = clientId;
-        saveLocalStorage();
-
-        if (typeof google === 'undefined') {
-            alert("Google GIS library not loaded. Verify internet connection.");
-            return;
-        }
-
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: clientId,
-            scope: 'https://www.googleapis.com/auth/drive.file',
-            callback: (response) => {
-                if (response.access_token) {
-                    appData.settings.googleAccessToken = response.access_token;
-                    saveLocalStorage();
-                    document.getElementById('gdriveAuthStatus').innerHTML = '<span style="color:var(--success)">✓ Connected to Google Drive</span>';
-                    alert("Successfully authenticated with Google Drive!");
-                    syncToGoogleDrive();
-                }
-            },
-        });
-        tokenClient.requestAccessToken();
-    }
-
-    async function syncToGoogleDrive() {
-        const token = appData.settings?.googleAccessToken;
-        if (!token) {
-            alert("Please click 'Sign In with Google' first to authorize Drive sync.");
-            return;
-        }
-
-        const fileContent = JSON.stringify(appData, null, 2);
-        const metadata = { name: 'heavyduty_backup.json', mimeType: 'application/json' };
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', new Blob([fileContent], { type: 'application/json' }));
-
-        try {
-            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token },
-                body: form
-            });
-            if (res.ok) {
-                alert("✓ Cloud Backup uploaded to Google Drive successfully!");
-            } else {
-                alert("Drive Sync failed. Token may be expired — please Sign In again.");
-            }
-        } catch(e) {
-            alert("Google Drive sync error: " + e.message);
-        }
-    }
-
-    function saveRestTimerSetting() {
-        const val = document.getElementById('restTimerSetting').value;
-        if (!appData.settings) appData.settings = {};
-        appData.settings.restTime = Number(val);
-        localStorage.setItem('fitness4me_rest_time', val);
-        saveLocalStorage();
-    }
-
-    function initAnalytics() {
-        const profile = getCurrentProfile();
-        const container = document.getElementById('historyLogContainer');
-        
-        if (!profile.history || profile.history.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-muted)">No saved workout history yet.</p>';
-        } else {
-            container.innerHTML = profile.history.slice().reverse().map(h => {
-                let exercisesHTML = '';
-                if (h.exercises && h.setsData) {
-                    h.exercises.forEach((ex, exIdx) => {
-                        const sets = h.setsData[exIdx];
-                        exercisesHTML += `<div style="margin-top:0.4rem; font-size:0.9rem; color:var(--accent);"><strong>${ex.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(${ex.pulleyMode !== 'None' ? 'Pulley H:' + ex.pulleyHeight + ' ' + ex.pulleyMode : ''} ${ex.bench !== 'None' ? 'Bench:' + ex.bench : ''})</span></div>`;
-                        if (ex.notes) exercisesHTML += `<div style="font-size:0.8rem; color:var(--text-muted); font-style:italic; margin-left:0.5rem;">Note: ${ex.notes}</div>`;
-                        
-                        if (ex.type === 'treadmill') {
-                            exercisesHTML += `<div style="font-size:0.85rem; color:var(--text-muted); margin-left:0.5rem;">Cardio: Incline ${sets.incline || 1} | Speed ${sets.speed || 1} | Duration ${sets.duration || 15} mins</div>`;
-                        } else if (Array.isArray(sets)) {
-                            exercisesHTML += sets.map((s, sIdx) => 
-                                `<div style="font-size:0.85rem; color:var(--text-muted); margin-left:0.5rem;">Set #${sIdx+1}: ${s.plate || s.weight || 1} Plates · ${s.reps || 0} Reps (${s.intensity || 'Normal'})</div>`
-                            ).join('');
-                        }
-                    });
-                }
-                const logDate = h.timestamp || h.date || new Date().toISOString();
-                return `
-                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:0.75rem; border-radius:0.5rem; margin-bottom:0.75rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:white;">${h.name}</strong>
-                            <span style="font-size:0.8rem; color:var(--text-muted);">${new Date(logDate).toLocaleDateString()}</span>
-                        </div>
-                        ${exercisesHTML}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        const sel = document.getElementById('analyticsExerciseSelect');
-        let allEx = [];
-        (profile.routines || []).forEach(r => (r.exercises || []).forEach(e => { if(!allEx.includes(e.name)) allEx.push(e.name); }));
-        sel.innerHTML = allEx.map(e => `<option value="${e}">${e}</option>`).join('');
-        renderAnalyticsChart();
-    }
-
-    function renderAnalyticsChart() {
-        const ctx = document.getElementById('strengthChart').getContext('2d');
-        if (window.myChart) window.myChart.destroy();
-        window.myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Session 1', 'Session 2', 'Session 3', 'Session 4'],
-                datasets: [{ label: 'Weight/Reps Progress', data: [10, 12, 12, 14], borderColor: '#3b82f6', tension: 0.1 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    function switchProfile(id) {
-        appData.activeProfileId = id;
-        saveLocalStorage();
-        renderDashboard();
-        renderHealthCard();
-        renderRoutineManagerSelector();
-    }
-
-    function createNewProfile() {
-        const name = prompt("Enter new profile name:");
-        if (!name) return;
-        const id = 'profile_' + Date.now();
-        appData.profiles[id] = {
-            name: name,
-            routines: JSON.parse(JSON.stringify(getCurrentProfile().routines)),
-            history: [],
-            healthData: null,
-            healthLog: []
-        };
-        appData.activeProfileId = id;
-        saveLocalStorage();
-        updateProfileSelector();
-        renderDashboard();
-        renderHealthCard();
-        renderRoutineManagerSelector();
-    }
-
-    function updateProfileSelector() {
-        const sel = document.getElementById('profileSelector');
-        if (!sel) return;
-        sel.innerHTML = Object.keys(appData.profiles || {}).map(id => `<option value="${id}" ${appData.activeProfileId === id ? 'selected' : ''}>${appData.profiles[id].name}</option>`).join('');
-    }
-
-    // APPLE HEALTH PATCH LOGIC
-    const daysOld = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
-    const num = v => {
-        if (v === undefined || v === null || v === '') return null;
-        const m = String(v).replace(',', '.').match(/-?\d+(\.\d+)?/);
-        return m ? parseFloat(m[0]) : null;
-    };
-    const pick = (o, keys) => {
-        for (const k of Object.keys(o)) {
-            if (keys.includes(k.toLowerCase().replace(/[\s_-]/g, ''))) return o[k];
-        }
-        return null;
-    };
-
-    function parseHealthText(txt) {
-        let t = txt.trim().replace(/[“”„]/g, '"').replace(/[‘’]/g, "'");
-        let obj = null;
-        try { obj = JSON.parse(t); } catch (e) {
-            obj = {};
-            t.replace(/([a-zA-Z ]+?)\s*[:=]?\s*(-?\d+[.,]?\d*)/g, (_, k, v) => { obj[k.trim()] = v; });
-            if (!Object.keys(obj).length) throw new Error('Could not read values. Use JSON like {"hrv":65,"sleepHours":7.5,"restingHR":52}');
-        }
-        return normalize(obj);
-    }
-
-    function normalize(o) {
-        const hrv = num(pick(o, ['hrv', 'heartratevariability', 'hrvms']));
-        const rhr = num(pick(o, ['restinghr', 'rhr', 'restingheartrate']));
-        const hours = num(pick(o, ['sleephours', 'sleep', 'sleepduration', 'hoursslept']));
-        let score = num(pick(o, ['sleepscore', 'sleepquality']));
-        if (score === null && hours !== null) score = Math.min(100, Math.round(hours / 8 * 100));
-        if (hrv === null && rhr === null && score === null)
-            throw new Error('No HRV, resting HR or sleep value found.');
-        if (hrv !== null && (hrv < 5 || hrv > 250)) throw new Error('HRV should be 5–250 ms.');
-        if (rhr !== null && (rhr < 30 || rhr > 140)) throw new Error('Resting HR should be 30–140 bpm.');
-        if (hours !== null && (hours < 0 || hours > 16)) throw new Error('Sleep hours should be 0–16.');
-        return { hrv, restingHR: rhr, sleepHours: hours, sleepScore: score };
-    }
-
-    function saveHealth(vals, source) {
-        const p = getCurrentProfile();
-        const prev = p.healthData || {};
-        const rec = {
-            hrv: vals.hrv ?? prev.hrv ?? null,
-            restingHR: vals.restingHR ?? prev.restingHR ?? null,
-            sleepHours: vals.sleepHours ?? prev.sleepHours ?? null,
-            sleepScore: vals.sleepScore ?? prev.sleepScore ?? null,
-            date: new Date().toISOString(), source: source
-        };
-        p.healthData = rec;
-        p.healthLog = [rec, ...(p.healthLog || [])].slice(0, 30);
-        saveLocalStorage();
-        updateHealthStatusBanners();
-        calculateRestDays();
-        renderHealthCard();
-    }
-
-    window.importAppleHealthPayload = function (textOverride) {
-        const el = document.getElementById('hpPaste');
-        const txt = typeof textOverride === 'string' ? textOverride : (el ? el.value : '');
-        if (!txt.trim()) return hpMsg('Paste Shortcut output first.', true);
-        try { 
-            saveHealth(parseHealthText(txt), 'shortcut'); 
-            if (el) el.value = ''; 
-            hpMsg('✓ Imported from Shortcut.'); 
-        } catch (e) { hpMsg(e.message, true); }
-    };
-
-    window.updateHealthStatusBanners = function () {
-        const el = document.getElementById('homeHealthStatusText');
-        if (!el) return;
-        const hd = getCurrentProfile().healthData;
-        if (!hd) { el.innerHTML = '<span style="color:var(--text-muted)">Tap to enter HRV / sleep</span>'; return; }
-        const age = daysOld(hd.date);
-        const low = (hd.hrv !== null && hd.hrv < 40) || (hd.sleepScore !== null && hd.sleepScore < 60);
-        const col = low ? 'var(--danger)' : 'var(--success)';
-        const parts = [];
-        if (hd.hrv !== null) parts.push('HRV ' + hd.hrv + 'ms');
-        if (hd.restingHR !== null) parts.push('RHR ' + hd.restingHR);
-        if (hd.sleepHours !== null) parts.push('Sleep ' + hd.sleepHours + 'h');
-        else if (hd.sleepScore !== null) parts.push('Sleep ' + hd.sleepScore + '%');
-        el.innerHTML = '<span style="color:' + col + '">' + parts.join(' · ') + '<br>' +
-            (low ? 'Low recovery — add rest' : 'Recovery looks good') + '</span>' +
-            (age >= 3 ? '<br><span style="color:var(--warning);font-size:12px">⚠ ' + age + ' days old — update</span>' : '');
-    };
-
-    function hpMsg(m, err) {
-        const el = document.getElementById('hpMsg');
-        if (el) { el.textContent = m; el.style.color = err ? 'var(--danger)' : 'var(--success)'; }
-    }
-
-    function renderHealthCard() {
-        let card = document.getElementById('hpCard');
-        if (!card) return;
-        const hd = getCurrentProfile().healthData || {};
-        const log = (getCurrentProfile().healthLog || []).slice(0, 5);
-        const v = x => (x ?? '');
-        card.innerHTML = `
-            <div class="card-title">🍏 Recovery Data (Apple Health / Manual)</div>
-            <p style="font-size:0.9rem;color:var(--text-muted);margin:0.4rem 0 0.75rem">
-                Enter values by hand or let your iOS Shortcut send them automatically.</p>
-
-            <label>Manual entry</label>
-            <div class="exercise-settings-grid">
-                <div><label>HRV (ms)</label><input id="hpHrv" type="number" inputmode="decimal" value="${v(hd.hrv)}" placeholder="65"></div>
-                <div><label>Resting HR</label><input id="hpRhr" type="number" inputmode="numeric" value="${v(hd.restingHR)}" placeholder="52"></div>
-                <div><label>Sleep (hours)</label><input id="hpSleep" type="number" step="0.25" inputmode="decimal" value="${v(hd.sleepHours)}" placeholder="7.5"></div>
+      const assets = getWatchlist();
+      const container = document.getElementById('assets-grid-container');
+      
+      container.innerHTML = assets.map(a => {
+        const val = getValuationStatus(a.mvrv);
+        return `
+          <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-amber-500 font-mono">${a.ticker}</span>
+                <h3 class="font-extrabold text-lg text-slate-900 dark:text-white">${a.name || a.ticker}</h3>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.class === 'Macro Anchor' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30' : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'}">${a.class}</span>
             </div>
-            <button class="btn btn-primary" onclick="hpManualSave()">💾 Save today's values</button>
 
-            <hr style="border:0;border-top:1px solid var(--card-border);margin:0.75rem 0">
-            <label>From iOS Shortcut (JSON or text)</label>
-            <textarea id="hpPaste" rows="2" placeholder='{"hrv":65,"sleepHours":7.5,"restingHR":52}'></textarea>
-            <div style="display:flex;gap:0.5rem">
-                <button class="btn btn-secondary" style="flex:1" onclick="hpClipboard()">📋 Paste &amp; import</button>
-                <button class="btn btn-secondary" style="flex:1" onclick="importAppleHealthPayload()">Import text</button>
+            <div class="p-2.5 rounded-lg border ${val.class} flex justify-between items-center text-xs font-mono">
+              <span>MVRV Ratio: <strong>${a.mvrv}</strong></span>
+              <span class="font-bold">${val.text}</span>
             </div>
-            <div id="hpMsg" style="font-size:0.85rem;min-height:1rem;margin-bottom:0.4rem"></div>
 
-            <details style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.5rem">
-                <summary style="cursor:pointer;color:var(--accent)">Shortcut setup guide</summary>
-                <ol style="padding-left:1.2rem;margin-top:0.4rem">
-                    <li>Shortcuts → Find Health Samples (HRV, Sleep, Resting HR).</li>
-                    <li>Text action: <code>{"hrv":[HRV],"sleepHours":[Sleep],"restingHR":[RHR]}</code></li>
-                    <li>Copy to Clipboard or Open URL: <code>${location.origin}${location.pathname}?hrv=[HRV]&amp;sleep=[Sleep]&amp;rhr=[RHR]</code></li>
-                </ol>
-            </details>
+            <div class="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100 dark:border-slate-700/60 font-mono">
+              <div><span class="text-slate-400">Spot:</span> <span class="font-bold text-slate-900 dark:text-white">$${a.price}</span></div>
+              <div><span class="text-slate-400">Alpha (α):</span> <span class="font-bold text-amber-500">${a.alpha}</span></div>
+              <div><span class="text-slate-400">RSI (14d):</span> <span class="${a.rsi > 70 ? 'text-red-400 font-bold' : 'text-emerald-400'}">${a.rsi}</span></div>
+              ${a.electrical_cost ? `<div><span class="text-slate-400">Energy Floor:</span> <span class="text-emerald-400 font-bold">$${a.electrical_cost}</span></div>` : `<div><span class="text-slate-400">50 MWA:</span> <span class="text-emerald-400">${a.mwa50}</span></div>`}
+            </div>
 
-            ${log.length ? '<label>Recent entries</label>' + log.map(r =>
-                `<div style="font-size:0.85rem;background:#0f172a;border-radius:0.35rem;padding:0.35rem 0.6rem;margin-bottom:0.25rem;display:flex;justify-content:space-between">
-                <span>${new Date(r.date).toLocaleDateString()}</span>
-                <span>HRV ${v(r.hrv) || '–'} · RHR ${v(r.restingHR) || '–'} · ${v(r.sleepHours) || '–'}h</span></div>`).join('') : ''}
-            ${hd.date ? '<button class="btn btn-danger" style="margin-top:0.5rem" onclick="hpClear()">Clear health data</button>' : ''}`;
+            <p class="text-xs text-slate-500 dark:text-slate-400 italic">${a.outlook || 'Active monitoring...'}</p>
+          </div>
+        `;
+      }).join('');
     }
 
-    window.hpManualSave = function () {
-        try {
-            const g = id => document.getElementById(id).value;
-            saveHealth(normalize({ hrv: g('hpHrv'), restingHR: g('hpRhr'), sleepHours: g('hpSleep') }), 'manual');
-            hpMsg('✓ Saved.');
-        } catch (e) { hpMsg(e.message, true); }
-    };
-
-    window.hpClipboard = async function () {
-        try { importAppleHealthPayload(await navigator.clipboard.readText()); }
-        catch (e) { hpMsg('Clipboard blocked by browser — paste into box and tap Import text.', true); }
-    };
-
-    window.hpClear = function () {
-        if (!confirm('Clear stored health data for this profile?')) return;
-        const p = getCurrentProfile(); p.healthData = null; p.healthLog = [];
-        saveLocalStorage(); updateHealthStatusBanners(); calculateRestDays(); renderHealthCard();
-    };
-
-    const q = new URLSearchParams(location.search);
-    if (q.has('hrv') || q.has('sleep') || q.has('rhr')) {
-        try {
-            saveHealth(normalize({ hrv: q.get('hrv'), sleepHours: q.get('sleep'), restingHR: q.get('rhr') }), 'url');
-            history.replaceState(null, '', location.pathname);
-        } catch (e) { console.warn(e.message); }
+    function renderWatchlistRegistry() {
+      const assets = getWatchlist();
+      const container = document.getElementById('watchlist-registry-container');
+      
+      container.innerHTML = assets.map(a => `
+        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-700 font-mono">
+          <div>
+            <span class="font-bold text-amber-500 text-sm">${a.ticker}</span>
+            <span class="text-slate-400 text-xs ml-2">MVRV: ${a.mvrv}</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="removeAsset('${a.ticker}')" class="text-red-500 hover:underline font-bold">Remove</button>
+          </div>
+        </div>
+      `).join('');
     }
-</script>
+
+    function registerCustomAsset() {
+      const ticker = document.getElementById('new-ticker').value.trim().toUpperCase();
+      const mcap = parseFloat(document.getElementById('new-mcap').value) || 10;
+      const mvrv = parseFloat(document.getElementById('new-mvrv').value) || 1.4;
+
+      if (!ticker) { alert('Please enter a valid ticker'); return; }
+
+      const list = getWatchlist();
+      if (list.find(a => a.ticker === ticker)) { alert('Asset already registered'); return; }
+
+      const isMacro = mcap >= 50;
+      list.push({
+        ticker: ticker,
+        name: ticker,
+        price: 1.00,
+        class: isMacro ? 'Macro Anchor' : 'High-Beta Altcoin',
+        alpha: isMacro ? 0.08 : 0.12,
+        mvrv: mvrv,
+        rsi: 50.0,
+        mwa50: 'Active',
+        outlook: mvrv < 1.2 ? 'Significantly Undervalued (Bottom Signal)' : 'Fairly Valued'
+      });
+
+      saveWatchlist(list);
+      document.getElementById('new-ticker').value = '';
+      document.getElementById('new-mcap').value = '';
+      document.getElementById('new-mvrv').value = '';
+      renderDashboard();
+      renderWatchlistRegistry();
+      alert(`Asset ${ticker} successfully onboarded with MVRV ${mvrv}!`);
+    }
+
+    function removeAsset(ticker) {
+      let list = getWatchlist().filter(a => a.ticker !== ticker);
+      saveWatchlist(list);
+      renderDashboard();
+      renderWatchlistRegistry();
+    }
+
+    function renderTelemetryHistory() {
+      const history = [
+        { timestamp: new Date().toISOString(), ticker: 'BTC', timeframe: '24h', mvrv: 1.15, valuation: 'Undervalued (Bottom Signal)', accuracy: 99.49, adj: 0.0004 },
+        { timestamp: new Date().toISOString(), ticker: 'ETH', timeframe: '24h', mvrv: 1.65, valuation: 'Fairly Valued', accuracy: 99.18, adj: 0.0007 }
+      ];
+      const container = document.getElementById('telemetry-history-container');
+
+      container.innerHTML = history.map(h => `
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 shadow-sm font-mono text-xs">
+          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-2">
+            <span class="font-bold text-amber-500">${h.ticker} (${h.timeframe}) — MVRV: ${h.mvrv}</span>
+            <span class="text-slate-400 text-[10px]">${h.timestamp}</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-slate-600 dark:text-slate-300">
+            <div>Valuation: <strong class="text-emerald-400">${h.valuation}</strong></div>
+            <div>Accuracy: <strong class="text-emerald-400">${h.accuracy}%</strong></div>
+            <div>Adjustment: <strong class="text-amber-500">${h.adj}</strong></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function clearTelemetryHistory() { renderTelemetryHistory(); }
+    function openSettingsModal() {}
+    function closeSettingsModal() {}
+
+    function switchTab(targetTab) {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === targetTab) {
+          btn.classList.add('bg-amber-500', 'text-slate-900');
+          btn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        } else {
+          btn.classList.remove('bg-amber-500', 'text-slate-900');
+          btn.classList.add('text-slate-600', 'dark:text-slate-400');
+        }
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        if (content.id === targetTab) content.classList.add('active');
+        else content.classList.remove('active');
+      });
+
+      if (targetTab === 'dashboard') renderDashboard();
+      if (targetTab === 'manager') renderWatchlistRegistry();
+      if (targetTab === 'history') renderTelemetryHistory();
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(button => {
+      button.addEventListener('click', () => switchTab(button.getAttribute('data-tab')));
+    });
+
+    initTheme();
+    renderDashboard();
+    renderWatchlistRegistry();
+    renderTelemetryHistory();
+  </script>
 </body>
 </html>
 
