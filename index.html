@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness4Me Heavy Duty & Cardio</title>
     <style>
-        /* --- FITNESS4ME HEAVY DUTY UI UPGRADE --- */
         :root {
             --bg-primary: #0d0d0d;
             --bg-card: #1a1a1a;
@@ -16,52 +15,20 @@
             --accent-info: #0a84ff;
             --border-color: #2c2c2e;
         }
-
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             -webkit-font-smoothing: antialiased;
-            font-size: 16px;
-            line-height: 1.5;
+            font-size: 16px; line-height: 1.5;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        h1, h2, h3 {
-            margin-top: 0;
-            font-weight: 600;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        h2 {
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-
-        h3 {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Card Layout */
+        .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+        h1, h2, h3 { margin-top: 0; font-weight: 600; }
+        h1 { font-size: 1.8rem; text-align: center; margin-bottom: 24px; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; }
+        h3 { font-size: 1.1rem; margin-bottom: 12px; color: var(--text-secondary); }
         .card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -70,8 +37,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 1px solid var(--border-color);
         }
-
-        /* Form Elements */
         label {
             display: block;
             margin-bottom: 6px;
@@ -79,7 +44,6 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
-
         select, input[type="text"], input[type="number"], textarea {
             width: 100%;
             padding: 12px;
@@ -90,20 +54,15 @@
             font-size: 1rem;
             margin-bottom: 12px;
         }
-
         select:focus, input:focus, textarea:focus {
             outline: none;
             border-color: var(--accent-info);
         }
-
-        /* Monospaced Numbers */
         .data-value, input[type="number"] {
             font-family: "SF Mono", "Roboto Mono", monospace;
             font-size: 1.1rem;
             font-weight: 600;
         }
-
-        /* Buttons */
         .btn {
             border: none;
             padding: 14px 20px;
@@ -115,41 +74,11 @@
             width: 100%;
             margin-bottom: 8px;
         }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: var(--accent-info);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0073e6;
-        }
-
-        .btn-secondary {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border-color);
-        }
-
-        .btn-danger {
-            background: var(--accent-intensity);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--accent-recovery);
-            color: white;
-        }
-
-        /* Recovery Badge */
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--accent-info); color: white; }
+        .btn-secondary { background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-danger { background: var(--accent-intensity); color: white; }
+        .btn-success { background: var(--accent-recovery); color: white; }
         .recovery-badge {
             display: inline-block;
             padding: 8px 16px;
@@ -158,247 +87,73 @@
             font-size: 0.9rem;
             margin-bottom: 12px;
         }
-
-        .recovery-ready {
-            background: rgba(48, 209, 88, 0.2);
-            color: var(--accent-recovery);
-            border: 1px solid var(--accent-recovery);
-        }
-
-        .recovery-warning {
-            background: rgba(255, 59, 48, 0.2);
-            color: var(--accent-intensity);
-            border: 1px solid var(--accent-intensity);
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background: var(--bg-primary);
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        td {
-            font-size: 0.95rem;
-        }
-
-        /* Navigation */
+        .recovery-ready { background: rgba(48, 209, 88, 0.2); color: var(--accent-recovery); border: 1px solid var(--accent-recovery); }
+        .recovery-warning { background: rgba(255, 59, 48, 0.2); color: var(--accent-intensity); border: 1px solid var(--accent-intensity); }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--bg-primary); font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; }
         .nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--bg-card);
             border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 1000;
+            display: flex; justify-content: space-around;
+            padding: 8px 0; z-index: 1000;
         }
-
-        .nav-item {
-            text-align: center;
-            padding: 8px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: color 0.2s;
+        .nav-item { text-align: center; padding: 8px; cursor: pointer; color: var(--text-secondary); }
+        .nav-item.active { color: var(--accent-info); }
+        .nav-icon { font-size: 1.5rem; display: block; }
+        .nav-label { font-size: 0.75rem; margin-top: 4px; }
+        .section { display: none; padding-bottom: 80px; }
+        .section.active { display: block; }
+        .rest-timer { text-align: center; padding: 20px; background: var(--bg-primary); border-radius: 12px; margin-bottom: 16px; }
+        .timer-display { font-size: 3rem; font-weight: bold; font-family: "SF Mono", monospace; color: var(--accent-info); }
+        .status-indicator { display: flex; align-items: center; gap: 8px; padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--text-secondary); }
+        .status-dot.green { background: var(--accent-recovery); }
+        .status-dot.blue { background: var(--accent-info); }
+        .exercise-card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border-color); }
+        .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .exercise-name { font-size: 1.1rem; font-weight: 600; }
+        .set-row { display: grid; grid-template-columns: 50px 1fr 1fr 1fr 80px; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .set-row select, .set-row input { margin-bottom: 0; padding: 8px; font-size: 0.9rem; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 2000;
+            align-items: center; justify-content: center;
         }
-
-        .nav-item.active {
-            color: var(--accent-info);
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg-card); border-radius: 16px; padding: 24px;
+            max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
         }
-
-        .nav-icon {
-            font-size: 1.5rem;
-            display: block;
-        }
-
-        .nav-label {
-            font-size: 0.75rem;
-            margin-top: 4px;
-        }
-
-        /* Sections */
-        .section {
-            display: none;
-            padding-bottom: 80px;
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        /* Rest Timer */
-        .rest-timer {
-            text-align: center;
-            padding: 20px;
-            background: var(--bg-primary);
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        .timer-display {
-            font-size: 3rem;
-            font-weight: bold;
-            font-family: "SF Mono", "Roboto Mono", monospace;
-            color: var(--accent-info);
-        }
-
-        /* Status Indicators */
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
+        .health-import-section { background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2e 100%); border: 2px solid var(--accent-info); }
+        .health-info { background: rgba(10, 132, 255, 0.1); border-left: 4px solid var(--accent-info); padding: 12px; margin: 12px 0; border-radius: 4px; font-size: 0.9rem; }
+        .health-info a { color: var(--accent-info); text-decoration: none; font-weight: 600; }
+        .library-item {
             background: var(--bg-primary);
             border-radius: 8px;
-            margin-bottom: 12px;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--text-secondary);
-        }
-
-        .status-dot.green {
-            background: var(--accent-recovery);
-        }
-
-        .status-dot.red {
-            background: var(--accent-intensity);
-        }
-
-        .status-dot.blue {
-            background: var(--accent-info);
-        }
-
-        /* Apple Health Section */
-        .health-import-section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2e 100%);
-            border: 2px solid var(--accent-info);
-        }
-
-        .health-info {
-            background: rgba(10, 132, 255, 0.1);
-            border-left: 4px solid var(--accent-info);
             padding: 12px;
-            margin: 12px 0;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .health-info a {
-            color: var(--accent-info);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Exercise Card */
-        .exercise-card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .exercise-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .exercise-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .set-row {
-            display: grid;
-            grid-template-columns: 50px 1fr 1fr 1fr 80px;
-            gap: 8px;
-            align-items: center;
             margin-bottom: 8px;
+            border-left: 3px solid var(--accent-info);
         }
-
-        .set-row select, .set-row input {
-            margin-bottom: 0;
-            padding: 8px;
-            font-size: 0.9rem;
+        .library-item-name { font-weight: 600; margin-bottom: 4px; }
+        .library-item-meta { font-size: 0.85rem; color: var(--text-secondary); }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--border-color);
+            font-size: 0.75rem;
+            margin-right: 4px;
         }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .set-row {
-                grid-template-columns: 40px 1fr 1fr 1fr 60px;
-                gap: 4px;
-            }
-
-            .set-row select, .set-row input {
-                padding: 6px;
-                font-size: 0.85rem;
-            }
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-info);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .search-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 12px;
         }
     </style>
 </head>
@@ -406,9 +161,8 @@
     <div class="container">
         <h1>🏋️ Fitness4Me Heavy Duty & Cardio</h1>
 
-        <!-- HOME SECTION -->
+        <!-- HOME -->
         <div id="home-section" class="section active">
-            <!-- Rest Timer -->
             <div class="card">
                 <h2>⏱️ Rest Timer</h2>
                 <div class="rest-timer">
@@ -420,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- Mike Mentzer Recovery Advisor -->
             <div class="card">
                 <h2>🧠 Mike Mentzer Recovery Advisor</h2>
                 <div id="recovery-status">
@@ -430,23 +183,18 @@
                 </div>
             </div>
 
-            <!-- Apple Health Integration -->
             <div class="card health-import-section">
                 <h2>🍎 Apple Health Integration</h2>
                 <div class="status-indicator">
                     <div class="status-dot" id="health-status-dot"></div>
                     <span id="health-status-text">Not Connected</span>
                 </div>
-                
                 <div class="health-info">
-                    <strong>How to connect Apple Health:</strong><br>
-                    <strong>Method 1:</strong> Use <a href="https://apps.apple.com/app/health-auto-export-json-csv/id1115567461" target="_blank">Health Auto Export</a> app to export HRV/Sleep data as JSON, then import below.<br><br>
-                    <strong>Method 2:</strong> Create an iOS Shortcut that sends data via URL parameters (see Settings for instructions).
+                    <strong>How to connect:</strong><br>
+                    Use <a href="https://apps.apple.com/app/health-auto-export-json-csv/id1115567461" target="_blank">Health Auto Export</a> to export HRV/Sleep as JSON, then import below.
                 </div>
-
                 <label>Import Apple Health JSON File:</label>
                 <input type="file" id="health-file-input" accept=".json" onchange="importHealthData(event)">
-                
                 <label>Or Enter Data Manually:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div>
@@ -461,7 +209,6 @@
                 <button class="btn btn-primary" onclick="saveManualHealthData()">Save Health Data</button>
             </div>
 
-            <!-- Start Workout -->
             <div class="card">
                 <h2>🚀 Start Today's Workout</h2>
                 <label>Select Routine:</label>
@@ -471,9 +218,8 @@
                 <button class="btn btn-success" onclick="startWorkout()">Start Workout</button>
             </div>
 
-            <!-- Strength Analytics -->
             <div class="card">
-                <h2>📈 Strength Analytics & Trajectory</h2>
+                <h2>📈 Strength Analytics</h2>
                 <label>Select Exercise:</label>
                 <select id="analytics-exercise-select">
                     <option value="">-- Select Exercise --</option>
@@ -484,14 +230,13 @@
             </div>
         </div>
 
-        <!-- WORKOUT SECTION -->
+        <!-- WORKOUT -->
         <div id="workout-section" class="section">
             <div id="no-workout-message" class="card">
                 <h2>No Active Workout</h2>
                 <p>Go to Home and select a routine to start.</p>
-                <button class="btn btn-primary" onclick="showSection('home')">Go to Home</button>
+                <button class="btn btn-primary" onclick="showSection('home', event)">Go to Home</button>
             </div>
-
             <div id="active-workout-container" style="display: none;">
                 <div class="card">
                     <h2 id="workout-title">Workout</h2>
@@ -501,7 +246,7 @@
             </div>
         </div>
 
-        <!-- HISTORY SECTION -->
+        <!-- HISTORY -->
         <div id="history-section" class="section">
             <div class="card">
                 <h2>📊 Completed Workouts History</h2>
@@ -511,12 +256,23 @@
             </div>
         </div>
 
-        <!-- SETTINGS SECTION -->
+        <!-- SETTINGS -->
         <div id="settings-section" class="section">
-            <!-- Routine Customizer -->
             <div class="card">
-                <h2>⚙️ Routine & Exercise Customizer</h2>
-                <p>Rename workouts, add/remove/reorder exercises, and configure pulley & bench setups.</p>
+                <h2>📚 Exercise Library</h2>
+                <p>Import your GymBook exercise database to auto-populate routines with proper names, regions, and muscle groups.</p>
+                <div class="status-indicator">
+                    <div class="status-dot blue"></div>
+                    <span id="library-count">0 exercises in library</span>
+                </div>
+                <label>Import GymBook Exercises CSV:</label>
+                <input type="file" id="exercises-file-input" accept=".csv" onchange="importExercisesFile(event)">
+                <button class="btn btn-secondary" onclick="viewExerciseLibrary()">👁️ View Library</button>
+                <button class="btn btn-danger" onclick="clearExerciseLibrary()">🗑️ Clear Library</button>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Routine Customizer</h2>
                 <label>Select Routine to Edit:</label>
                 <select id="routine-select-edit">
                     <option value="">-- Select Routine --</option>
@@ -525,7 +281,6 @@
                 <button class="btn btn-secondary" onclick="createNewRoutine()">+ Create New Routine</button>
             </div>
 
-            <!-- Display Settings -->
             <div class="card">
                 <h2>🔠 Display & Font Size</h2>
                 <label>Choose Font Size:</label>
@@ -537,31 +292,22 @@
                 </select>
             </div>
 
-            <!-- Data Backup -->
             <div class="card">
-                <h2>💾 Local Data & Backup Migration</h2>
+                <h2>💾 Local Data & Backup</h2>
                 <p>Export or restore complete workout logs and historical snapshots.</p>
-                <button class="btn btn-primary" onclick="exportBackup()">📥 Export JSON Backup File</button>
-                <label>Import / Restore JSON Backup or GymBook CSV File:</label>
+                <button class="btn btn-primary" onclick="exportBackup()">📥 Export JSON Backup</button>
+                <label>Import JSON Backup OR GymBook CSV (Logs or Exercises):</label>
                 <input type="file" id="import-file-input" accept=".json,.csv" onchange="importBackup(event)">
-            </div>
-
-            <!-- Google Drive Sync -->
-            <div class="card">
-                <h2>☁️ Google Drive Cloud Sync</h2>
-                <label>Google Cloud OAuth Client ID:</label>
-                <input type="text" id="google-client-id" placeholder="Enter your Google Client ID">
-                <div class="status-indicator">
-                    <div class="status-dot" id="google-status-dot"></div>
-                    <span id="google-status-text">Not Connected</span>
+                <div class="health-info" style="margin-top: 12px;">
+                    💡 The importer auto-detects file type:<br>
+                    • <strong>JSON</strong> = Full app backup<br>
+                    • <strong>CSV with Date/Workout columns</strong> = Workout logs<br>
+                    • <strong>CSV with Name/Region columns</strong> = Exercise library
                 </div>
-                <button class="btn btn-primary" onclick="signInGoogle()">🔐 Sign In with Google</button>
-                <button class="btn btn-secondary" onclick="syncToGoogleDrive()">☁️ Sync Backup to Google Drive Now</button>
             </div>
 
-            <!-- Rest Timer Settings -->
             <div class="card">
-                <h2>⏱️ Rest Timer Default (Seconds)</h2>
+                <h2>⏱️ Rest Timer Default</h2>
                 <select id="rest-timer-default" onchange="saveRestTimerDefault(this.value)">
                     <option value="30">30 seconds</option>
                     <option value="45" selected>45 seconds</option>
@@ -571,7 +317,6 @@
                 </select>
             </div>
 
-            <!-- Profile Management -->
             <div class="card">
                 <h2>👤 Profile Management</h2>
                 <label>Active Profile:</label>
@@ -580,76 +325,34 @@
                 </select>
                 <button class="btn btn-secondary" onclick="addNewProfile()">Add New Profile</button>
             </div>
-
-            <!-- Apple Health Setup Instructions -->
-            <div class="card">
-                <h2>🍎 Apple Health Setup Instructions</h2>
-                
-                <h3>Method 1: Health Auto Export (Recommended)</h3>
-                <ol style="color: var(--text-secondary); line-height: 1.8;">
-                    <li>Download <a href="https://apps.apple.com/app/health-auto-export-json-csv/id1115567461" target="_blank" style="color: var(--accent-info);">Health Auto Export</a> from the App Store</li>
-                    <li>Open the app and grant Health permissions</li>
-                    <li>Go to "Automations" → "Create New"</li>
-                    <li>Select metrics: HRV, Sleep Analysis</li>
-                    <li>Set export format to "JSON"</li>
-                    <li>Choose export location: iCloud Drive or Dropbox</li>
-                    <li>Set automation to run daily or on-demand</li>
-                    <li>In Fitness4Me, tap "Import Apple Health JSON File" and select the exported file</li>
-                </ol>
-
-                <h3>Method 2: iOS Shortcut (Advanced)</h3>
-                <ol style="color: var(--text-secondary); line-height: 1.8;">
-                    <li>Open the <strong>Shortcuts</strong> app on your iPhone</li>
-                    <li>Tap "+" to create a new shortcut</li>
-                    <li>Name it "Sync to Fitness4Me"</li>
-                    <li>Add action: <strong>Find Health Samples</strong></li>
-                    <li>Configure for HRV (most recent) and Sleep (last night)</li>
-                    <li>Add action: <strong>Get Dictionary Value</strong> for each metric</li>
-                    <li>Add action: <strong>Text</strong> with format: <code>https://your-domain.com/fitness4me?hrv=[HRV]&sleep=[Sleep]</code></li>
-                    <li>Add action: <strong>Open URL</strong></li>
-                    <li>Save and add to your Home Screen or Apple Watch face</li>
-                    <li>Tap the shortcut to automatically sync your data</li>
-                </ol>
-
-                <h3>Method 3: Native App Wrapper (Developer)</h3>
-                <p style="color: var(--text-secondary);">
-                    For true HealthKit integration, wrap this web app using <a href="https://capacitorjs.com" target="_blank" style="color: var(--accent-info);">CapacitorJS</a>:
-                </p>
-                <pre style="background: var(--bg-primary); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; color: var(--text-secondary);">
-npm install @capacitor/core @capacitor/ios
-npx cap init
-npm install @capacitor/health
-npx cap add ios
-                </pre>
-            </div>
         </div>
     </div>
 
     <!-- Navigation -->
     <div class="nav">
-        <div class="nav-item active" onclick="showSection('home')">
+        <div class="nav-item active" onclick="showSection('home', event)">
             <span class="nav-icon">🏠</span>
             <div class="nav-label">Home</div>
         </div>
-        <div class="nav-item" onclick="showSection('workout')">
+        <div class="nav-item" onclick="showSection('workout', event)">
             <span class="nav-icon">💪</span>
             <div class="nav-label">Workout</div>
         </div>
-        <div class="nav-item" onclick="showSection('history')">
+        <div class="nav-item" onclick="showSection('history', event)">
             <span class="nav-icon">📊</span>
             <div class="nav-label">History</div>
         </div>
-        <div class="nav-item" onclick="showSection('settings')">
+        <div class="nav-item" onclick="showSection('settings', event)">
             <span class="nav-icon">⚙️</span>
             <div class="nav-label">Settings</div>
         </div>
     </div>
 
-    <!-- Modal for Routine Editor -->
+    <!-- Modal -->
     <div id="routine-editor-modal" class="modal">
         <div class="modal-content">
-            <h2>Edit Routine</h2>
-            <div id="routine-editor-content"></div>
+            <h2 id="modal-title">Edit</h2>
+            <div id="modal-content"></div>
             <button class="btn btn-secondary" onclick="closeModal()">Close</button>
         </div>
     </div>
@@ -658,18 +361,14 @@ npx cap add ios
         // ============================================
         // DATA MANAGEMENT
         // ============================================
-        
         let appData = {
             routines: [],
             workoutHistory: [],
+            exerciseLibrary: [], // NEW: Exercise library from GymBook
             profiles: ['default'],
             activeProfile: 'default',
             restTimerDefault: 45,
-            healthData: {
-                hrv: null,
-                sleep: null,
-                lastUpdated: null
-            },
+            healthData: { hrv: null, sleep: null, lastUpdated: null },
             fontSize: 16
         };
 
@@ -677,34 +376,20 @@ npx cap add ios
         let timerInterval = null;
         let timerSeconds = 45;
 
-        // Load data from localStorage
         function loadData() {
             const saved = localStorage.getItem('fitness4me_data');
             if (saved) {
                 appData = JSON.parse(saved);
+                // Ensure new fields exist for older backups
+                if (!appData.exerciseLibrary) appData.exerciseLibrary = [];
             } else {
-                // Initialize with default routines
                 appData.routines = [
                     {
                         id: 'routine_1',
                         name: 'Heavy Duty Workout A',
                         exercises: [
-                            {
-                                id: 'ex_1',
-                                name: 'Pec Deck',
-                                sets: [{plates: 5, reps: 8, mode: 'failure'}],
-                                pulleyHeight: 15,
-                                pulleyUsage: 'both',
-                                notes: ''
-                            },
-                            {
-                                id: 'ex_2',
-                                name: 'Machine Chest Press',
-                                sets: [{plates: 8, reps: 8, mode: 'failure'}],
-                                pulleyHeight: 10,
-                                pulleyUsage: 'both',
-                                notes: ''
-                            }
+                            { id: 'ex_1', name: 'Pec Deck', sets: [{plates: 5, reps: 8, mode: 'failure'}], pulleyHeight: 15, pulleyUsage: 'both', notes: '' },
+                            { id: 'ex_2', name: 'Machine Chest Press', sets: [{plates: 8, reps: 8, mode: 'failure'}], pulleyHeight: 10, pulleyUsage: 'both', notes: '' }
                         ]
                     }
                 ];
@@ -719,138 +404,87 @@ npx cap add ios
         // ============================================
         // NAVIGATION
         // ============================================
-
-        function showSection(sectionName) {
+        function showSection(sectionName, evt) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             document.getElementById(`${sectionName}-section`).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
-            if (sectionName === 'home') {
-                updateHomeSection();
-            } else if (sectionName === 'history') {
-                updateHistorySection();
-            } else if (sectionName === 'settings') {
-                updateSettingsSection();
-            }
+            if (sectionName === 'home') updateHomeSection();
+            else if (sectionName === 'history') updateHistorySection();
+            else if (sectionName === 'settings') updateSettingsSection();
         }
 
         // ============================================
         // HOME SECTION
         // ============================================
-
         function updateHomeSection() {
-            // Update routine select
             const routineSelect = document.getElementById('routine-select-home');
             routineSelect.innerHTML = '<option value="">-- Select Routine --</option>';
             appData.routines.forEach(r => {
                 routineSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
             });
 
-            // Update analytics select
             const analyticsSelect = document.getElementById('analytics-exercise-select');
             analyticsSelect.innerHTML = '<option value="">-- Select Exercise --</option>';
             const allExercises = new Set();
-            appData.routines.forEach(r => {
-                r.exercises.forEach(e => allExercises.add(e.name));
-            });
+            appData.routines.forEach(r => r.exercises.forEach(e => allExercises.add(e.name)));
+            appData.workoutHistory.forEach(w => w.exercises.forEach(e => allExercises.add(e.name)));
             allExercises.forEach(ex => {
                 analyticsSelect.innerHTML += `<option value="${ex}">${ex}</option>`;
             });
 
-            // Update recovery advisor
             updateRecoveryAdvisor();
-
-            // Update health status
             updateHealthStatus();
-
-            // Update last trained
             updateLastTrained();
         }
 
         function updateRecoveryAdvisor() {
             const healthData = appData.healthData;
             const statusDiv = document.getElementById('recovery-status');
-            
             if (!healthData.hrv && !healthData.sleep) {
                 statusDiv.innerHTML = `
                     <div class="recovery-badge recovery-ready">🟢 Fully Recovered</div>
                     <p>Ready for maximum intensity failure sets.</p>
                     <p><strong>Last Trained:</strong> <span id="last-trained">Never</span></p>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 12px;">
-                        💡 Import Apple Health data for personalized recovery analysis
-                    </p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 12px;">💡 Import Apple Health data for personalized recovery analysis</p>
                 `;
                 return;
             }
-
             let recoveryScore = 100;
             let warnings = [];
-
-            // HRV Analysis (lower HRV = less recovered)
             if (healthData.hrv) {
-                if (healthData.hrv < 40) {
-                    recoveryScore -= 40;
-                    warnings.push('Low HRV - consider extra rest');
-                } else if (healthData.hrv < 60) {
-                    recoveryScore -= 20;
-                    warnings.push('Moderate HRV - monitor intensity');
-                }
+                if (healthData.hrv < 40) { recoveryScore -= 40; warnings.push('Low HRV - consider extra rest'); }
+                else if (healthData.hrv < 60) { recoveryScore -= 20; warnings.push('Moderate HRV - monitor intensity'); }
             }
-
-            // Sleep Analysis
             if (healthData.sleep) {
-                if (healthData.sleep < 6) {
-                    recoveryScore -= 30;
-                    warnings.push('Poor sleep - high overtraining risk');
-                } else if (healthData.sleep < 7) {
-                    recoveryScore -= 15;
-                    warnings.push('Suboptimal sleep');
-                }
+                if (healthData.sleep < 6) { recoveryScore -= 30; warnings.push('Poor sleep - high overtraining risk'); }
+                else if (healthData.sleep < 7) { recoveryScore -= 15; warnings.push('Suboptimal sleep'); }
             }
-
-            // Check days since last workout
             const lastWorkout = appData.workoutHistory[appData.workoutHistory.length - 1];
             if (lastWorkout) {
                 const daysSince = Math.floor((Date.now() - lastWorkout.date) / (1000 * 60 * 60 * 24));
-                if (daysSince < 2) {
-                    recoveryScore -= 20;
-                    warnings.push('Recent workout - ensure full recovery');
-                }
+                if (daysSince < 2) { recoveryScore -= 20; warnings.push('Recent workout - ensure full recovery'); }
             }
-
             const isRecovered = recoveryScore >= 70;
             const badgeClass = isRecovered ? 'recovery-ready' : 'recovery-warning';
             const badgeText = isRecovered ? '🟢 Ready for Intensity' : '⚠️ Recovery Needed';
-            const message = isRecovered 
+            const message = isRecovered
                 ? 'Your recovery metrics indicate you are ready for maximum intensity failure sets.'
                 : 'Your recovery metrics suggest you should consider lighter training or an extra rest day.';
-
             statusDiv.innerHTML = `
                 <div class="recovery-badge ${badgeClass}">${badgeText}</div>
                 <p>${message}</p>
                 <p><strong>Recovery Score:</strong> ${recoveryScore}/100</p>
                 ${healthData.hrv ? `<p><strong>HRV:</strong> ${healthData.hrv} ms</p>` : ''}
                 ${healthData.sleep ? `<p><strong>Sleep:</strong> ${healthData.sleep} hours</p>` : ''}
-                ${warnings.length > 0 ? `
-                    <div style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.1); border-radius: 8px;">
-                        <strong>⚠️ Warnings:</strong>
-                        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                            ${warnings.map(w => `<li>${w}</li>`).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 12px;">
-                    Last updated: ${healthData.lastUpdated ? new Date(healthData.lastUpdated).toLocaleString() : 'Never'}
-                </p>
+                ${warnings.length > 0 ? `<div style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.1); border-radius: 8px;"><strong>⚠️ Warnings:</strong><ul style="margin: 8px 0 0 0; padding-left: 20px;">${warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>` : ''}
             `;
         }
 
         function updateHealthStatus() {
             const dot = document.getElementById('health-status-dot');
             const text = document.getElementById('health-status-text');
-            
             if (appData.healthData.lastUpdated) {
                 dot.className = 'status-dot green';
                 text.textContent = 'Connected - Data Available';
@@ -863,7 +497,6 @@ npx cap add ios
         function updateLastTrained() {
             const lastWorkout = appData.workoutHistory[appData.workoutHistory.length - 1];
             const lastTrainedEl = document.getElementById('last-trained');
-            
             if (lastWorkout) {
                 const daysSince = Math.floor((Date.now() - lastWorkout.date) / (1000 * 60 * 60 * 24));
                 lastTrainedEl.textContent = `${daysSince} day${daysSince !== 1 ? 's' : ''} ago`;
@@ -873,34 +506,20 @@ npx cap add ios
         }
 
         // ============================================
-        // APPLE HEALTH INTEGRATION
+        // APPLE HEALTH
         // ============================================
-
         function importHealthData(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
-                    // Parse Health Auto Export format
-                    let hrv = null;
-                    let sleep = null;
-
-                    // Try to find HRV data
-                    if (data.heartRateVariabilitySDNN) {
-                        hrv = data.heartRateVariabilitySDNN[data.heartRateVariabilitySDNN.length - 1]?.value;
-                    } else if (data.hrv) {
-                        hrv = data.hrv[data.hrv.length - 1]?.value || data.hrv;
-                    }
-
-                    // Try to find Sleep data
+                    let hrv = null, sleep = null;
+                    if (data.heartRateVariabilitySDNN) hrv = data.heartRateVariabilitySDNN[data.heartRateVariabilitySDNN.length - 1]?.value;
+                    else if (data.hrv) hrv = data.hrv[data.hrv.length - 1]?.value || data.hrv;
                     if (data.sleepAnalysis) {
-                        const sleepData = data.sleepAnalysis.filter(s => 
-                            s.value === 'InBed' || s.value === 'Asleep'
-                        );
+                        const sleepData = data.sleepAnalysis.filter(s => s.value === 'InBed' || s.value === 'Asleep');
                         if (sleepData.length > 0) {
                             const totalSleep = sleepData.reduce((sum, s) => {
                                 const start = new Date(s.startDate);
@@ -909,19 +528,16 @@ npx cap add ios
                             }, 0);
                             sleep = Math.round(totalSleep * 10) / 10;
                         }
-                    } else if (data.sleep) {
-                        sleep = data.sleep;
-                    }
-
+                    } else if (data.sleep) sleep = data.sleep;
                     if (hrv || sleep) {
-                        appData.healthData.hrv = hrv;
-                        appData.healthData.sleep = sleep;
+                        if (hrv) appData.healthData.hrv = hrv;
+                        if (sleep) appData.healthData.sleep = sleep;
                         appData.healthData.lastUpdated = Date.now();
                         saveData();
                         updateHomeSection();
                         alert('✅ Apple Health data imported successfully!');
                     } else {
-                        alert('⚠️ Could not find HRV or Sleep data in the file. Please check the format.');
+                        alert('⚠️ Could not find HRV or Sleep data in the file.');
                     }
                 } catch (error) {
                     alert('❌ Error parsing file: ' + error.message);
@@ -933,45 +549,301 @@ npx cap add ios
         function saveManualHealthData() {
             const hrv = document.getElementById('manual-hrv').value;
             const sleep = document.getElementById('manual-sleep').value;
-
             if (hrv) appData.healthData.hrv = Number(hrv);
             if (sleep) appData.healthData.sleep = Number(sleep);
             appData.healthData.lastUpdated = Date.now();
-
             saveData();
             updateHomeSection();
             alert('✅ Health data saved!');
         }
 
-        // Check for URL parameters (iOS Shortcut integration)
-        function checkURLParameters() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hrv = urlParams.get('hrv');
-            const sleep = urlParams.get('sleep');
-
-            if (hrv || sleep) {
-                if (hrv) appData.healthData.hrv = Number(hrv);
-                if (sleep) appData.healthData.sleep = Number(sleep);
-                appData.healthData.lastUpdated = Date.now();
-                saveData();
-                updateHomeSection();
-                
-                // Show success message
-                alert('✅ Health data synced from iOS Shortcut!');
-            }
+        // ============================================
+        // EXERCISE LIBRARY (NEW!)
+        // ============================================
+        function importExercisesFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    importGymBookExercises(e.target.result);
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
         }
 
-        // ============================================
-        // WORKOUT MANAGEMENT
-        // ============================================
-
-        function startWorkout() {
-            const routineId = document.getElementById('routine-select-home').value;
-            if (!routineId) {
-                alert('Please select a routine');
+        function importGymBookExercises(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                alert('❌ Exercise CSV is empty or invalid');
+                return;
+            }
+            const header = parseCSVLine(lines[0]);
+            // Verify it's an exercises file
+            if (!header[0] || header[0].toLowerCase() !== 'name') {
+                alert('❌ This does not appear to be a GymBook Exercises CSV. Expected first column: "Name"');
                 return;
             }
 
+            const dataLines = lines.slice(1);
+            const newExercises = [];
+            let skipped = 0;
+
+            dataLines.forEach(line => {
+                const cols = parseCSVLine(line);
+                if (cols.length < 2) return;
+                const name = cols[0]?.trim();
+                if (!name) return;
+
+                // Skip if already in library (by name)
+                if (appData.exerciseLibrary.find(e => e.name.toLowerCase() === name.toLowerCase())) {
+                    skipped++;
+                    return;
+                }
+
+                newExercises.push({
+                    id: 'lib_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    name: name,
+                    region: cols[1]?.trim() || '',
+                    primaryMuscles: cols[2]?.trim() || '',
+                    secondaryMuscles: cols[3]?.trim() || '',
+                    notes: cols[4]?.trim() || '',
+                    logCount: parseInt(cols[5]) || 0,
+                    workoutCount: parseInt(cols[6]) || 0
+                });
+            });
+
+            if (newExercises.length === 0) {
+                alert(`ℹ️ No new exercises to import. ${skipped} exercises already in library.`);
+                return;
+            }
+
+            // Merge with existing library
+            appData.exerciseLibrary = [...appData.exerciseLibrary, ...newExercises];
+            // Sort alphabetically
+            appData.exerciseLibrary.sort((a, b) => a.name.localeCompare(b.name));
+            saveData();
+            updateSettingsSection();
+            alert(`✅ Imported ${newExercises.length} new exercises!${skipped > 0 ? ` (${skipped} already existed)` : ''}\n\nTotal library: ${appData.exerciseLibrary.length} exercises`);
+        }
+
+        function viewExerciseLibrary() {
+            if (appData.exerciseLibrary.length === 0) {
+                alert('📚 Your exercise library is empty.\n\nImport a GymBook Exercises CSV to populate it.');
+                return;
+            }
+
+            const modal = document.getElementById('routine-editor-modal');
+            document.getElementById('modal-title').textContent = `📚 Exercise Library (${appData.exerciseLibrary.length})`;
+
+            let html = `
+                <input type="text" class="search-input" id="library-search" placeholder="🔍 Search exercises..." oninput="filterLibrary()">
+                <div id="library-list">
+            `;
+
+            appData.exerciseLibrary.forEach(ex => {
+                html += `
+                    <div class="library-item" data-name="${ex.name.toLowerCase()}">
+                        <div class="library-item-name">${ex.name}</div>
+                        <div class="library-item-meta">
+                            ${ex.region ? `<span class="badge">${ex.region}</span>` : ''}
+                            ${ex.primaryMuscles ? `<span class="badge">${ex.primaryMuscles}</span>` : ''}
+                            ${ex.secondaryMuscles ? `<span class="badge">${ex.secondaryMuscles}</span>` : ''}
+                        </div>
+                        ${ex.notes ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px; font-style: italic;">📝 ${ex.notes}</div>` : ''}
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                            📊 ${ex.logCount} logs • ${ex.workoutCount} workouts
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('modal-content').innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function filterLibrary() {
+            const query = document.getElementById('library-search').value.toLowerCase();
+            document.querySelectorAll('.library-item').forEach(item => {
+                const name = item.getAttribute('data-name');
+                item.style.display = name.includes(query) ? 'block' : 'none';
+            });
+        }
+
+        function clearExerciseLibrary() {
+            if (!confirm(`Delete all ${appData.exerciseLibrary.length} exercises from your library?`)) return;
+            appData.exerciseLibrary = [];
+            saveData();
+            updateSettingsSection();
+            alert('✅ Exercise library cleared.');
+        }
+
+        // ============================================
+        // CSV PARSER (handles quoted fields)
+        // ============================================
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        // ============================================
+        // SMART IMPORT (auto-detects file type)
+        // ============================================
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fileName = file.name.toLowerCase();
+            const isCSV = fileName.endsWith('.csv');
+            const isJSON = fileName.endsWith('.json');
+
+            if (!isCSV && !isJSON) {
+                alert('❌ Please select a JSON or CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    if (isJSON) {
+                        const data = JSON.parse(e.target.result);
+                        appData = data;
+                        if (!appData.exerciseLibrary) appData.exerciseLibrary = [];
+                        saveData();
+                        alert('✅ JSON backup imported successfully!');
+                        location.reload();
+                    } else if (isCSV) {
+                        // Auto-detect CSV type by checking header
+                        const firstLine = e.target.result.split('\n')[0];
+                        const header = parseCSVLine(firstLine);
+                        const firstCol = (header[0] || '').toLowerCase();
+
+                        if (firstCol === 'date') {
+                            // It's a Logs CSV
+                            importGymBookCSV(e.target.result);
+                        } else if (firstCol === 'name') {
+                            // It's an Exercises CSV
+                            importGymBookExercises(e.target.result);
+                        } else {
+                            alert('❌ Unrecognized CSV format.\n\nExpected either:\n• Logs CSV (first column: "Date")\n• Exercises CSV (first column: "Name")');
+                        }
+                    }
+                } catch (error) {
+                    alert('❌ Error importing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function importGymBookCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                alert('❌ CSV file is empty or invalid');
+                return;
+            }
+            const dataLines = lines.slice(1);
+            const workoutSessions = {};
+
+            dataLines.forEach(line => {
+                const columns = parseCSVLine(line);
+                if (columns.length < 11) return;
+                const [date, workoutName, time, exerciseName, region, primaryMuscles, secondaryMuscles, setType, repsText, weightText, notes, skipped] = columns;
+                const workoutKey = `${date}_${workoutName}_${time}`;
+                if (!workoutSessions[workoutKey]) {
+                    workoutSessions[workoutKey] = { date, workoutName, time, exercises: {} };
+                }
+                const session = workoutSessions[workoutKey];
+                if (!session.exercises[exerciseName]) {
+                    // Try to pull notes from exercise library
+                    let exerciseNotes = notes || '';
+                    const libExercise = appData.exerciseLibrary.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
+                    if (libExercise && libExercise.notes && !exerciseNotes) {
+                        exerciseNotes = libExercise.notes;
+                    }
+                    session.exercises[exerciseName] = {
+                        name: exerciseName,
+                        sets: [],
+                        notes: exerciseNotes
+                    };
+                }
+                const repsMatch = repsText.match(/(\d+)/);
+                const reps = repsMatch ? parseInt(repsMatch[1]) : 0;
+                const weightMatch = weightText.match(/([\d,]+)/);
+                let weight = 0;
+                if (weightMatch) weight = parseFloat(weightMatch[1].replace(',', '.'));
+                let mode = 'failure';
+                if (setType.toLowerCase().includes('warm')) mode = 'warmup';
+                if (skipped && skipped.toLowerCase() === 'yes') return;
+                session.exercises[exerciseName].sets.push({
+                    plates: Math.round(weight),
+                    reps: reps,
+                    mode: mode
+                });
+            });
+
+            const importedWorkouts = [];
+            Object.values(workoutSessions).forEach(session => {
+                const dateParts = session.date.split('.');
+                const day = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]) - 1;
+                const year = parseInt(dateParts[2]) + 2000;
+                const workoutDate = new Date(year, month, day).getTime();
+                importedWorkouts.push({
+                    id: 'workout_' + workoutDate,
+                    date: workoutDate,
+                    routineName: session.workoutName,
+                    exercises: Object.values(session.exercises),
+                    duration: 45
+                });
+            });
+
+            importedWorkouts.sort((a, b) => a.date - b.date);
+
+            if (confirm('Replace existing workout history with imported data?\n\nClick OK to replace, Cancel to merge')) {
+                appData.workoutHistory = importedWorkouts;
+            } else {
+                appData.workoutHistory = [...appData.workoutHistory, ...importedWorkouts];
+            }
+            saveData();
+            alert(`✅ Successfully imported ${importedWorkouts.length} workouts from GymBook CSV!`);
+            location.reload();
+        }
+
+        function exportBackup() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'fitness4me_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // WORKOUT
+        // ============================================
+        function startWorkout() {
+            const routineId = document.getElementById('routine-select-home').value;
+            if (!routineId) { alert('Please select a routine'); return; }
             const routine = appData.routines.find(r => r.id === routineId);
             currentWorkout = {
                 routineId: routine.id,
@@ -979,8 +851,8 @@ npx cap add ios
                 startTime: Date.now(),
                 exercises: JSON.parse(JSON.stringify(routine.exercises))
             };
-
-            showSection('workout');
+            showSection('workout', {currentTarget: document.querySelector('.nav-item:nth-child(2)')});
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector('.nav-item:nth-child(2)').classList.add('active');
             renderActiveWorkout();
         }
@@ -991,24 +863,19 @@ npx cap add ios
                 document.getElementById('active-workout-container').style.display = 'none';
                 return;
             }
-
             document.getElementById('no-workout-message').style.display = 'none';
             document.getElementById('active-workout-container').style.display = 'block';
             document.getElementById('workout-title').textContent = currentWorkout.routineName;
-
             const exercisesDiv = document.getElementById('workout-exercises');
             exercisesDiv.innerHTML = '';
-
             currentWorkout.exercises.forEach((exercise, exIndex) => {
                 const exerciseCard = document.createElement('div');
                 exerciseCard.className = 'exercise-card';
-                
                 exerciseCard.innerHTML = `
                     <div class="exercise-header">
                         <div class="exercise-name">${exercise.name}</div>
                         <button class="btn btn-secondary" style="width: auto; padding: 8px 12px; font-size: 0.85rem;" onclick="addSet(${exIndex})">+ Set</button>
                     </div>
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
                         <div>
                             <label>Height:</label>
@@ -1025,54 +892,32 @@ npx cap add ios
                             </select>
                         </div>
                     </div>
-
                     <table>
                         <thead>
-                            <tr>
-                                <th>Set</th>
-                                <th>Plate</th>
-                                <th>Reps</th>
-                                <th>Mode</th>
-                                <th>Action</th>
-                            </tr>
+                            <tr><th>Set</th><th>Plate</th><th>Reps</th><th>Mode</th><th>Action</th></tr>
                         </thead>
                         <tbody>
                             ${exercise.sets.map((set, setIndex) => `
                                 <tr>
                                     <td>${setIndex + 1}</td>
-                                    <td>
-                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'plates', this.value)">
-                                            ${getPlateOptions(set.plates)}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'reps', this.value)">
-                                            ${getRepsOptions(set.reps)}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'mode', this.value)">
-                                            <option value="failure" ${set.mode === 'failure' ? 'selected' : ''}>Failure</option>
-                                            <option value="warmup" ${set.mode === 'warmup' ? 'selected' : ''}>Warmup</option>
-                                            <option value="target" ${set.mode === 'target' ? 'selected' : ''}>Target</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-danger" style="padding: 6px 10px; font-size: 0.8rem;" onclick="removeSet(${exIndex}, ${setIndex})">×</button>
-                                    </td>
+                                    <td><select onchange="updateSet(${exIndex}, ${setIndex}, 'plates', this.value)">${getPlateOptions(set.plates)}</select></td>
+                                    <td><select onchange="updateSet(${exIndex}, ${setIndex}, 'reps', this.value)">${getRepsOptions(set.reps)}</select></td>
+                                    <td><select onchange="updateSet(${exIndex}, ${setIndex}, 'mode', this.value)">
+                                        <option value="failure" ${set.mode === 'failure' ? 'selected' : ''}>Failure</option>
+                                        <option value="warmup" ${set.mode === 'warmup' ? 'selected' : ''}>Warmup</option>
+                                        <option value="target" ${set.mode === 'target' ? 'selected' : ''}>Target</option>
+                                    </select></td>
+                                    <td><button class="btn btn-danger" style="padding: 6px 10px; font-size: 0.8rem;" onclick="removeSet(${exIndex}, ${setIndex})">×</button></td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
-
                     <div style="margin-top: 12px;">
                         <label>Notes:</label>
                         <textarea rows="2" onchange="updateExerciseConfig(${exIndex}, 'notes', this.value)" placeholder="Add notes...">${exercise.notes || ''}</textarea>
                     </div>
-
                     <button class="btn btn-primary" style="margin-top: 12px;" onclick="logSet(${exIndex})">✓ Log Set & Start Rest Timer</button>
                 `;
-                
                 exercisesDiv.appendChild(exerciseCard);
             });
         }
@@ -1085,39 +930,28 @@ npx cap add ios
             }
             return opts;
         }
-
         function getPlateOptions(currentVal) {
             const valNum = Number(currentVal) || 1;
             let opts = '';
             for (let i = 1; i <= 25; i++) {
                 opts += `<option value="${i}" ${i === valNum ? 'selected' : ''}>${i}</option>`;
             }
-            if (valNum < 1 || valNum > 25 || !Number.isInteger(valNum)) {
-                opts += `<option value="${valNum}" selected>${valNum}</option>`;
-            }
             return opts;
         }
-
         function getRepsOptions(currentVal) {
             const valNum = Number(currentVal) || 10;
             let opts = '';
             for (let i = 1; i <= 100; i++) {
                 opts += `<option value="${i}" ${i === valNum ? 'selected' : ''}>${i}</option>`;
             }
-            if (valNum < 1 || valNum > 100 || !Number.isInteger(valNum)) {
-                opts += `<option value="${valNum}" selected>${valNum}</option>`;
-            }
             return opts;
         }
-
         function updateExerciseConfig(exIndex, field, value) {
             currentWorkout.exercises[exIndex][field] = value;
         }
-
         function updateSet(exIndex, setIndex, field, value) {
             currentWorkout.exercises[exIndex].sets[setIndex][field] = field === 'plates' || field === 'reps' ? Number(value) : value;
         }
-
         function addSet(exIndex) {
             const lastSet = currentWorkout.exercises[exIndex].sets[currentWorkout.exercises[exIndex].sets.length - 1];
             currentWorkout.exercises[exIndex].sets.push({
@@ -1127,24 +961,18 @@ npx cap add ios
             });
             renderActiveWorkout();
         }
-
         function removeSet(exIndex, setIndex) {
             if (currentWorkout.exercises[exIndex].sets.length > 1) {
                 currentWorkout.exercises[exIndex].sets.splice(setIndex, 1);
                 renderActiveWorkout();
             }
         }
-
         function logSet(exIndex) {
             startTimer();
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
-            }
+            if (navigator.vibrate) navigator.vibrate(100);
         }
-
         function finishWorkout() {
             if (!confirm('Finish this workout?')) return;
-
             const workoutRecord = {
                 id: 'workout_' + Date.now(),
                 date: currentWorkout.startTime,
@@ -1152,50 +980,40 @@ npx cap add ios
                 exercises: currentWorkout.exercises,
                 duration: Math.floor((Date.now() - currentWorkout.startTime) / 1000 / 60)
             };
-
             appData.workoutHistory.push(workoutRecord);
             saveData();
-
             currentWorkout = null;
             alert('✅ Workout completed! Duration: ' + workoutRecord.duration + ' minutes');
-            showSection('home');
+            showSection('home', {currentTarget: document.querySelector('.nav-item:first-child')});
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector('.nav-item:first-child').classList.add('active');
         }
 
         // ============================================
-        // REST TIMER
+        // TIMER
         // ============================================
-
         function startTimer() {
             timerSeconds = appData.restTimerDefault;
             updateTimerDisplay();
-            
             if (timerInterval) clearInterval(timerInterval);
-            
             timerInterval = setInterval(() => {
                 timerSeconds--;
                 updateTimerDisplay();
-                
                 if (timerSeconds <= 0) {
                     clearInterval(timerInterval);
-                    if (navigator.vibrate) {
-                        navigator.vibrate([200, 100, 200]);
-                    }
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                     alert('⏱️ Rest time complete!');
                 }
             }, 1000);
         }
-
         function resetTimer() {
             if (timerInterval) clearInterval(timerInterval);
             timerSeconds = appData.restTimerDefault;
             updateTimerDisplay();
         }
-
         function updateTimerDisplay() {
             document.getElementById('timer-display').textContent = timerSeconds;
         }
-
         function saveRestTimerDefault(value) {
             appData.restTimerDefault = Number(value);
             timerSeconds = Number(value);
@@ -1204,28 +1022,22 @@ npx cap add ios
         }
 
         // ============================================
-        // HISTORY SECTION
+        // HISTORY
         // ============================================
-
         function updateHistorySection() {
             const historyDiv = document.getElementById('workout-history');
-            
             if (appData.workoutHistory.length === 0) {
                 historyDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No workouts completed yet</p>';
                 return;
             }
-
             historyDiv.innerHTML = appData.workoutHistory.slice().reverse().map(workout => {
                 const date = new Date(workout.date).toLocaleDateString();
                 const duration = workout.duration || 0;
                 const exerciseCount = workout.exercises.length;
-                
                 return `
                     <div class="card" style="margin-bottom: 12px;">
                         <h3>${workout.routineName}</h3>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                            ${date} • ${duration} minutes • ${exerciseCount} exercises
-                        </p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">${date} • ${duration} minutes • ${exerciseCount} exercises</p>
                         <details style="margin-top: 8px;">
                             <summary style="cursor: pointer; color: var(--accent-info);">View Details</summary>
                             <div style="margin-top: 12px;">
@@ -1246,18 +1058,17 @@ npx cap add ios
         }
 
         // ============================================
-        // SETTINGS SECTION
+        // SETTINGS
         // ============================================
-
         function updateSettingsSection() {
             const routineSelect = document.getElementById('routine-select-edit');
             routineSelect.innerHTML = '<option value="">-- Select Routine --</option>';
             appData.routines.forEach(r => {
                 routineSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
             });
-
             document.getElementById('font-size-select').value = appData.fontSize;
             document.getElementById('rest-timer-default').value = appData.restTimerDefault;
+            document.getElementById('library-count').textContent = `${appData.exerciseLibrary.length} exercises in library`;
         }
 
         function changeFontSize(size) {
@@ -1268,18 +1079,21 @@ npx cap add ios
 
         function openRoutineEditor() {
             const routineId = document.getElementById('routine-select-edit').value;
-            if (!routineId) {
-                alert('Please select a routine');
-                return;
-            }
-
+            if (!routineId) { alert('Please select a routine'); return; }
             const routine = appData.routines.find(r => r.id === routineId);
-            const editorContent = document.getElementById('routine-editor-content');
-            
+            const editorContent = document.getElementById('modal-content');
+            document.getElementById('modal-title').textContent = 'Edit Routine';
+
+            // Build exercise library dropdown options
+            const libraryOptions = appData.exerciseLibrary.length > 0
+                ? `<optgroup label="📚 From Exercise Library">
+                    ${appData.exerciseLibrary.map(ex => `<option value="${ex.name}">${ex.name}</option>`).join('')}
+                   </optgroup>`
+                : '';
+
             editorContent.innerHTML = `
                 <label>Routine Name:</label>
                 <input type="text" id="edit-routine-name" value="${routine.name}">
-                
                 <h3>Exercises</h3>
                 <div id="edit-exercises-list">
                     ${routine.exercises.map((ex, i) => `
@@ -1289,12 +1103,61 @@ npx cap add ios
                         </div>
                     `).join('')}
                 </div>
-                
-                <button class="btn btn-secondary" onclick="addExercise('${routineId}')">+ Add Exercise</button>
+                <h3>+ Add Exercise</h3>
+                <select id="new-exercise-select">
+                    <option value="">-- Select from library or type custom --</option>
+                    ${libraryOptions}
+                    <option value="__custom__">✏️ Type custom exercise name...</option>
+                </select>
+                <input type="text" id="custom-exercise-name" placeholder="Custom exercise name" style="display: none;">
+                <button class="btn btn-secondary" onclick="addExerciseFromLibrary('${routineId}')">+ Add Selected Exercise</button>
                 <button class="btn btn-primary" onclick="saveRoutineEdits('${routineId}')">Save Changes</button>
             `;
 
+            // Handle dropdown change to show/hide custom input
+            setTimeout(() => {
+                const select = document.getElementById('new-exercise-select');
+                const customInput = document.getElementById('custom-exercise-name');
+                if (select && customInput) {
+                    select.addEventListener('change', function() {
+                        customInput.style.display = this.value === '__custom__' ? 'block' : 'none';
+                        if (this.value === '__custom__') customInput.focus();
+                    });
+                }
+            }, 100);
+
             document.getElementById('routine-editor-modal').classList.add('active');
+        }
+
+        function addExerciseFromLibrary(routineId) {
+            const select = document.getElementById('new-exercise-select');
+            const customInput = document.getElementById('custom-exercise-name');
+            let exerciseName = select.value;
+
+            if (exerciseName === '__custom__') {
+                exerciseName = customInput.value.trim();
+                if (!exerciseName) { alert('Please enter a custom exercise name'); return; }
+            } else if (!exerciseName) {
+                alert('Please select an exercise');
+                return;
+            }
+
+            const routine = appData.routines.find(r => r.id === routineId);
+
+            // Look up in library for default notes
+            const libExercise = appData.exerciseLibrary.find(e => e.name === exerciseName);
+            const defaultNotes = libExercise ? libExercise.notes : '';
+
+            routine.exercises.push({
+                id: 'ex_' + Date.now(),
+                name: exerciseName,
+                sets: [{plates: 5, reps: 10, mode: 'failure'}],
+                pulleyHeight: 15,
+                pulleyUsage: 'both',
+                notes: defaultNotes
+            });
+            saveData();
+            openRoutineEditor(); // Refresh
         }
 
         function updateExerciseName(routineId, exIndex, name) {
@@ -1302,7 +1165,6 @@ npx cap add ios
             routine.exercises[exIndex].name = name;
             saveData();
         }
-
         function removeExercise(routineId, exIndex) {
             if (!confirm('Remove this exercise?')) return;
             const routine = appData.routines.find(r => r.id === routineId);
@@ -1310,21 +1172,6 @@ npx cap add ios
             saveData();
             openRoutineEditor();
         }
-
-        function addExercise(routineId) {
-            const routine = appData.routines.find(r => r.id === routineId);
-            routine.exercises.push({
-                id: 'ex_' + Date.now(),
-                name: 'New Exercise',
-                sets: [{plates: 5, reps: 10, mode: 'failure'}],
-                pulleyHeight: 15,
-                pulleyUsage: 'both',
-                notes: ''
-            });
-            saveData();
-            openRoutineEditor();
-        }
-
         function saveRoutineEdits(routineId) {
             const routine = appData.routines.find(r => r.id === routineId);
             routine.name = document.getElementById('edit-routine-name').value;
@@ -1332,250 +1179,36 @@ npx cap add ios
             closeModal();
             alert('✅ Routine saved!');
         }
-
         function createNewRoutine() {
             const name = prompt('Enter routine name:');
             if (!name) return;
-
-            appData.routines.push({
-                id: 'routine_' + Date.now(),
-                name: name,
-                exercises: []
-            });
+            appData.routines.push({ id: 'routine_' + Date.now(), name: name, exercises: [] });
             saveData();
+            updateSettingsSection();
             alert('✅ Routine created!');
         }
-
         function closeModal() {
             document.getElementById('routine-editor-modal').classList.remove('active');
         }
-// ============================================
-// DATA EXPORT/IMPORT
-// ============================================
-
-function exportBackup() {
-    const dataStr = JSON.stringify(appData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'fitness4me_backup_' + new Date().toISOString().split('T')[0] + '.json';
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
-function importBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const fileName = file.name.toLowerCase();
-    const isCSV = fileName.endsWith('.csv');
-    const isJSON = fileName.endsWith('.json');
-
-    if (!isCSV && !isJSON) {
-        alert('❌ Please select a JSON or CSV file');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            if (isJSON) {
-                // Import JSON backup
-                const data = JSON.parse(e.target.result);
-                appData = data;
-                saveData();
-                alert('✅ JSON backup imported successfully!');
-                location.reload();
-            } else if (isCSV) {
-                // Import GymBook CSV
-                importGymBookCSV(e.target.result);
-            }
-        } catch (error) {
-            alert('❌ Error importing file: ' + error.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-function importGymBookCSV(csvText) {
-    try {
-        const lines = csvText.split('\n').filter(line => line.trim());
-        if (lines.length < 2) {
-            alert('❌ CSV file is empty or invalid');
-            return;
-        }
-
-        // Skip header line
-        const dataLines = lines.slice(1);
-        
-        // Group by workout session (date + workout name + time)
-        const workoutSessions = {};
-        
-        dataLines.forEach(line => {
-            const columns = parseCSVLine(line);
-            if (columns.length < 11) return;
-            
-            const [date, workoutName, time, exerciseName, region, primaryMuscles, secondaryMuscles, setType, repsText, weightText, notes, skipped] = columns;
-            
-            // Create unique workout key
-            const workoutKey = `${date}_${workoutName}_${time}`;
-            
-            if (!workoutSessions[workoutKey]) {
-                workoutSessions[workoutKey] = {
-                    date: date,
-                    workoutName: workoutName,
-                    time: time,
-                    exercises: {}
-                };
-            }
-            
-            const session = workoutSessions[workoutKey];
-            
-            if (!session.exercises[exerciseName]) {
-                session.exercises[exerciseName] = {
-                    name: exerciseName,
-                    sets: [],
-                    notes: notes || ''
-                };
-            }
-            
-            // Parse repetitions
-            const repsMatch = repsText.match(/(\d+)/);
-            const reps = repsMatch ? parseInt(repsMatch[1]) : 0;
-            
-            // Parse weight (handle European decimal format: "1,00 kg" -> 1.00)
-            const weightMatch = weightText.match(/([\d,]+)/);
-            let weight = 0;
-            if (weightMatch) {
-                weight = parseFloat(weightMatch[1].replace(',', '.'));
-            }
-            
-            // Determine set mode
-            let mode = 'failure';
-            if (setType.toLowerCase().includes('warm')) {
-                mode = 'warmup';
-            }
-            
-            // Skip if marked as skipped
-            if (skipped && skipped.toLowerCase() === 'yes') {
-                return;
-            }
-            
-            // Add set (using weight as "plates" for simplicity, or you could map it differently)
-            session.exercises[exerciseName].sets.push({
-                plates: Math.round(weight), // Convert kg to plate number (you may want to adjust this mapping)
-                reps: reps,
-                mode: mode
-            });
-        });
-        
-        // Convert workout sessions to app format
-        const importedWorkouts = [];
-        Object.values(workoutSessions).forEach(session => {
-            // Parse date (DD.MM.YY format)
-            const dateParts = session.date.split('.');
-            const day = parseInt(dateParts[0]);
-            const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
-            const year = parseInt(dateParts[2]) + 2000; // Convert YY to YYYY
-            const workoutDate = new Date(year, month, day).getTime();
-            
-            // Parse time to calculate duration (simplified)
-            const timeParts = session.time.split(':');
-            const startHour = parseInt(timeParts[0]);
-            const startMinute = parseInt(timeParts[1]);
-            
-            const workout = {
-                id: 'workout_' + workoutDate,
-                date: workoutDate,
-                routineName: session.workoutName,
-                exercises: Object.values(session.exercises),
-                duration: 45 // Default duration, you could calculate from actual times
-            };
-            
-            importedWorkouts.push(workout);
-        });
-        
-        // Sort by date
-        importedWorkouts.sort((a, b) => a.date - b.date);
-        
-        // Add to existing history or replace
-        if (confirm('Replace existing workout history with imported data?\n\nClick OK to replace, Cancel to merge')) {
-            appData.workoutHistory = importedWorkouts;
-        } else {
-            appData.workoutHistory = [...appData.workoutHistory, ...importedWorkouts];
-        }
-        
-        saveData();
-        alert(`✅ Successfully imported ${importedWorkouts.length} workouts from GymBook CSV!`);
-        location.reload();
-        
-    } catch (error) {
-        alert('❌ Error parsing CSV: ' + error.message);
-        console.error(error);
-    }
-}
-
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
-    
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            result.push(current.trim());
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    result.push(current.trim());
-    
-    return result;
-}
-        // ============================================
-        // GOOGLE DRIVE SYNC (Placeholder)
-        // ============================================
-
-        function signInGoogle() {
-            alert('Google Drive integration requires OAuth setup. See documentation for details.');
-        }
-
-        function syncToGoogleDrive() {
-            alert('Google Drive sync not configured. Please set up OAuth credentials first.');
-        }
-
-        // ============================================
-        // PROFILE MANAGEMENT
-        // ============================================
-
         function addNewProfile() {
             const name = prompt('Enter profile name:');
             if (!name) return;
-
             appData.profiles.push(name.toLowerCase().replace(/\s+/g, '_'));
             saveData();
-            
             const profileSelect = document.getElementById('profile-select');
             profileSelect.innerHTML += `<option value="${name.toLowerCase().replace(/\s+/g, '_')}">${name}</option>`;
             alert('✅ Profile created!');
         }
 
         // ============================================
-        // INITIALIZATION
+        // INIT
         // ============================================
-
         window.onload = function() {
             loadData();
             document.body.style.fontSize = appData.fontSize + 'px';
             timerSeconds = appData.restTimerDefault;
             updateTimerDisplay();
             updateHomeSection();
-            checkURLParameters(); // Check for iOS Shortcut data
         };
     </script>
 </body>
