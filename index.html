@@ -1,372 +1,1429 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CryptoAnalyst - Executive Intelligence Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            amber: { 500: '#f59e0b', 600: '#d97706' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness4Me Heavy Duty & Cardio</title>
+    <style>
+        /* --- FITNESS4ME HEAVY DUTY UI UPGRADE --- */
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-card: #1a1a1a;
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent-intensity: #ff3b30;
+            --accent-recovery: #30d158;
+            --accent-info: #0a84ff;
+            --border-color: #2c2c2e;
         }
-      }
-    }
-  </script>
-  <style>
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-  </style>
-</head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Header / Navigation -->
-  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
-      <div class="flex items-center space-x-2">
-        <span class="text-xl">📈</span>
-        <h1 class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">CryptoAnalyst Intel (Institutional Edition)</h1>
-      </div>
-      
-      <div class="flex items-center space-x-2">
-        <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-          <span id="theme-icon">🌙 Dark</span>
-        </button>
-        <button onclick="openSettingsModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-          ⚙️ Settings
-        </button>
-      </div>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Card Layout */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        select, input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-info);
+        }
+
+        /* Monospaced Numbers */
+        .data-value, input[type="number"] {
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--accent-info);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0073e6;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--accent-intensity);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--accent-recovery);
+            color: white;
+        }
+
+        /* Recovery Badge */
+        .recovery-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .recovery-ready {
+            background: rgba(48, 209, 88, 0.2);
+            color: var(--accent-recovery);
+            border: 1px solid var(--accent-recovery);
+        }
+
+        .recovery-warning {
+            background: rgba(255, 59, 48, 0.2);
+            color: var(--accent-intensity);
+            border: 1px solid var(--accent-intensity);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-primary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-size: 0.95rem;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-info);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            display: block;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Rest Timer */
+        .rest-timer {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            color: var(--accent-info);
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+        }
+
+        .status-dot.green {
+            background: var(--accent-recovery);
+        }
+
+        .status-dot.red {
+            background: var(--accent-intensity);
+        }
+
+        .status-dot.blue {
+            background: var(--accent-info);
+        }
+
+        /* Apple Health Section */
+        .health-import-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2e 100%);
+            border: 2px solid var(--accent-info);
+        }
+
+        .health-info {
+            background: rgba(10, 132, 255, 0.1);
+            border-left: 4px solid var(--accent-info);
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .health-info a {
+            color: var(--accent-info);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Exercise Card */
+        .exercise-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .exercise-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 1fr 80px;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .set-row select, .set-row input {
+            margin-bottom: 0;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .set-row {
+                grid-template-columns: 40px 1fr 1fr 1fr 60px;
+                gap: 4px;
+            }
+
+            .set-row select, .set-row input {
+                padding: 6px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-info);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️ Fitness4Me Heavy Duty & Cardio</h1>
+
+        <!-- HOME SECTION -->
+        <div id="home-section" class="section active">
+            <!-- Rest Timer -->
+            <div class="card">
+                <h2>⏱️ Rest Timer</h2>
+                <div class="rest-timer">
+                    <div class="timer-display" id="timer-display">45</div>
+                    <div style="margin-top: 12px;">
+                        <button class="btn btn-primary" onclick="startTimer()">Start Timer</button>
+                        <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mike Mentzer Recovery Advisor -->
+            <div class="card">
+                <h2>🧠 Mike Mentzer Recovery Advisor</h2>
+                <div id="recovery-status">
+                    <div class="recovery-badge recovery-ready">🟢 Fully Recovered</div>
+                    <p>Ready for maximum intensity failure sets.</p>
+                    <p><strong>Last Trained:</strong> <span id="last-trained">Never</span></p>
+                </div>
+            </div>
+
+            <!-- Apple Health Integration -->
+            <div class="card health-import-section">
+                <h2>🍎 Apple Health Integration</h2>
+                <div class="status-indicator">
+                    <div class="status-dot" id="health-status-dot"></div>
+                    <span id="health-status-text">Not Connected</span>
+                </div>
+                
+                <div class="health-info">
+                    <strong>How to connect Apple Health:</strong><br>
+                    <strong>Method 1:</strong> Use <a href="https://apps.apple.com/app/health-auto-export-json-csv/id1115567461" target="_blank">Health Auto Export</a> app to export HRV/Sleep data as JSON, then import below.<br><br>
+                    <strong>Method 2:</strong> Create an iOS Shortcut that sends data via URL parameters (see Settings for instructions).
+                </div>
+
+                <label>Import Apple Health JSON File:</label>
+                <input type="file" id="health-file-input" accept=".json" onchange="importHealthData(event)">
+                
+                <label>Or Enter Data Manually:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label>HRV (ms):</label>
+                        <input type="number" id="manual-hrv" placeholder="e.g., 65">
+                    </div>
+                    <div>
+                        <label>Sleep (hours):</label>
+                        <input type="number" id="manual-sleep" placeholder="e.g., 7.5" step="0.1">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveManualHealthData()">Save Health Data</button>
+            </div>
+
+            <!-- Start Workout -->
+            <div class="card">
+                <h2>🚀 Start Today's Workout</h2>
+                <label>Select Routine:</label>
+                <select id="routine-select-home">
+                    <option value="">-- Select Routine --</option>
+                </select>
+                <button class="btn btn-success" onclick="startWorkout()">Start Workout</button>
+            </div>
+
+            <!-- Strength Analytics -->
+            <div class="card">
+                <h2>📈 Strength Analytics & Trajectory</h2>
+                <label>Select Exercise:</label>
+                <select id="analytics-exercise-select">
+                    <option value="">-- Select Exercise --</option>
+                </select>
+                <div id="analytics-chart" style="margin-top: 16px;">
+                    <p style="color: var(--text-secondary); text-align: center;">Select an exercise to view analytics</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- WORKOUT SECTION -->
+        <div id="workout-section" class="section">
+            <div id="no-workout-message" class="card">
+                <h2>No Active Workout</h2>
+                <p>Go to Home and select a routine to start.</p>
+                <button class="btn btn-primary" onclick="showSection('home')">Go to Home</button>
+            </div>
+
+            <div id="active-workout-container" style="display: none;">
+                <div class="card">
+                    <h2 id="workout-title">Workout</h2>
+                    <div id="workout-exercises"></div>
+                    <button class="btn btn-success" onclick="finishWorkout()">Finish Workout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY SECTION -->
+        <div id="history-section" class="section">
+            <div class="card">
+                <h2>📊 Completed Workouts History</h2>
+                <div id="workout-history">
+                    <p style="color: var(--text-secondary); text-align: center;">No workouts completed yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS SECTION -->
+        <div id="settings-section" class="section">
+            <!-- Routine Customizer -->
+            <div class="card">
+                <h2>⚙️ Routine & Exercise Customizer</h2>
+                <p>Rename workouts, add/remove/reorder exercises, and configure pulley & bench setups.</p>
+                <label>Select Routine to Edit:</label>
+                <select id="routine-select-edit">
+                    <option value="">-- Select Routine --</option>
+                </select>
+                <button class="btn btn-primary" onclick="openRoutineEditor()">Edit Routine</button>
+                <button class="btn btn-secondary" onclick="createNewRoutine()">+ Create New Routine</button>
+            </div>
+
+            <!-- Display Settings -->
+            <div class="card">
+                <h2>🔠 Display & Font Size</h2>
+                <label>Choose Font Size:</label>
+                <select id="font-size-select" onchange="changeFontSize(this.value)">
+                    <option value="14">Compact (14px)</option>
+                    <option value="16" selected>Normal (16px)</option>
+                    <option value="18">Large (18px)</option>
+                    <option value="20">Extra Large (20px)</option>
+                </select>
+            </div>
+
+            <!-- Data Backup -->
+            <div class="card">
+                <h2>💾 Local Data & Backup Migration</h2>
+                <p>Export or restore complete workout logs and historical snapshots.</p>
+                <button class="btn btn-primary" onclick="exportBackup()">📥 Export JSON Backup File</button>
+                <label>Import / Restore JSON Backup or GymBook CSV File:</label>
+                <input type="file" id="import-file-input" accept=".json,.csv" onchange="importBackup(event)">
+            </div>
+
+            <!-- Google Drive Sync -->
+            <div class="card">
+                <h2>☁️ Google Drive Cloud Sync</h2>
+                <label>Google Cloud OAuth Client ID:</label>
+                <input type="text" id="google-client-id" placeholder="Enter your Google Client ID">
+                <div class="status-indicator">
+                    <div class="status-dot" id="google-status-dot"></div>
+                    <span id="google-status-text">Not Connected</span>
+                </div>
+                <button class="btn btn-primary" onclick="signInGoogle()">🔐 Sign In with Google</button>
+                <button class="btn btn-secondary" onclick="syncToGoogleDrive()">☁️ Sync Backup to Google Drive Now</button>
+            </div>
+
+            <!-- Rest Timer Settings -->
+            <div class="card">
+                <h2>⏱️ Rest Timer Default (Seconds)</h2>
+                <select id="rest-timer-default" onchange="saveRestTimerDefault(this.value)">
+                    <option value="30">30 seconds</option>
+                    <option value="45" selected>45 seconds</option>
+                    <option value="60">60 seconds</option>
+                    <option value="90">90 seconds</option>
+                    <option value="120">120 seconds</option>
+                </select>
+            </div>
+
+            <!-- Profile Management -->
+            <div class="card">
+                <h2>👤 Profile Management</h2>
+                <label>Active Profile:</label>
+                <select id="profile-select">
+                    <option value="default">Default Profile</option>
+                </select>
+                <button class="btn btn-secondary" onclick="addNewProfile()">Add New Profile</button>
+            </div>
+
+            <!-- Apple Health Setup Instructions -->
+            <div class="card">
+                <h2>🍎 Apple Health Setup Instructions</h2>
+                
+                <h3>Method 1: Health Auto Export (Recommended)</h3>
+                <ol style="color: var(--text-secondary); line-height: 1.8;">
+                    <li>Download <a href="https://apps.apple.com/app/health-auto-export-json-csv/id1115567461" target="_blank" style="color: var(--accent-info);">Health Auto Export</a> from the App Store</li>
+                    <li>Open the app and grant Health permissions</li>
+                    <li>Go to "Automations" → "Create New"</li>
+                    <li>Select metrics: HRV, Sleep Analysis</li>
+                    <li>Set export format to "JSON"</li>
+                    <li>Choose export location: iCloud Drive or Dropbox</li>
+                    <li>Set automation to run daily or on-demand</li>
+                    <li>In Fitness4Me, tap "Import Apple Health JSON File" and select the exported file</li>
+                </ol>
+
+                <h3>Method 2: iOS Shortcut (Advanced)</h3>
+                <ol style="color: var(--text-secondary); line-height: 1.8;">
+                    <li>Open the <strong>Shortcuts</strong> app on your iPhone</li>
+                    <li>Tap "+" to create a new shortcut</li>
+                    <li>Name it "Sync to Fitness4Me"</li>
+                    <li>Add action: <strong>Find Health Samples</strong></li>
+                    <li>Configure for HRV (most recent) and Sleep (last night)</li>
+                    <li>Add action: <strong>Get Dictionary Value</strong> for each metric</li>
+                    <li>Add action: <strong>Text</strong> with format: <code>https://your-domain.com/fitness4me?hrv=[HRV]&sleep=[Sleep]</code></li>
+                    <li>Add action: <strong>Open URL</strong></li>
+                    <li>Save and add to your Home Screen or Apple Watch face</li>
+                    <li>Tap the shortcut to automatically sync your data</li>
+                </ol>
+
+                <h3>Method 3: Native App Wrapper (Developer)</h3>
+                <p style="color: var(--text-secondary);">
+                    For true HealthKit integration, wrap this web app using <a href="https://capacitorjs.com" target="_blank" style="color: var(--accent-info);">CapacitorJS</a>:
+                </p>
+                <pre style="background: var(--bg-primary); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; color: var(--text-secondary);">
+npm install @capacitor/core @capacitor/ios
+npx cap init
+npm install @capacitor/health
+npx cap add ios
+                </pre>
+            </div>
+        </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="max-w-6xl mx-auto px-4 flex space-x-2 border-t border-slate-100 dark:border-slate-700/50 pt-2 pb-2 overflow-x-auto">
-      <button data-tab="dashboard" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-900 transition">Dashboard & MVRV</button>
-      <button data-tab="report" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Market Analyst Advisor Report</button>
-      <button data-tab="manager" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Asset Manager</button>
-      <button data-tab="history" class="nav-btn px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Feedback Telemetry</button>
-    </nav>
-  </header>
-
-  <!-- Main Content Area -->
-  <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
-
-    <!-- TAB 1: DASHBOARD & MVRV VALUATION -->
-    <section id="dashboard" class="tab-content active space-y-6">
-      <div class="flex justify-between items-center bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
-        <div>
-          <h2 class="text-base font-bold text-slate-900 dark:text-white">🔍 MVRV Ratio & Electrical Cost Floor Active</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">MVRV &lt; 1.2 signals significant undervaluation and historical market bottoms. Electrical cost model establishes thermodynamic miner floor.</p>
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-item active" onclick="showSection('home')">
+            <span class="nav-icon">🏠</span>
+            <div class="nav-label">Home</div>
         </div>
-        <button onclick="switchTab('manager')" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow transition whitespace-nowrap">
-          + Onboard Asset
-        </button>
-      </div>
+        <div class="nav-item" onclick="showSection('workout')">
+            <span class="nav-icon">💪</span>
+            <div class="nav-label">Workout</div>
+        </div>
+        <div class="nav-item" onclick="showSection('history')">
+            <span class="nav-icon">📊</span>
+            <div class="nav-label">History</div>
+        </div>
+        <div class="nav-item" onclick="showSection('settings')">
+            <span class="nav-icon">⚙️</span>
+            <div class="nav-label">Settings</div>
+        </div>
+    </div>
 
-      <div id="assets-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </section>
+    <!-- Modal for Routine Editor -->
+    <div id="routine-editor-modal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Routine</h2>
+            <div id="routine-editor-content"></div>
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
 
-    <!-- TAB 2: MARKET ANALYST ADVISOR REPORT -->
-    <section id="report" class="tab-content space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+    <script>
+        // ============================================
+        // DATA MANAGEMENT
+        // ============================================
         
-        <div class="border-b border-slate-200 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
-              <span>🏛️</span><span>Market Analyst Advisor Report // Director’s Desk</span>
-            </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Senior Investment Director Memorandum & Thermodynamic Valuation Suite</p>
-          </div>
-          <span class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[11px] font-bold rounded-lg">Master Report v5.2</span>
-        </div>
+        let appData = {
+            routines: [],
+            workoutHistory: [],
+            profiles: ['default'],
+            activeProfile: 'default',
+            restTimerDefault: 45,
+            healthData: {
+                hrv: null,
+                sleep: null,
+                lastUpdated: null
+            },
+            fontSize: 16
+        };
 
-        <div class="space-y-4 text-xs">
-          
-          <!-- BTC -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900 dark:text-white text-sm">1. Bitcoin (BTC) — Macro Anchor & Energy Floor</span>
-              <span class="text-emerald-500 font-bold">MVRV: 1.15 (Significantly Undervalued — Bottom Signal)</span>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio sits at 1.15 (&lt; 1.2 threshold), historically signaling a macro market bottom and high-conviction buying opportunity. The Bitcoin electrical cost floor (~$68,500) and STH cost basis (~$76,150) provide robust thermodynamic support against macro friction.</p>
-            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Coiling for a test of $85,000–$86,500 resistance. Sustained ETF net inflows and fundamental undervaluation support upside continuation toward $93,350.</p>
-          </div>
+        let currentWorkout = null;
+        let timerInterval = null;
+        let timerSeconds = 45;
 
-          <!-- ETH -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900 dark:text-white text-sm">2. Ethereum (ETH) — Settlement Layer</span>
-              <span class="text-blue-500 font-bold">MVRV: 1.65 (Fairly Valued)</span>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.65 reflects balanced equilibrium within the 1.2–2.4 accumulation band. Whale netflows show steady exchange withdrawals above reclaimed 100 MWA (~$2,530).</p>
-            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Defending 50 MWA pivot (~$2,640). Rotation back into infrastructure drives path of least resistance toward $2,780–$2,950.</p>
-          </div>
-
-          <!-- SOL -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900 dark:text-white text-sm">3. Solana (SOL) — High-Beta Momentum</span>
-              <span class="text-amber-500 font-bold">MVRV: 2.10 (Fairly Valued / Upper Bound)</span>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 2.10 approaches upper fair value thresholds. High-beta outperformance with elevated Open Interest Z-scores warrants tactical risk controls.</p>
-            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Structural trend robust above $105–$109 50 MWA zone; take tactical profits on overbought RSI extensions while keeping dry powder for dips.</p>
-          </div>
-
-          <!-- XRP -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900 dark:text-white text-sm">4. XRP (XRP) — Cross-Border Settlement</span>
-              <span class="text-blue-500 font-bold">MVRV: 1.85 (Fairly Valued)</span>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.85 indicates healthy equilibrium. Backed by genuine spot volume velocity and cross-border liquidity channels holding above 50 MWA (~$1.41).</p>
-            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Momentum favored toward $1.75 macro resistance node with disciplined trailing stops anchored beneath immediate support.</p>
-          </div>
-
-          <!-- ONDO -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900 dark:text-white text-sm">5. Ondo (ONDO) — RWA Pioneer</span>
-              <span class="text-blue-500 font-bold">MVRV: 1.40 (Fairly Valued / Accumulation)</span>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300"><strong>Valuation Framework:</strong> MVRV ratio at 1.40 rests comfortably in the accumulation corridor. Healthy horizontal base following broader RWA sector consolidation.</p>
-            <p class="text-amber-600 dark:text-amber-400 font-semibold">Outlook: Primed for rotational catch-up play targeting $0.62 psychological resistance and medium-term expansion ceiling above $1.00.</p>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 3: UNIVERSAL ASSET MANAGER -->
-    <section id="manager" class="tab-content space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Universal Asset Onboarding Protocol</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Add any asset to dynamically provision MVRV valuation, electrical cost floors, and technical indicators.</p>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2">
-          <input type="text" id="new-ticker" placeholder="Ticker (e.g. AVAX)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 uppercase font-mono" />
-          <input type="number" id="new-mcap" placeholder="Market Cap ($B)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono" />
-          <input type="number" step="0.05" id="new-mvrv" placeholder="MVRV Ratio" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono" />
-          <button onclick="registerCustomAsset()" class="py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-lg shadow transition">
-            Register Asset
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tracked Watchlist Registry</h3>
-        <div id="watchlist-registry-container" class="space-y-2 text-xs"></div>
-      </div>
-    </section>
-
-    <!-- TAB 4: FEEDBACK TELEMETRY HISTORY -->
-    <section id="history" class="tab-content space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Self-Improving Feedback & MVRV Telemetry</h2>
-        <button onclick="clearTelemetryHistory()" class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold text-xs rounded-lg hover:bg-red-200">
-          Clear Telemetry Logs
-        </button>
-      </div>
-      <div id="telemetry-history-container" class="space-y-4"></div>
-    </section>
-
-  </main>
-
-  <script>
-    const defaultAssets = [
-      { ticker: 'BTC', name: 'Bitcoin', price: 85478.23, class: 'Macro Anchor', alpha: 0.08, mvrv: 1.15, electrical_cost: 68500, rsi: 64.5, mwa50: 'Bullish', outlook: 'MVRV < 1.2 signaling market bottom / strong buy.' },
-      { ticker: 'ETH', name: 'Ethereum', price: 2781.40, class: 'Macro Anchor', alpha: 0.08, mvrv: 1.65, rsi: 67.8, mwa50: 'Bullish', outlook: 'Fairly valued; holding 100 MWA support.' },
-      { ticker: 'SOL', name: 'Solana', price: 118.82, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 2.10, rsi: 73.5, mwa50: 'Strongly Bullish', outlook: 'Fairly valued with high-beta momentum.' },
-      { ticker: 'XRP', name: 'XRP', price: 1.5586, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 1.85, rsi: 66.8, mwa50: 'Bullish', outlook: 'Structural breakout toward $1.75.' },
-      { ticker: 'ONDO', name: 'Ondo Finance', price: 0.584, class: 'High-Beta Altcoin', alpha: 0.12, mvrv: 1.40, rsi: 58.2, mwa50: 'Consolidating', outlook: 'Accumulation phase for RWA rotation.' }
-    ];
-
-    function getValuationStatus(mvrv) {
-      if (mvrv < 1.2) return { text: 'Significantly Undervalued (Bottom Signal)', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
-      if (mvrv <= 2.4) return { text: 'Fairly Valued (Neutral)', class: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
-      return { text: 'Overvalued (Euphoria)', class: 'bg-red-500/10 text-red-400 border-red-500/30' };
-    }
-
-    function initTheme() {
-      const theme = localStorage.getItem('theme') || 'dark';
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.getElementById('theme-icon').innerText = '☀️ Light';
-      } else {
-        document.documentElement.classList.add('dark');
-        document.getElementById('theme-icon').innerText = '🌙 Dark';
-      }
-    }
-
-    function toggleTheme() {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-        document.getElementById('theme-icon').innerText = '☀️ Light';
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        document.getElementById('theme-icon').innerText = '🌙 Dark';
-      }
-    }
-
-    function getWatchlist() {
-      const stored = localStorage.getItem('crypto_watchlist_institutional');
-      return stored ? JSON.parse(stored) : defaultAssets;
-    }
-
-    function saveWatchlist(list) {
-      localStorage.setItem('crypto_watchlist_institutional', JSON.stringify(list));
-    }
-
-    function renderDashboard() {
-      const assets = getWatchlist();
-      const container = document.getElementById('assets-grid-container');
-      
-      container.innerHTML = assets.map(a => {
-        const val = getValuationStatus(a.mvrv);
-        return `
-          <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-3">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-xs font-bold text-amber-500 font-mono">${a.ticker}</span>
-                <h3 class="font-extrabold text-lg text-slate-900 dark:text-white">${a.name || a.ticker}</h3>
-              </div>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.class === 'Macro Anchor' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30' : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'}">${a.class}</span>
-            </div>
-
-            <div class="p-2.5 rounded-lg border ${val.class} flex justify-between items-center text-xs font-mono">
-              <span>MVRV Ratio: <strong>${a.mvrv}</strong></span>
-              <span class="font-bold">${val.text}</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100 dark:border-slate-700/60 font-mono">
-              <div><span class="text-slate-400">Spot:</span> <span class="font-bold text-slate-900 dark:text-white">$${a.price}</span></div>
-              <div><span class="text-slate-400">Alpha (α):</span> <span class="font-bold text-amber-500">${a.alpha}</span></div>
-              <div><span class="text-slate-400">RSI (14d):</span> <span class="${a.rsi > 70 ? 'text-red-400 font-bold' : 'text-emerald-400'}">${a.rsi}</span></div>
-              ${a.electrical_cost ? `<div><span class="text-slate-400">Energy Floor:</span> <span class="text-emerald-400 font-bold">$${a.electrical_cost}</span></div>` : `<div><span class="text-slate-400">50 MWA:</span> <span class="text-emerald-400">${a.mwa50}</span></div>`}
-            </div>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400 italic">${a.outlook || 'Active monitoring...'}</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderWatchlistRegistry() {
-      const assets = getWatchlist();
-      const container = document.getElementById('watchlist-registry-container');
-      
-      container.innerHTML = assets.map(a => `
-        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-700 font-mono">
-          <div>
-            <span class="font-bold text-amber-500 text-sm">${a.ticker}</span>
-            <span class="text-slate-400 text-xs ml-2">MVRV: ${a.mvrv}</span>
-          </div>
-          <div class="flex items-center space-x-3">
-            <button onclick="removeAsset('${a.ticker}')" class="text-red-500 hover:underline font-bold">Remove</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function registerCustomAsset() {
-      const ticker = document.getElementById('new-ticker').value.trim().toUpperCase();
-      const mcap = parseFloat(document.getElementById('new-mcap').value) || 10;
-      const mvrv = parseFloat(document.getElementById('new-mvrv').value) || 1.4;
-
-      if (!ticker) { alert('Please enter a valid ticker'); return; }
-
-      const list = getWatchlist();
-      if (list.find(a => a.ticker === ticker)) { alert('Asset already registered'); return; }
-
-      const isMacro = mcap >= 50;
-      list.push({
-        ticker: ticker,
-        name: ticker,
-        price: 1.00,
-        class: isMacro ? 'Macro Anchor' : 'High-Beta Altcoin',
-        alpha: isMacro ? 0.08 : 0.12,
-        mvrv: mvrv,
-        rsi: 50.0,
-        mwa50: 'Active',
-        outlook: mvrv < 1.2 ? 'Significantly Undervalued (Bottom Signal)' : 'Fairly Valued'
-      });
-
-      saveWatchlist(list);
-      document.getElementById('new-ticker').value = '';
-      document.getElementById('new-mcap').value = '';
-      document.getElementById('new-mvrv').value = '';
-      renderDashboard();
-      renderWatchlistRegistry();
-      alert(`Asset ${ticker} successfully onboarded with MVRV ${mvrv}!`);
-    }
-
-    function removeAsset(ticker) {
-      let list = getWatchlist().filter(a => a.ticker !== ticker);
-      saveWatchlist(list);
-      renderDashboard();
-      renderWatchlistRegistry();
-    }
-
-    function renderTelemetryHistory() {
-      const history = [
-        { timestamp: new Date().toISOString(), ticker: 'BTC', timeframe: '24h', mvrv: 1.15, valuation: 'Undervalued (Bottom Signal)', accuracy: 99.49, adj: 0.0004 },
-        { timestamp: new Date().toISOString(), ticker: 'ETH', timeframe: '24h', mvrv: 1.65, valuation: 'Fairly Valued', accuracy: 99.18, adj: 0.0007 }
-      ];
-      const container = document.getElementById('telemetry-history-container');
-
-      container.innerHTML = history.map(h => `
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 shadow-sm font-mono text-xs">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-2">
-            <span class="font-bold text-amber-500">${h.ticker} (${h.timeframe}) — MVRV: ${h.mvrv}</span>
-            <span class="text-slate-400 text-[10px]">${h.timestamp}</span>
-          </div>
-          <div class="grid grid-cols-3 gap-2 text-slate-600 dark:text-slate-300">
-            <div>Valuation: <strong class="text-emerald-400">${h.valuation}</strong></div>
-            <div>Accuracy: <strong class="text-emerald-400">${h.accuracy}%</strong></div>
-            <div>Adjustment: <strong class="text-amber-500">${h.adj}</strong></div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function clearTelemetryHistory() { renderTelemetryHistory(); }
-    function openSettingsModal() {}
-    function closeSettingsModal() {}
-
-    function switchTab(targetTab) {
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        if (btn.getAttribute('data-tab') === targetTab) {
-          btn.classList.add('bg-amber-500', 'text-slate-900');
-          btn.classList.remove('text-slate-600', 'dark:text-slate-400');
-        } else {
-          btn.classList.remove('bg-amber-500', 'text-slate-900');
-          btn.classList.add('text-slate-600', 'dark:text-slate-400');
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('fitness4me_data');
+            if (saved) {
+                appData = JSON.parse(saved);
+            } else {
+                // Initialize with default routines
+                appData.routines = [
+                    {
+                        id: 'routine_1',
+                        name: 'Heavy Duty Workout A',
+                        exercises: [
+                            {
+                                id: 'ex_1',
+                                name: 'Pec Deck',
+                                sets: [{plates: 5, reps: 8, mode: 'failure'}],
+                                pulleyHeight: 15,
+                                pulleyUsage: 'both',
+                                notes: ''
+                            },
+                            {
+                                id: 'ex_2',
+                                name: 'Machine Chest Press',
+                                sets: [{plates: 8, reps: 8, mode: 'failure'}],
+                                pulleyHeight: 10,
+                                pulleyUsage: 'both',
+                                notes: ''
+                            }
+                        ]
+                    }
+                ];
+                saveData();
+            }
         }
-      });
 
-      document.querySelectorAll('.tab-content').forEach(content => {
-        if (content.id === targetTab) content.classList.add('active');
-        else content.classList.remove('active');
-      });
+        function saveData() {
+            localStorage.setItem('fitness4me_data', JSON.stringify(appData));
+        }
 
-      if (targetTab === 'dashboard') renderDashboard();
-      if (targetTab === 'manager') renderWatchlistRegistry();
-      if (targetTab === 'history') renderTelemetryHistory();
-    }
+        // ============================================
+        // NAVIGATION
+        // ============================================
 
-    document.querySelectorAll('.nav-btn').forEach(button => {
-      button.addEventListener('click', () => switchTab(button.getAttribute('data-tab')));
-    });
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`${sectionName}-section`).classList.add('active');
+            event.currentTarget.classList.add('active');
 
-    initTheme();
-    renderDashboard();
-    renderWatchlistRegistry();
-    renderTelemetryHistory();
-  </script>
+            if (sectionName === 'home') {
+                updateHomeSection();
+            } else if (sectionName === 'history') {
+                updateHistorySection();
+            } else if (sectionName === 'settings') {
+                updateSettingsSection();
+            }
+        }
+
+        // ============================================
+        // HOME SECTION
+        // ============================================
+
+        function updateHomeSection() {
+            // Update routine select
+            const routineSelect = document.getElementById('routine-select-home');
+            routineSelect.innerHTML = '<option value="">-- Select Routine --</option>';
+            appData.routines.forEach(r => {
+                routineSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+            });
+
+            // Update analytics select
+            const analyticsSelect = document.getElementById('analytics-exercise-select');
+            analyticsSelect.innerHTML = '<option value="">-- Select Exercise --</option>';
+            const allExercises = new Set();
+            appData.routines.forEach(r => {
+                r.exercises.forEach(e => allExercises.add(e.name));
+            });
+            allExercises.forEach(ex => {
+                analyticsSelect.innerHTML += `<option value="${ex}">${ex}</option>`;
+            });
+
+            // Update recovery advisor
+            updateRecoveryAdvisor();
+
+            // Update health status
+            updateHealthStatus();
+
+            // Update last trained
+            updateLastTrained();
+        }
+
+        function updateRecoveryAdvisor() {
+            const healthData = appData.healthData;
+            const statusDiv = document.getElementById('recovery-status');
+            
+            if (!healthData.hrv && !healthData.sleep) {
+                statusDiv.innerHTML = `
+                    <div class="recovery-badge recovery-ready">🟢 Fully Recovered</div>
+                    <p>Ready for maximum intensity failure sets.</p>
+                    <p><strong>Last Trained:</strong> <span id="last-trained">Never</span></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 12px;">
+                        💡 Import Apple Health data for personalized recovery analysis
+                    </p>
+                `;
+                return;
+            }
+
+            let recoveryScore = 100;
+            let warnings = [];
+
+            // HRV Analysis (lower HRV = less recovered)
+            if (healthData.hrv) {
+                if (healthData.hrv < 40) {
+                    recoveryScore -= 40;
+                    warnings.push('Low HRV - consider extra rest');
+                } else if (healthData.hrv < 60) {
+                    recoveryScore -= 20;
+                    warnings.push('Moderate HRV - monitor intensity');
+                }
+            }
+
+            // Sleep Analysis
+            if (healthData.sleep) {
+                if (healthData.sleep < 6) {
+                    recoveryScore -= 30;
+                    warnings.push('Poor sleep - high overtraining risk');
+                } else if (healthData.sleep < 7) {
+                    recoveryScore -= 15;
+                    warnings.push('Suboptimal sleep');
+                }
+            }
+
+            // Check days since last workout
+            const lastWorkout = appData.workoutHistory[appData.workoutHistory.length - 1];
+            if (lastWorkout) {
+                const daysSince = Math.floor((Date.now() - lastWorkout.date) / (1000 * 60 * 60 * 24));
+                if (daysSince < 2) {
+                    recoveryScore -= 20;
+                    warnings.push('Recent workout - ensure full recovery');
+                }
+            }
+
+            const isRecovered = recoveryScore >= 70;
+            const badgeClass = isRecovered ? 'recovery-ready' : 'recovery-warning';
+            const badgeText = isRecovered ? '🟢 Ready for Intensity' : '⚠️ Recovery Needed';
+            const message = isRecovered 
+                ? 'Your recovery metrics indicate you are ready for maximum intensity failure sets.'
+                : 'Your recovery metrics suggest you should consider lighter training or an extra rest day.';
+
+            statusDiv.innerHTML = `
+                <div class="recovery-badge ${badgeClass}">${badgeText}</div>
+                <p>${message}</p>
+                <p><strong>Recovery Score:</strong> ${recoveryScore}/100</p>
+                ${healthData.hrv ? `<p><strong>HRV:</strong> ${healthData.hrv} ms</p>` : ''}
+                ${healthData.sleep ? `<p><strong>Sleep:</strong> ${healthData.sleep} hours</p>` : ''}
+                ${warnings.length > 0 ? `
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.1); border-radius: 8px;">
+                        <strong>⚠️ Warnings:</strong>
+                        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                            ${warnings.map(w => `<li>${w}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 12px;">
+                    Last updated: ${healthData.lastUpdated ? new Date(healthData.lastUpdated).toLocaleString() : 'Never'}
+                </p>
+            `;
+        }
+
+        function updateHealthStatus() {
+            const dot = document.getElementById('health-status-dot');
+            const text = document.getElementById('health-status-text');
+            
+            if (appData.healthData.lastUpdated) {
+                dot.className = 'status-dot green';
+                text.textContent = 'Connected - Data Available';
+            } else {
+                dot.className = 'status-dot';
+                text.textContent = 'Not Connected';
+            }
+        }
+
+        function updateLastTrained() {
+            const lastWorkout = appData.workoutHistory[appData.workoutHistory.length - 1];
+            const lastTrainedEl = document.getElementById('last-trained');
+            
+            if (lastWorkout) {
+                const daysSince = Math.floor((Date.now() - lastWorkout.date) / (1000 * 60 * 60 * 24));
+                lastTrainedEl.textContent = `${daysSince} day${daysSince !== 1 ? 's' : ''} ago`;
+            } else {
+                lastTrainedEl.textContent = 'Never';
+            }
+        }
+
+        // ============================================
+        // APPLE HEALTH INTEGRATION
+        // ============================================
+
+        function importHealthData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Parse Health Auto Export format
+                    let hrv = null;
+                    let sleep = null;
+
+                    // Try to find HRV data
+                    if (data.heartRateVariabilitySDNN) {
+                        hrv = data.heartRateVariabilitySDNN[data.heartRateVariabilitySDNN.length - 1]?.value;
+                    } else if (data.hrv) {
+                        hrv = data.hrv[data.hrv.length - 1]?.value || data.hrv;
+                    }
+
+                    // Try to find Sleep data
+                    if (data.sleepAnalysis) {
+                        const sleepData = data.sleepAnalysis.filter(s => 
+                            s.value === 'InBed' || s.value === 'Asleep'
+                        );
+                        if (sleepData.length > 0) {
+                            const totalSleep = sleepData.reduce((sum, s) => {
+                                const start = new Date(s.startDate);
+                                const end = new Date(s.endDate);
+                                return sum + (end - start) / (1000 * 60 * 60);
+                            }, 0);
+                            sleep = Math.round(totalSleep * 10) / 10;
+                        }
+                    } else if (data.sleep) {
+                        sleep = data.sleep;
+                    }
+
+                    if (hrv || sleep) {
+                        appData.healthData.hrv = hrv;
+                        appData.healthData.sleep = sleep;
+                        appData.healthData.lastUpdated = Date.now();
+                        saveData();
+                        updateHomeSection();
+                        alert('✅ Apple Health data imported successfully!');
+                    } else {
+                        alert('⚠️ Could not find HRV or Sleep data in the file. Please check the format.');
+                    }
+                } catch (error) {
+                    alert('❌ Error parsing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveManualHealthData() {
+            const hrv = document.getElementById('manual-hrv').value;
+            const sleep = document.getElementById('manual-sleep').value;
+
+            if (hrv) appData.healthData.hrv = Number(hrv);
+            if (sleep) appData.healthData.sleep = Number(sleep);
+            appData.healthData.lastUpdated = Date.now();
+
+            saveData();
+            updateHomeSection();
+            alert('✅ Health data saved!');
+        }
+
+        // Check for URL parameters (iOS Shortcut integration)
+        function checkURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hrv = urlParams.get('hrv');
+            const sleep = urlParams.get('sleep');
+
+            if (hrv || sleep) {
+                if (hrv) appData.healthData.hrv = Number(hrv);
+                if (sleep) appData.healthData.sleep = Number(sleep);
+                appData.healthData.lastUpdated = Date.now();
+                saveData();
+                updateHomeSection();
+                
+                // Show success message
+                alert('✅ Health data synced from iOS Shortcut!');
+            }
+        }
+
+        // ============================================
+        // WORKOUT MANAGEMENT
+        // ============================================
+
+        function startWorkout() {
+            const routineId = document.getElementById('routine-select-home').value;
+            if (!routineId) {
+                alert('Please select a routine');
+                return;
+            }
+
+            const routine = appData.routines.find(r => r.id === routineId);
+            currentWorkout = {
+                routineId: routine.id,
+                routineName: routine.name,
+                startTime: Date.now(),
+                exercises: JSON.parse(JSON.stringify(routine.exercises))
+            };
+
+            showSection('workout');
+            document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+            renderActiveWorkout();
+        }
+
+        function renderActiveWorkout() {
+            if (!currentWorkout) {
+                document.getElementById('no-workout-message').style.display = 'block';
+                document.getElementById('active-workout-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('no-workout-message').style.display = 'none';
+            document.getElementById('active-workout-container').style.display = 'block';
+            document.getElementById('workout-title').textContent = currentWorkout.routineName;
+
+            const exercisesDiv = document.getElementById('workout-exercises');
+            exercisesDiv.innerHTML = '';
+
+            currentWorkout.exercises.forEach((exercise, exIndex) => {
+                const exerciseCard = document.createElement('div');
+                exerciseCard.className = 'exercise-card';
+                
+                exerciseCard.innerHTML = `
+                    <div class="exercise-header">
+                        <div class="exercise-name">${exercise.name}</div>
+                        <button class="btn btn-secondary" style="width: auto; padding: 8px 12px; font-size: 0.85rem;" onclick="addSet(${exIndex})">+ Set</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <div>
+                            <label>Height:</label>
+                            <select onchange="updateExerciseConfig(${exIndex}, 'pulleyHeight', this.value)">
+                                ${getPulleyHeightOptions(exercise.pulleyHeight)}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Pulley:</label>
+                            <select onchange="updateExerciseConfig(${exIndex}, 'pulleyUsage', this.value)">
+                                <option value="both" ${exercise.pulleyUsage === 'both' ? 'selected' : ''}>Both</option>
+                                <option value="one" ${exercise.pulleyUsage === 'one' ? 'selected' : ''}>One</option>
+                                <option value="none" ${exercise.pulleyUsage === 'none' ? 'selected' : ''}>None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Set</th>
+                                <th>Plate</th>
+                                <th>Reps</th>
+                                <th>Mode</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${exercise.sets.map((set, setIndex) => `
+                                <tr>
+                                    <td>${setIndex + 1}</td>
+                                    <td>
+                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'plates', this.value)">
+                                            ${getPlateOptions(set.plates)}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'reps', this.value)">
+                                            ${getRepsOptions(set.reps)}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select onchange="updateSet(${exIndex}, ${setIndex}, 'mode', this.value)">
+                                            <option value="failure" ${set.mode === 'failure' ? 'selected' : ''}>Failure</option>
+                                            <option value="warmup" ${set.mode === 'warmup' ? 'selected' : ''}>Warmup</option>
+                                            <option value="target" ${set.mode === 'target' ? 'selected' : ''}>Target</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" style="padding: 6px 10px; font-size: 0.8rem;" onclick="removeSet(${exIndex}, ${setIndex})">×</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 12px;">
+                        <label>Notes:</label>
+                        <textarea rows="2" onchange="updateExerciseConfig(${exIndex}, 'notes', this.value)" placeholder="Add notes...">${exercise.notes || ''}</textarea>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="logSet(${exIndex})">✓ Log Set & Start Rest Timer</button>
+                `;
+                
+                exercisesDiv.appendChild(exerciseCard);
+            });
+        }
+
+        function getPulleyHeightOptions(currentVal) {
+            const valNum = Number(currentVal) || 15;
+            let opts = '';
+            for (let i = 1; i <= 31; i++) {
+                opts += `<option value="${i}" ${i === valNum ? 'selected' : ''}>${i}</option>`;
+            }
+            return opts;
+        }
+
+        function getPlateOptions(currentVal) {
+            const valNum = Number(currentVal) || 1;
+            let opts = '';
+            for (let i = 1; i <= 25; i++) {
+                opts += `<option value="${i}" ${i === valNum ? 'selected' : ''}>${i}</option>`;
+            }
+            if (valNum < 1 || valNum > 25 || !Number.isInteger(valNum)) {
+                opts += `<option value="${valNum}" selected>${valNum}</option>`;
+            }
+            return opts;
+        }
+
+        function getRepsOptions(currentVal) {
+            const valNum = Number(currentVal) || 10;
+            let opts = '';
+            for (let i = 1; i <= 100; i++) {
+                opts += `<option value="${i}" ${i === valNum ? 'selected' : ''}>${i}</option>`;
+            }
+            if (valNum < 1 || valNum > 100 || !Number.isInteger(valNum)) {
+                opts += `<option value="${valNum}" selected>${valNum}</option>`;
+            }
+            return opts;
+        }
+
+        function updateExerciseConfig(exIndex, field, value) {
+            currentWorkout.exercises[exIndex][field] = value;
+        }
+
+        function updateSet(exIndex, setIndex, field, value) {
+            currentWorkout.exercises[exIndex].sets[setIndex][field] = field === 'plates' || field === 'reps' ? Number(value) : value;
+        }
+
+        function addSet(exIndex) {
+            const lastSet = currentWorkout.exercises[exIndex].sets[currentWorkout.exercises[exIndex].sets.length - 1];
+            currentWorkout.exercises[exIndex].sets.push({
+                plates: lastSet ? lastSet.plates : 5,
+                reps: lastSet ? lastSet.reps : 10,
+                mode: 'failure'
+            });
+            renderActiveWorkout();
+        }
+
+        function removeSet(exIndex, setIndex) {
+            if (currentWorkout.exercises[exIndex].sets.length > 1) {
+                currentWorkout.exercises[exIndex].sets.splice(setIndex, 1);
+                renderActiveWorkout();
+            }
+        }
+
+        function logSet(exIndex) {
+            startTimer();
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+
+        function finishWorkout() {
+            if (!confirm('Finish this workout?')) return;
+
+            const workoutRecord = {
+                id: 'workout_' + Date.now(),
+                date: currentWorkout.startTime,
+                routineName: currentWorkout.routineName,
+                exercises: currentWorkout.exercises,
+                duration: Math.floor((Date.now() - currentWorkout.startTime) / 1000 / 60)
+            };
+
+            appData.workoutHistory.push(workoutRecord);
+            saveData();
+
+            currentWorkout = null;
+            alert('✅ Workout completed! Duration: ' + workoutRecord.duration + ' minutes');
+            showSection('home');
+            document.querySelector('.nav-item:first-child').classList.add('active');
+        }
+
+        // ============================================
+        // REST TIMER
+        // ============================================
+
+        function startTimer() {
+            timerSeconds = appData.restTimerDefault;
+            updateTimerDisplay();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                    alert('⏱️ Rest time complete!');
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerSeconds = appData.restTimerDefault;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-display').textContent = timerSeconds;
+        }
+
+        function saveRestTimerDefault(value) {
+            appData.restTimerDefault = Number(value);
+            timerSeconds = Number(value);
+            updateTimerDisplay();
+            saveData();
+        }
+
+        // ============================================
+        // HISTORY SECTION
+        // ============================================
+
+        function updateHistorySection() {
+            const historyDiv = document.getElementById('workout-history');
+            
+            if (appData.workoutHistory.length === 0) {
+                historyDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No workouts completed yet</p>';
+                return;
+            }
+
+            historyDiv.innerHTML = appData.workoutHistory.slice().reverse().map(workout => {
+                const date = new Date(workout.date).toLocaleDateString();
+                const duration = workout.duration || 0;
+                const exerciseCount = workout.exercises.length;
+                
+                return `
+                    <div class="card" style="margin-bottom: 12px;">
+                        <h3>${workout.routineName}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                            ${date} • ${duration} minutes • ${exerciseCount} exercises
+                        </p>
+                        <details style="margin-top: 8px;">
+                            <summary style="cursor: pointer; color: var(--accent-info);">View Details</summary>
+                            <div style="margin-top: 12px;">
+                                ${workout.exercises.map(ex => `
+                                    <div style="padding: 8px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 8px;">
+                                        <strong>${ex.name}</strong>
+                                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+                                            ${ex.sets.map(s => `${s.plates} plates × ${s.reps} reps`).join(', ')}
+                                        </div>
+                                        ${ex.notes ? `<div style="font-size: 0.85rem; margin-top: 4px; font-style: italic;">${ex.notes}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // SETTINGS SECTION
+        // ============================================
+
+        function updateSettingsSection() {
+            const routineSelect = document.getElementById('routine-select-edit');
+            routineSelect.innerHTML = '<option value="">-- Select Routine --</option>';
+            appData.routines.forEach(r => {
+                routineSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+            });
+
+            document.getElementById('font-size-select').value = appData.fontSize;
+            document.getElementById('rest-timer-default').value = appData.restTimerDefault;
+        }
+
+        function changeFontSize(size) {
+            appData.fontSize = Number(size);
+            document.body.style.fontSize = size + 'px';
+            saveData();
+        }
+
+        function openRoutineEditor() {
+            const routineId = document.getElementById('routine-select-edit').value;
+            if (!routineId) {
+                alert('Please select a routine');
+                return;
+            }
+
+            const routine = appData.routines.find(r => r.id === routineId);
+            const editorContent = document.getElementById('routine-editor-content');
+            
+            editorContent.innerHTML = `
+                <label>Routine Name:</label>
+                <input type="text" id="edit-routine-name" value="${routine.name}">
+                
+                <h3>Exercises</h3>
+                <div id="edit-exercises-list">
+                    ${routine.exercises.map((ex, i) => `
+                        <div class="exercise-card">
+                            <input type="text" value="${ex.name}" onchange="updateExerciseName('${routineId}', ${i}, this.value)">
+                            <button class="btn btn-danger" onclick="removeExercise('${routineId}', ${i})">Remove Exercise</button>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <button class="btn btn-secondary" onclick="addExercise('${routineId}')">+ Add Exercise</button>
+                <button class="btn btn-primary" onclick="saveRoutineEdits('${routineId}')">Save Changes</button>
+            `;
+
+            document.getElementById('routine-editor-modal').classList.add('active');
+        }
+
+        function updateExerciseName(routineId, exIndex, name) {
+            const routine = appData.routines.find(r => r.id === routineId);
+            routine.exercises[exIndex].name = name;
+            saveData();
+        }
+
+        function removeExercise(routineId, exIndex) {
+            if (!confirm('Remove this exercise?')) return;
+            const routine = appData.routines.find(r => r.id === routineId);
+            routine.exercises.splice(exIndex, 1);
+            saveData();
+            openRoutineEditor();
+        }
+
+        function addExercise(routineId) {
+            const routine = appData.routines.find(r => r.id === routineId);
+            routine.exercises.push({
+                id: 'ex_' + Date.now(),
+                name: 'New Exercise',
+                sets: [{plates: 5, reps: 10, mode: 'failure'}],
+                pulleyHeight: 15,
+                pulleyUsage: 'both',
+                notes: ''
+            });
+            saveData();
+            openRoutineEditor();
+        }
+
+        function saveRoutineEdits(routineId) {
+            const routine = appData.routines.find(r => r.id === routineId);
+            routine.name = document.getElementById('edit-routine-name').value;
+            saveData();
+            closeModal();
+            alert('✅ Routine saved!');
+        }
+
+        function createNewRoutine() {
+            const name = prompt('Enter routine name:');
+            if (!name) return;
+
+            appData.routines.push({
+                id: 'routine_' + Date.now(),
+                name: name,
+                exercises: []
+            });
+            saveData();
+            alert('✅ Routine created!');
+        }
+
+        function closeModal() {
+            document.getElementById('routine-editor-modal').classList.remove('active');
+        }
+
+        // ============================================
+        // DATA EXPORT/IMPORT
+        // ============================================
+
+        function exportBackup() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'fitness4me_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    appData = data;
+                    saveData();
+                    alert('✅ Backup imported successfully!');
+                    location.reload();
+                } catch (error) {
+                    alert('❌ Error importing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ============================================
+        // GOOGLE DRIVE SYNC (Placeholder)
+        // ============================================
+
+        function signInGoogle() {
+            alert('Google Drive integration requires OAuth setup. See documentation for details.');
+        }
+
+        function syncToGoogleDrive() {
+            alert('Google Drive sync not configured. Please set up OAuth credentials first.');
+        }
+
+        // ============================================
+        // PROFILE MANAGEMENT
+        // ============================================
+
+        function addNewProfile() {
+            const name = prompt('Enter profile name:');
+            if (!name) return;
+
+            appData.profiles.push(name.toLowerCase().replace(/\s+/g, '_'));
+            saveData();
+            
+            const profileSelect = document.getElementById('profile-select');
+            profileSelect.innerHTML += `<option value="${name.toLowerCase().replace(/\s+/g, '_')}">${name}</option>`;
+            alert('✅ Profile created!');
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        window.onload = function() {
+            loadData();
+            document.body.style.fontSize = appData.fontSize + 'px';
+            timerSeconds = appData.restTimerDefault;
+            updateTimerDisplay();
+            updateHomeSection();
+            checkURLParameters(); // Check for iOS Shortcut data
+        };
+    </script>
 </body>
 </html>
-
